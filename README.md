@@ -50,11 +50,15 @@ has the same reaction to the word "paste".
 <details>
 <summary><b>Other ways to install</b></summary>
 
-An Arch package built from the release binary, so `pacman` tracks it:
+A pacman package, so `pacman` tracks it. Every release ships `blanca-bin` for
+x86_64 and aarch64; take the file for your machine from the
+[latest release](https://github.com/ezapmar/blanca/releases/latest):
 
 ```bash
-git clone https://github.com/ezapmar/blanca && cd blanca/packaging/aur && makepkg -si && blanca setup
+sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.1.2/blanca-bin-0.1.2-1-x86_64.pkg.tar.zst && blanca setup
 ```
+
+The same package can be built locally from `packaging/aur` with `makepkg -si`.
 
 From source: `go install github.com/ezapmar/blanca@latest && blanca setup`.
 
