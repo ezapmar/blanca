@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blanca · Clipboard manager for Omarchy</title>
+<meta name="description" content="Everything you copy, kept. One hotkey brings it back, one clipping at a time, and Return pastes it where you were.">
+<meta property="og:title" content="Blanca">
+<meta property="og:description" content="Everything you copy, kept. One hotkey brings it back, and Return pastes it where you were.">
+<meta property="og:image" content="assets/blanca-social.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/blanca-256.png" type="image/png">
+<style>
+  /* Tokens from docs/design.md */
+  :root {
+    --ink: #111111;
+    --paper: #FFFFFF;
+    --graphite: #262626;
+    --bone: #F9EBDB;
+    --ash: #9B9B9B;
+    --vermilion: #F24B1E;
+    --teal: #0C9794;
+    --saffron: #FBA335;
+    --rule: #3A3A3A;
+    --measure: 40rem;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--graphite);
+    color: var(--bone);
+    font: 17px/1.6 ui-sans-serif, -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 56rem; margin: 0 auto; padding: 0 16px; }
+  section { padding-top: 56px; padding-bottom: 56px; border-top: 1px solid var(--rule); }
+  h1, h2, h3 { line-height: 1.2; margin: 0 0 16px; font-weight: 800; letter-spacing: -0.01em; }
+  h2 { font-size: 1.6rem; }
+  h3 { font-size: 1.05rem; }
+  p { margin: 0 0 16px; max-width: var(--measure); }
+  .dim { color: var(--ash); }
+  a { color: var(--teal); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+  /* Hero: the banner is the only typeset wordmark */
+  .hero { padding-top: 48px; padding-bottom: 40px; }
+  .hero img.banner { width: 100%; max-width: 760px; height: auto; display: block; margin-bottom: 32px; }
+  .lede { font-size: 1.25rem; line-height: 1.5; color: var(--bone); max-width: 34rem; margin-bottom: 28px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .btn {
+    display: inline-block; padding: 12px 20px; border-radius: 4px; text-decoration: none;
+    font-weight: 700; border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--vermilion); color: var(--paper); }
+  .btn-quiet { color: var(--bone); border-color: var(--ash); }
+  .btn-quiet:hover { border-color: var(--bone); }
+
+  /* Code: the only other block of colour */
+  pre {
+    margin: 0 0 16px; padding: 16px 18px; background: #1b1b1b; color: var(--bone);
+    border: 1px solid var(--rule); border-radius: 4px; overflow-x: auto;
+    font: 14px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; }
+  .copy {
+    background: none; color: var(--ash); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; margin-bottom: 24px;
+  }
+  .copy:hover { color: var(--bone); border-color: var(--ash); }
+
+  /* Keys: a plain table, no boxes */
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 0; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { color: var(--ash); font-weight: 600; font-size: 14px; }
+  td:first-child { white-space: nowrap; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 14px; }
+
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 28px; }
+  .steps li { max-width: var(--measure); }
+  .steps .n { color: var(--vermilion); font-weight: 800; margin-right: 8px; }
+
+  .paper {
+    background: var(--paper); color: var(--ink); padding-top: 56px; padding-bottom: 56px;
+    border-top: 0;
+  }
+  .paper .dim { color: #5c5c5c; }
+  .paper a { color: #0C7F7D; }
+  .paper .mark { width: 96px; height: auto; display: block; margin-bottom: 20px; }
+
+  footer { padding-top: 40px; padding-bottom: 56px; border-top: 1px solid var(--rule); color: var(--ash); font-size: 14px; }
+  footer .tag { font-size: 1.1rem; color: var(--bone); margin-bottom: 12px; }
+  footer img { width: 40px; height: auto; display: block; margin-bottom: 12px; }
+
+  @media (min-width: 720px) {
+    .hero { padding-top: 88px; padding-bottom: 72px; }
+    section { padding-top: 72px; padding-bottom: 72px; }
+  }
+  @media (max-width: 520px) {
+    table, thead, tbody, tr, th, td { display: block; }
+    thead { display: none; }
+    tr { padding: 8px 0; border-bottom: 1px solid var(--rule); }
+    td, th { border: 0; padding: 2px 0; }
+    td:first-child { margin-bottom: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap hero">
+  <img class="banner" src="assets/blanca-banner.png" alt="Blanca: the mark, the wordmark and the tagline on graphite" width="1520" height="400">
+  <p class="lede">Everything you copy, kept. One hotkey brings it back, one clipping at a time, and Return pastes it where you were.</p>
+  <div class="actions">
+    <a class="btn btn-primary" href="#install">Install</a>
+    <a class="btn btn-quiet" href="https://github.com/ezapmar/blanca">Source on GitHub</a>
+  </div>
+</header>
+
+<main>
+  <section class="wrap" id="about">
+    <h2>What it is</h2>
+    <p>
+      A clipboard manager for <a href="https://omarchy.org">Omarchy</a>, ported from
+      <a href="https://github.com/snark/jumpcut">Jumpcut</a>, the macOS clipboard manager
+      Steve Cook has kept alive since 2002. Press the hotkey and the last thing you copied
+      appears in a small window. Press again for the one before. Return pastes it.
+    </p>
+    <p class="dim">
+      No daemon of its own, no account, nothing leaves your machine. One static Go binary.
+    </p>
+  </section>
+
+  <section class="wrap" id="keys">
+    <h2>Keys</h2>
+    <table>
+      <thead><tr><th>Key</th><th>Does</th></tr></thead>
+      <tbody>
+        <tr><td>Ctrl+Alt+V, again, ↓, →</td><td>Older clipping</td></tr>
+        <tr><td>Ctrl+Alt+Shift+V, ↑, ←</td><td>Newer clipping</td></tr>
+        <tr><td>PgDn, PgUp, Home, End</td><td>Ten at a time, newest, oldest</td></tr>
+        <tr><td>1 to 9, 0</td><td>Jump to that position; 0 is tenth</td></tr>
+        <tr><td>Return</td><td>Copy and paste</td></tr>
+        <tr><td>Backspace, Delete</td><td>Forget this clipping</td></tr>
+        <tr><td>Esc, q</td><td>Close</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="wrap" id="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><span class="n">1</span><strong>A watcher records.</strong> <code>wl-paste --watch blanca store</code> hands every text copy to Blanca. It keeps the last 99 in a JSON file on your machine, and skips whitespace, anything over 50,000 characters, and anything a password manager marked secret.</li>
+      <li><span class="n">2</span><strong>A bezel shows one thing.</strong> The hotkey opens a small floating terminal with the newest clipping and its position. It inherits your Omarchy theme and needs no GTK.</li>
+      <li><span class="n">3</span><strong>Return pastes.</strong> Blanca copies the clipping, lets focus return to where you were, then sends Shift+Insert, the chord Omarchy's own tools use, so it works in terminals too.</li>
+    </ol>
+  </section>
+
+  <section class="wrap" id="install">
+    <h2>Install</h2>
+    <p>One line. The script installs the binary, icons, keybind, autostart and window rules, reloads Hyprland, and starts the watcher.</p>
+    <pre><code id="install-cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code></pre>
+    <button class="copy" type="button" id="copy">Copy command</button>
+
+    <h3>Other ways</h3>
+    <p class="dim">Arch package, from the AUR release binary:</p>
+    <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
+    <p class="dim">From source:</p>
+    <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
+    <p class="dim">Runtime dependencies are <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
+  </section>
+
+  <section class="wrap" id="configure">
+    <h2>Configure</h2>
+    <p>Edit <code>~/.config/blanca/config.json</code>. Every key is optional.</p>
+<pre><code>{
+  "remember": 99,
+  "display": 10,
+  "wraparound": false,
+  "paste": true,
+  "paste_mode": "shift-insert",
+  "move_to_top": false,
+  "allow_whitespace": false,
+  "ignore_large": true,
+  "ignore_sensitive": true
+}</code></pre>
+    <p class="dim"><code>paste_mode</code> can be <code>ctrl-v</code> for the apps that ignore Shift+Insert. <code>paste: false</code> only copies.</p>
+  </section>
+
+  <section class="wrap" id="limits">
+    <h2>Honest limits</h2>
+    <ul>
+      <li>Text only. Images and files are not recorded.</li>
+      <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
+      <li>Wayland hands Blanca the text, not the window it came from, so there is no per-application ignore list.</li>
+      <li>This is v0.1. Expect edges.</li>
+    </ul>
+  </section>
+
+  <section class="paper" id="mark">
+    <div class="wrap">
+      <img class="mark" src="assets/blanca.svg" alt="The Blanca mark: one dog's face in black line art">
+      <h2>Copy twice. Lose nothing. Press the key.</h2>
+      <p class="dim">MIT licensed. Jumpcut is MIT licensed too; its notice is reproduced in the repository's LICENSE. Blanca is independent and not affiliated with the Jumpcut author or with Omarchy.</p>
+      <p><a href="https://github.com/ezapmar/blanca">github.com/ezapmar/blanca</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <img src="assets/blanca-tile.svg" alt="" width="40" height="40">
+  <div class="tag">Blanca.</div>
+  <p>Named after my dog, an Anatolian sighthound crossed with a Russell terrier. She has the same reaction to the word “paste”.</p>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('copy');
+    var cmd = document.getElementById('install-cmd');
+    if (!btn || !navigator.clipboard) { if (btn) btn.hidden = true; return; }
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(cmd.textContent).then(function () {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = 'Copy command'; }, 1600);
+      }, function () {});
+    });
+  })();
+</script>
+</body>
+</html>
