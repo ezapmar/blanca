@@ -24,8 +24,13 @@ What follows from that:
   the brightest thing on it. On light grounds the mark stands on its own.
 - **Capitalised.** The name is `Blanca`, capital B, in text and in the wordmark. It is a
   name, not a command.
-- **One accent, rarely.** A vermilion dot borrowed from the brainless family palette,
-  used for the full stop after the wordmark and for primary actions. Nothing else is red.
+- **One accent, rarely.** Vermilion, borrowed from the brainless family palette, for
+  primary actions. The wordmark carries no dot.
+- **Kilim at the edges.** On the web page, the brainless family's Anatolian motifs (the
+  eye, the star, the ram's horn, the tree of life) sit beside the content as 15 by 15
+  knot grids in bone, and a woven band of small eyes in vermilion, saffron and teal
+  separates sections. Buttons and code blocks take stepped corners. The motifs never
+  touch the mark and never appear in the bezel.
 
 ## Palette
 
@@ -36,7 +41,7 @@ What follows from that:
 | graphite | `#262626` | Ground. Tile, banner, dark surfaces |
 | bone | `#F9EBDB` | Wordmark and body text on graphite |
 | ash | `#9B9B9B` | Secondary text on graphite |
-| vermilion | `#F24B1E` | The one accent: the full stop, primary action |
+| vermilion | `#F24B1E` | The one accent: primary action. A dye in the woven band |
 | teal | `#0C9794` | Links, success |
 | saffron | `#FBA335` | Warnings |
 
@@ -62,7 +67,7 @@ Rules:
 - Minimum size: 48 px for the mark and tile, 16 px for the symbolic glyph. Below 48 px
   the line art closes up, so switch to the symbolic.
 - On dark bars the symbolic glyph takes the bar's own foreground colour. Do not force white.
-- Wordmark: a heavy grotesque, capital B, bone on graphite, with a vermilion full stop.
+- Wordmark: a heavy grotesque, capital B, bone on graphite, no full stop.
   The banner is the only typeset wordmark; do not set it in running text.
 
 ## The bezel

@@ -10,143 +10,198 @@
 <meta property="og:image" content="https://ezapmar.github.io/blanca/assets/blanca-social.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/blanca-256.png" type="image/png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Hanken+Grotesk:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  /* Tokens from docs/design.md */
+  /* Palette: docs/design.md. Stepped corners, the woven band and the knot-grid
+     motifs are shared with the brainless family. */
   :root {
-    --graphite: #262626;
-    --bone: #F9EBDB;
-    --ash: #9B9B9B;
-    --vermilion: #F24B1E;
-    --teal: #0C9794;
-    --well: #1E1E1E;
-    --rule: #383838;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --graphite: #262626; --bone: #F9EBDB; --ash: #9B9B9B;
+    --vermilion: #F24B1E; --teal: #0C9794; --saffron: #FBA335;
+    --well: #1C1C1C; --line: #3A3A3A; --link: #2FB5B1;
+
+    --display: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+
+    --step: 5px;
+    --stepped: polygon(
+      0 calc(2 * var(--step)), var(--step) calc(2 * var(--step)), var(--step) var(--step),
+      calc(2 * var(--step)) var(--step), calc(2 * var(--step)) 0,
+      calc(100% - 2 * var(--step)) 0, calc(100% - 2 * var(--step)) var(--step),
+      calc(100% - var(--step)) var(--step), calc(100% - var(--step)) calc(2 * var(--step)),
+      100% calc(2 * var(--step)),
+      100% calc(100% - 2 * var(--step)), calc(100% - var(--step)) calc(100% - 2 * var(--step)),
+      calc(100% - var(--step)) calc(100% - var(--step)), calc(100% - 2 * var(--step)) calc(100% - var(--step)),
+      calc(100% - 2 * var(--step)) 100%,
+      calc(2 * var(--step)) 100%, calc(2 * var(--step)) calc(100% - var(--step)),
+      var(--step) calc(100% - var(--step)), var(--step) calc(100% - 2 * var(--step)),
+      0 calc(100% - 2 * var(--step))
+    );
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
-    background: var(--graphite);
-    color: var(--bone);
-    font: 17px/1.65 ui-sans-serif, -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+    margin: 0; background: var(--graphite); color: var(--bone);
+    font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased;
   }
-  .col { max-width: 38rem; margin: 0 auto; padding: 0 16px; }
-
-  a { color: var(--teal); text-underline-offset: 3px; }
-  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
-  p { margin: 0 0 16px; }
-  .dim { color: var(--ash); }
+  .wrap { width: min(880px, 100%); margin-inline: auto; padding-inline: 16px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+  p { margin: 0; }
   code { font-family: var(--mono); font-size: 0.9em; }
+  h2 { margin: 0 0 32px; font: 800 clamp(1.5rem, 1.2rem + 1.4vw, 2rem)/1.1 var(--display); letter-spacing: -0.01em; }
+  .muted { color: var(--ash); }
 
-  /* Hero: one face, the banner wordmark, the one action */
-  .hero { text-align: center; padding-top: 72px; padding-bottom: 88px; }
-  .hero img { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto 28px; }
-  .lede { font-size: 1.2rem; line-height: 1.5; max-width: 30rem; margin: 0 auto 36px; }
-  .install {
-    display: flex; align-items: stretch; text-align: left;
-    background: var(--well); border-radius: 6px; overflow: hidden;
+  /* hero: one face, the banner wordmark, the one action */
+  .hero { padding-block: 56px 64px; }
+  .hero .wrap { display: grid; gap: 24px; justify-items: center; text-align: center; }
+  .hero img { width: min(560px, 100%); height: auto; display: block; }
+  .lede { font-size: 1.2rem; line-height: 1.5; max-width: 30rem; }
+  .cmd {
+    width: min(800px, 100%); margin-top: 8px;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+    background: var(--well); clip-path: var(--stepped); padding: 14px 16px; text-align: left;
+    font: 0.8rem/1.5 var(--mono);
   }
-  .install pre {
-    flex: 1; margin: 0; padding: 14px 16px; overflow-x: auto; white-space: nowrap;
-    font: 14px/1.6 var(--mono); color: var(--bone);
+  .cmd code { display: block; min-width: 0; overflow-x: auto; white-space: nowrap; padding-block: 2px; font-size: inherit; scrollbar-width: none; }
+  .cmd code::-webkit-scrollbar { display: none; }
+  .cmd button {
+    font: 700 0.82rem/1 var(--display); letter-spacing: 0.04em; border: 0; cursor: pointer;
+    padding: 9px 13px; background: var(--vermilion); color: var(--graphite);
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
   }
-  .install button {
-    flex: none; border: 0; padding: 0 18px; cursor: pointer;
-    background: var(--vermilion); color: #fff; font: inherit; font-size: 15px; font-weight: 700;
-  }
-  .hero .after { margin: 16px 0 0; font-size: 15px; color: var(--ash); }
+  .hero .after { font-size: 0.95rem; color: var(--ash); }
 
-  /* Body sections: whitespace, no rules */
-  section { padding-bottom: 72px; }
-  h2 { margin: 0 0 20px; font-size: 1.25rem; line-height: 1.3; font-weight: 700; }
+  /* woven band between sections */
+  .band { display: block; width: 100%; height: 24px; }
 
-  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
-  ol.steps li { counter-increment: s; position: relative; padding-left: 2rem; margin-bottom: 18px; }
-  ol.steps li::before { content: counter(s); position: absolute; left: 0; color: var(--ash); font-variant-numeric: tabular-nums; }
-  ol.steps li:last-child { margin-bottom: 0; }
+  section { padding-block: 72px; }
 
+  /* three knots */
+  .loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 36px 28px; }
+  .knot { display: grid; gap: 10px; align-content: start; }
+  .knot svg { width: 60px; height: 60px; margin-bottom: 6px; }
+  .knot .name { font: 0.78rem/1.4 var(--mono); color: var(--ash); }
+  .knot h3 { margin: 0; font: 700 1.15rem/1.2 var(--display); }
+  .knot p { color: var(--ash); font-size: 0.98rem; }
+
+  /* keys */
   dl.keys { margin: 0; display: grid; grid-template-columns: max-content 1fr; }
-  dl.keys dt, dl.keys dd { margin: 0; padding: 9px 0; border-top: 1px solid var(--rule); }
-  dl.keys dt { font: 14px/1.9 var(--mono); padding-right: 32px; }
+  dl.keys dt, dl.keys dd { margin: 0; padding: 10px 0; border-top: 1px solid var(--line); }
+  dl.keys dt { font: 0.85rem/1.9 var(--mono); padding-right: 40px; }
   dl.keys dd { color: var(--ash); }
   dl.keys dt:first-of-type, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
 
-  details { border-top: 1px solid var(--rule); }
-  details:last-of-type { border-bottom: 1px solid var(--rule); }
-  summary { cursor: pointer; padding: 14px 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; }
-  summary::-webkit-details-marker { display: none; }
-  summary::after { content: "+"; color: var(--ash); font-weight: 400; }
-  details[open] summary::after { content: "–"; }
-  details > :not(summary) { margin-top: 0; }
-  details > :last-child { margin-bottom: 20px; }
-  details pre {
-    margin: 0 0 16px; padding: 14px 16px; overflow-x: auto;
-    background: var(--well); border-radius: 6px; font: 14px/1.6 var(--mono);
+  /* folds */
+  details { border-top: 1px solid var(--line); }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary {
+    cursor: pointer; padding: 16px 0; list-style: none; display: flex; align-items: center; gap: 12px;
+    font: 700 1.05rem/1.3 var(--display);
   }
-  details ul { margin: 0 0 16px; padding-left: 1.2rem; }
-  details li { margin-bottom: 6px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: ""; width: 7px; height: 7px; flex: none; border: 1.5px solid var(--bone); transform: rotate(45deg); }
+  details[open] summary::before { background: var(--vermilion); border-color: var(--vermilion); }
+  details > :not(summary) { color: var(--ash); margin: 0 0 14px 19px; }
+  details > :last-child { margin-bottom: 22px; }
+  details pre {
+    padding: 14px 16px; overflow-x: auto; background: var(--well); color: var(--bone);
+    clip-path: var(--stepped); font: 0.85rem/1.6 var(--mono);
+  }
+  details pre code { font-size: inherit; }
+  details ul { padding-left: 1.1em; display: grid; gap: 6px; }
+  details li::marker { color: var(--saffron); }
 
-  footer { padding-bottom: 72px; font-size: 15px; color: var(--ash); }
-  footer p { margin: 0 0 6px; }
+  footer { padding-block: 48px 56px; }
+  footer .wrap { display: grid; gap: 16px; }
+  .foot-motifs { display: flex; gap: 12px; }
+  .foot-motifs svg { width: 28px; height: 28px; }
+  footer p { color: var(--ash); font-size: 0.92rem; max-width: 60ch; }
 
-  @media (max-width: 520px) {
-    .hero { padding-top: 40px; padding-bottom: 64px; }
-    .lede { font-size: 1.1rem; }
+  @media (max-width: 560px) {
+    .hero { padding-block: 32px 48px; }
+    .lede { font-size: 1.08rem; }
+    section { padding-block: 56px; }
     dl.keys { grid-template-columns: 1fr; }
     dl.keys dt { padding-bottom: 0; }
-    dl.keys dd { border-top: 0; padding-top: 0; }
-    dl.keys dt:first-of-type + dd { padding-top: 0; }
+    dl.keys dd, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
   }
 </style>
 </head>
 <body>
 
-<header class="col hero">
-  <img src="assets/blanca-banner.png" alt="Blanca. The clipboard bezel for Omarchy" width="1520" height="400">
-  <p class="lede">Everything you copy, kept. One hotkey brings it back, one clipping at a time, and Return pastes it where you were.</p>
-  <div class="install">
-    <pre><code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code></pre>
-    <button type="button" id="copy">Copy</button>
+<header class="hero">
+  <div class="wrap">
+    <img src="assets/blanca-banner.png" alt="Blanca. The clipboard bezel for Omarchy" width="1520" height="400">
+    <p class="lede">Everything you copy, kept. One hotkey brings it back, one clipping at a time, and Return pastes it where you were.</p>
+    <div class="cmd">
+      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
+      <button type="button" id="copy">Copy</button>
+    </div>
+    <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
   </div>
-  <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
 </header>
 
-<main class="col">
+<svg class="band" aria-hidden="true"></svg>
+
+<main>
   <section>
-    <h2>How it works</h2>
-    <ol class="steps">
-      <li><strong>A watcher records.</strong> Every text copy goes into a history of 99, kept in a file on your machine. Passwords from a password manager are skipped.</li>
-      <li><strong>A bezel shows one thing.</strong> The hotkey opens a small floating terminal with your newest clipping. Press again for the one before.</li>
-      <li><strong>Return pastes.</strong> The bezel closes and the clipping lands where you were typing.</li>
-    </ol>
+    <div class="wrap">
+      <h2>How it works</h2>
+      <div class="loop">
+        <div class="knot">
+          <svg data-motif="eye" viewBox="0 0 15 15" aria-hidden="true"></svg>
+          <span class="name">göz · the eye</span>
+          <h3>A watcher records</h3>
+          <p>Every text copy goes into a history of 99, kept in a file on your machine. Anything a password manager marks secret is skipped.</p>
+        </div>
+        <div class="knot">
+          <svg data-motif="star" viewBox="0 0 15 15" aria-hidden="true"></svg>
+          <span class="name">yıldız · the star</span>
+          <h3>A bezel shows one thing</h3>
+          <p>The hotkey opens a small floating terminal with your newest clipping. Press again for the one before.</p>
+        </div>
+        <div class="knot">
+          <svg data-motif="horn" viewBox="0 0 15 15" aria-hidden="true"></svg>
+          <span class="name">koçboynuzu · the ram's horn</span>
+          <h3>Return pastes</h3>
+          <p>The bezel closes and the clipping lands where you were typing.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section>
-    <h2>Keys</h2>
-    <dl class="keys">
-      <dt>Ctrl+Alt+V  ↓  →</dt><dd>Older clipping</dd>
-      <dt>Ctrl+Alt+Shift+V  ↑  ←</dt><dd>Newer clipping</dd>
-      <dt>PgDn  PgUp  Home  End</dt><dd>Ten at a time, newest, oldest</dd>
-      <dt>1 to 9, 0</dt><dd>Jump to that position; 0 is tenth</dd>
-      <dt>Return</dt><dd>Copy and paste</dd>
-      <dt>Backspace  Delete</dt><dd>Forget this clipping</dd>
-      <dt>Esc  q</dt><dd>Close</dd>
-    </dl>
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>Keys</h2>
+      <dl class="keys">
+        <dt>Ctrl+Alt+V  ↓  →</dt><dd>Older clipping</dd>
+        <dt>Ctrl+Alt+Shift+V  ↑  ←</dt><dd>Newer clipping</dd>
+        <dt>PgDn  PgUp  Home  End</dt><dd>Ten at a time, newest, oldest</dd>
+        <dt>1 to 9, 0</dt><dd>Jump to that position; 0 is tenth</dd>
+        <dt>Return</dt><dd>Copy and paste</dd>
+        <dt>Backspace  Delete</dt><dd>Forget this clipping</dd>
+        <dt>Esc  q</dt><dd>Close</dd>
+      </dl>
+    </div>
   </section>
 
-  <section>
-    <details>
-      <summary>Other ways to install</summary>
-      <p class="dim">Arch package, built from the release binary:</p>
-      <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
-      <p class="dim">From source:</p>
-      <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
-      <p class="dim">Needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
-    </details>
-    <details>
-      <summary>Configure</summary>
-      <p class="dim"><code>~/.config/blanca/config.json</code>. Every key is optional; these are the defaults.</p>
+  <section style="padding-top:0">
+    <div class="wrap">
+      <details>
+        <summary>Other ways to install</summary>
+        <p>Arch package, built from the release binary:</p>
+        <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
+        <p>From source:</p>
+        <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
+        <p>Needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
+      </details>
+      <details>
+        <summary>Configure</summary>
+        <p><code>~/.config/blanca/config.json</code>. Every key is optional; these are the defaults.</p>
 <pre><code>{
   "remember": 99,
   "display": 10,
@@ -158,36 +213,123 @@
   "ignore_large": true,
   "ignore_sensitive": true
 }</code></pre>
-      <p class="dim">Set <code>paste_mode</code> to <code>ctrl-v</code> for apps that ignore Shift+Insert.</p>
-    </details>
-    <details>
-      <summary>Honest limits</summary>
-      <ul class="dim">
-        <li>Text only. Images and files are not recorded.</li>
-        <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
-        <li>No per-application ignore list; Wayland does not say which window a copy came from.</li>
-        <li>This is v0.1. Expect edges.</li>
-      </ul>
-    </details>
+        <p>Set <code>paste_mode</code> to <code>ctrl-v</code> for apps that ignore Shift+Insert.</p>
+      </details>
+      <details>
+        <summary>Honest limits</summary>
+        <ul>
+          <li>Text only. Images and files are not recorded.</li>
+          <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
+          <li>No per-application ignore list; Wayland does not say which window a copy came from.</li>
+          <li>This is v0.1. Expect edges.</li>
+        </ul>
+      </details>
+    </div>
   </section>
 </main>
 
-<footer class="col">
-  <p>Named after my dog, an Anatolian sighthound crossed with a Russell terrier.</p>
-  <p>MIT. Ported from <a href="https://github.com/snark/jumpcut">Jumpcut</a> by Steve Cook; not affiliated with Jumpcut or <a href="https://omarchy.org">Omarchy</a>.</p>
+<svg class="band" aria-hidden="true"></svg>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-motifs" aria-hidden="true">
+      <svg data-motif="eye" viewBox="0 0 15 15"></svg>
+      <svg data-motif="tree" viewBox="0 0 15 15"></svg>
+      <svg data-motif="horn" viewBox="0 0 15 15"></svg>
+      <svg data-motif="star" viewBox="0 0 15 15"></svg>
+    </div>
+    <p>Named after my dog, an Anatolian sighthound crossed with a Russell terrier. The motifs are kilim knots from the looms of Anatolia, shared with <a href="https://github.com/ezapmar/brainless-public">brainless</a>.</p>
+    <p>MIT. Ported from <a href="https://github.com/snark/jumpcut">Jumpcut</a> by Steve Cook; not affiliated with Jumpcut or <a href="https://omarchy.org">Omarchy</a>.</p>
+  </div>
 </footer>
 
 <script>
-  (function () {
-    var btn = document.getElementById('copy');
-    if (!navigator.clipboard) { btn.hidden = true; return; }
-    btn.addEventListener('click', function () {
-      navigator.clipboard.writeText(document.getElementById('cmd').textContent).then(function () {
-        btn.textContent = 'Copied';
-        setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
-      }, function () {});
+/* Kilim motifs as 15 by 15 knot grids and the woven band, after the brainless site. */
+(function () {
+  var P = { bone: '#F9EBDB', vermilion: '#F24B1E', teal: '#0C9794', saffron: '#FBA335' };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function cell(svg, x, y, fill) {
+    var r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', x); r.setAttribute('y', y);
+    r.setAttribute('width', 1); r.setAttribute('height', 1);
+    r.setAttribute('fill', fill); r.setAttribute('shape-rendering', 'crispEdges');
+    svg.appendChild(r);
+  }
+
+  var horn = [
+    '.cc.........cc.', 'c..c.......c..c', 'c...c.....c...c', '.c..cc...cc..c.', '.....c...c.....',
+    '.....cc.cc.....', '......ccc......', '.......c.......', '.......c.......', '......ccc......',
+    '.....ccAcc.....', '....cc.A.cc....', '...cc..A..cc...', '..cc...A...cc..', '.......A.......'
+  ];
+
+  function drawMotif(svg) {
+    var kind = svg.getAttribute('data-motif'), c = P.bone, x, y, i;
+    if (kind === 'eye') {
+      for (y = 0; y < 15; y++) for (x = 0; x < 15; x++) {
+        var d = Math.abs(x - 7) + Math.abs(y - 7);
+        if (d > 7 || (d >= 4 && d <= 6)) continue;
+        cell(svg, x, y, d > 1 ? c : P.teal);
+      }
+    } else if (kind === 'star') {
+      for (y = 0; y < 15; y++) for (x = 0; x < 15; x++) {
+        var dx = Math.abs(x - 7), dy = Math.abs(y - 7), m = Math.max(dx, dy);
+        if ((dx + dy <= 7 && dx + dy >= 5) || (m <= 4 && m >= 3)) cell(svg, x, y, c);
+        else if (dx + dy <= 1) cell(svg, x, y, P.vermilion);
+      }
+    } else if (kind === 'tree') {
+      for (y = 1; y < 15; y++) cell(svg, 7, y, c);
+      for (y = 2; y < 13; y += 3) for (i = 1; i <= 4; i++) { cell(svg, 7 - i, y + i, c); cell(svg, 7 + i, y + i, c); }
+      cell(svg, 7, 0, P.vermilion); cell(svg, 6, 1, P.vermilion); cell(svg, 8, 1, P.vermilion);
+    } else if (kind === 'horn') {
+      for (y = 0; y < 15; y++) for (x = 0; x < 15; x++) {
+        if (horn[y][x] === 'c') cell(svg, x, y, c);
+        else if (horn[y][x] === 'A') cell(svg, x, y, P.saffron);
+      }
+    }
+  }
+
+  /* A row of small eyes in alternating dyes, between two threads. */
+  function drawBand(svg, seed) {
+    var unit = 15, dyes = [P.vermilion, P.saffron, P.teal];
+    var cols = Math.ceil(Math.max(svg.clientWidth || 0, 320) / 24 * 15 / unit) + 1;
+    svg.setAttribute('viewBox', '0 0 ' + (cols * unit) + ' 15');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    [1, 13].forEach(function (y) {
+      var l = document.createElementNS(NS, 'rect');
+      l.setAttribute('x', 0); l.setAttribute('y', y); l.setAttribute('width', cols * unit); l.setAttribute('height', 1);
+      l.setAttribute('fill', P.bone); svg.appendChild(l);
     });
-  })();
+    for (var i = 0; i < cols; i++) {
+      var cx = i * unit + 7;
+      for (var y = 3; y <= 11; y++) for (var x = i * unit; x < i * unit + unit; x++) {
+        var d = Math.abs(x - cx) + Math.abs(y - 7);
+        if (d > 4) continue;
+        cell(svg, x, y, d === 4 || d < 2 ? P.bone : dyes[(i + seed) % dyes.length]);
+      }
+    }
+  }
+
+  var motifs = document.querySelectorAll('svg[data-motif]');
+  for (var i = 0; i < motifs.length; i++) drawMotif(motifs[i]);
+  function bands() {
+    var b = document.querySelectorAll('svg.band');
+    for (var j = 0; j < b.length; j++) drawBand(b[j], j);
+  }
+  bands();
+  var t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(bands, 150); });
+
+  var btn = document.getElementById('copy');
+  if (!navigator.clipboard) { btn.hidden = true; return; }
+  btn.addEventListener('click', function () {
+    navigator.clipboard.writeText(document.getElementById('cmd').textContent).then(function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+    }, function () {});
+  });
+})();
 </script>
 </body>
 </html>
