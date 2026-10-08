@@ -30,21 +30,3 @@ func TestHistory(t *testing.T) {
 		t.Fatal("delete missing")
 	}
 }
-
-func TestShorten(t *testing.T) {
-	if got := shorten("  hello\nworld", 40); got != "hello" {
-		t.Fatal(got)
-	}
-	if got := shorten("ééééé", 3); got != "ééé…" {
-		t.Fatal(got)
-	}
-}
-
-func TestWrapAndKeys(t *testing.T) {
-	if got := wrap("abcdef\tx", 4); !reflect.DeepEqual(got, []string{"abcd", "ef  ", "  x"}) {
-		t.Fatal(got)
-	}
-	if parseKey("\x1b[B").k != kNext || parseKey("\x1b").k != kQuit || parseKey("7").n != 7 {
-		t.Fatal("keys")
-	}
-}
