@@ -38,7 +38,7 @@ sudo pacman -S --needed go wl-clipboard wtype
 ```
 
 ```bash
-git clone <this repo> && cd blanca && go build && install -Dm755 blanca ~/.local/bin/blanca
+go install github.com/ezapmar/blanca@latest
 ```
 
 Then add to your Hyprland config:

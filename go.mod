@@ -1,4 +1,4 @@
-module blanca
+module github.com/ezapmar/blanca
 
 go 1.26.0
 

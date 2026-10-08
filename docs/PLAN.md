@@ -105,7 +105,7 @@ o.window("org.omarchy.blanca", { size = { 640, 360 } })
 ## 6. Files
 
 ```
-go.mod            module blanca; dep: golang.org/x/term
+go.mod            module github.com/ezapmar/blanca; dep: golang.org/x/term
 main.go           dispatch, paths, config
 history.go        load/save (flock), add, delete, top, clear, shorten
 store.go          store command
