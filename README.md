@@ -109,11 +109,12 @@ password managers such as KeePassXC.
 The logo lives in `assets/`: `blanca.svg` is the app icon (white face, black
 line art, transparent background, so it works on dark and light themes),
 `blanca-symbolic.svg` is the single-colour toolbar/tray glyph for 16 to 32 px,
-and `png/` holds rasterised sizes. To register Blanca in the app launcher with
-its icon:
+`blanca-tile.svg` is the same art on a rounded graphite tile for the launcher,
+and `png/` holds rasterised sizes. To register Blanca in the app launcher:
 
 ```bash
 install -Dm644 assets/blanca.svg ~/.local/share/icons/hicolor/scalable/apps/blanca.svg
+install -Dm644 assets/blanca-tile.svg ~/.local/share/icons/hicolor/scalable/apps/blanca-tile.svg
 install -Dm644 assets/blanca-symbolic.svg ~/.local/share/icons/hicolor/symbolic/apps/blanca-symbolic.svg
 install -Dm644 assets/blanca.desktop ~/.local/share/applications/blanca.desktop
 ```
