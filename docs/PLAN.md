@@ -121,12 +121,16 @@ history_test.go   stack semantics
 - TUI smoke-tested in a macOS terminal with a seeded history.
 - Real Omarchy test needed for: wl-paste watch, wtype paste, Hyprland rules, focus return.
 
+## Decisions
+
+- Module path: `github.com/ezapmar/blanca`, public repo (2026-10-08).
+- `paste_mode` default stays `shift-insert`, matching Omarchy's own paste helper.
+- Blanca keeps its own history file (`~/.local/share/blanca/history.json`) rather than
+  sharing Omarchy's `clipboard-history.json`.
+
 ## Unresolved questions
 
-1. Module path: `blanca` for now; GitHub owner/repo for `go install`?
-2. `paste_mode` default: Omarchy uses Shift-Insert (works in terminals). Keep, or Ctrl-V?
-3. Store history in Omarchy's own `~/.local/state/omarchy/clipboard-history.json` instead
-   of a separate file? (Would share with Omarchy's clipboard panel; format is theirs.)
-4. Hyprland window rule keys (`float`, `center`, `size`) copied from Omarchy defaults;
+1. Hyprland window rule keys (`float`, `center`, `size`) copied from Omarchy defaults;
    is `stay_focused` wanted/available in your Hyprland version?
-5. Default hotkey Ctrl-Alt-V conflicts with nothing in Omarchy defaults as of today; OK?
+2. Default hotkey Ctrl-Alt-V conflicts with nothing in Omarchy defaults as of today; OK?
+3. Needs a real run on Omarchy: wl-paste watch, wtype paste, focus return after the bezel closes.
