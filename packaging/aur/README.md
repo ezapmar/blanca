@@ -16,5 +16,5 @@ cp PKGBUILD .SRCINFO /tmp/blanca-bin/ && cd /tmp/blanca-bin
 git add PKGBUILD .SRCINFO && git commit -m "Update to 0.1.0" && git push
 ```
 
-On each release: bump `pkgver`, paste the two checksums from the release's
-`SHA256SUMS`, regenerate `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO`, push.
+On each release, `scripts/release <version>` tags, waits for the build, and updates
+`pkgver`, the checksums and `.SRCINFO` here. Then push those two files to the AUR repo.
