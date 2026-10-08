@@ -24,18 +24,6 @@ install -Dm644 "$src/assets/blanca-symbolic.svg" "$data/icons/hicolor/symbolic/a
 install -Dm644 "$src/assets/blanca.desktop" "$data/applications/blanca.desktop"
 echo "Installed blanca $tag to ~/.local/bin"
 for dep in wl-paste wl-copy wtype xdg-terminal-exec; do
-  command -v "$dep" >/dev/null 2>&1 || echo "Missing: $dep (sudo pacman -S --needed wl-clipboard wtype)"
+  command -v "$dep" >/dev/null 2>&1 || echo "Missing: $dep (sudo pacman -S --needed wl-clipboard wtype xdg-terminal-exec)"
 done
-cat <<'HINT'
-
-Add to ~/.config/hypr/bindings.lua:
-  o.bind("CTRL + ALT + V", "Blanca clipboard", "blanca bezel")
-  o.bind("CTRL + ALT + SHIFT + V", "Blanca clipboard (back)", "blanca bezel --up")
-Add to ~/.config/hypr/autostart.lua:
-  o.launch_on_start("wl-paste --type text --watch blanca store")
-Add to ~/.config/hypr/hyprland.lua:
-  o.window("org.omarchy.blanca", { float = true })
-  o.window("org.omarchy.blanca", { center = true })
-  o.window("org.omarchy.blanca", { size = { 640, 360 } })
-Then: hyprctl reload && setsid wl-paste --type text --watch blanca store &
-HINT
+"$HOME/.local/bin/blanca" setup

@@ -74,6 +74,7 @@ func usage() {
   list [N]      print the first N clippings, shortened
   get N         print clipping N in full
   clear         forget all clippings
+  setup         add the Hyprland keybind, autostart and window rules
   version
 `)
 	os.Exit(2)
@@ -124,6 +125,8 @@ func main() {
 			fatal(err)
 		}
 		exec.Command("wl-copy", "--clear").Run()
+	case "setup":
+		cmdSetup()
 	case "version", "--version":
 		fmt.Println("blanca", version)
 	default:
