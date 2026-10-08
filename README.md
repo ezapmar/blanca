@@ -1,53 +1,115 @@
-# Blanca
+<p align="center">
+  <img src="assets/blanca-banner.png" alt="Blanca" width="760">
+</p>
 
-Blanca is a clipboard manager for [Omarchy](https://omarchy.org) Linux. It
-keeps a history of the text you have cut or copied, so you can get back to a
-snippet, a URL, or that sentence you had _just right_ five minutes ago, even
-after you have copied something else.
+<p align="center">
+  <b>Everything you copy, kept. One hotkey brings it back, one clipping at a time,<br>
+  and Return pastes it where you were.</b>
+</p>
 
-Blanca is a port of [Jumpcut](https://github.com/snark/jumpcut), the
-long-running macOS clipboard manager by Steve Cook, rebuilt in Go for Wayland
-and Hyprland. It is named after my dog.
+<p align="center">
+  <a href="https://github.com/ezapmar/blanca/releases"><img alt="release" src="https://img.shields.io/github/v/release/ezapmar/blanca?style=flat-square&labelColor=262626&color=F24B1E&label=release"></a>
+  <a href="LICENSE"><img alt="licence" src="https://img.shields.io/badge/licence-MIT-0C9794?style=flat-square&labelColor=262626"></a>
+  <img alt="go" src="https://img.shields.io/badge/go-static%20binary-FBA335?style=flat-square&labelColor=262626">
+  <img alt="omarchy" src="https://img.shields.io/badge/omarchy-hyprland%20%2B%20wayland-F9EBDB?style=flat-square&labelColor=262626">
+</p>
 
-## How it works
+<p align="center">
+  <a href="#install">Install</a> &nbsp;·&nbsp;
+  <a href="#the-first-minute">First minute</a> &nbsp;·&nbsp;
+  <a href="#configure">Configure</a> &nbsp;·&nbsp;
+  <a href="#where-this-came-from">Jumpcut</a> &nbsp;·&nbsp;
+  <a href="docs/design.md">Design</a>
+</p>
 
-Jumpcut's signature is the **bezel**: press a hotkey and one clipping appears,
-front and center. Press the hotkey again to step back through history, hit
-Return to paste. Blanca keeps that exact interaction, Omarchy-style:
+Blanca is a clipboard manager for [Omarchy](https://omarchy.org). It is a port of
+[Jumpcut](https://github.com/snark/jumpcut), the macOS clipboard manager Steve Cook has
+kept alive since 2002, rebuilt in Go for Hyprland and Wayland. One static binary, no
+daemon of its own, no account, nothing leaves your machine.
 
-- `wl-paste --watch blanca store` records every text copy into
-  `~/.local/share/blanca/history.json`.
-- `Ctrl+Alt+V` runs `blanca bezel`, which opens the bezel as a small floating
-  terminal (app id `org.omarchy.blanca`, so it picks up your Omarchy theme and
-  transparency). Pressing the hotkey again while it is open advances it;
-  `Ctrl+Alt+Shift+V` goes back.
-- Return copies the clipping and pastes it into the window you came from with
-  `wtype` (Shift+Insert, like Omarchy's own clipboard tools). Esc closes.
+It is named after my dog. She is an Anatolian sighthound crossed with a Russell terrier,
+and she has the same reaction to the word "paste".
 
-Keys in the bezel, same as Jumpcut: `↑ ↓ ← →` move, `PgUp PgDn` ±10,
-`Home End`, `1`–`9` jump (`0` is tenth), `Return` select, `Backspace`/`Delete`
-remove the clipping, `Esc` or `q` close.
+---
 
-## Install (Arch / Omarchy)
+## The problem
 
-No Go toolchain needed. Blanca is a single static binary; the installer fetches
-the latest release, puts it in `~/.local/bin`, and installs the icons and
-desktop entry:
+I copy a command from a terminal. Then I copy an error message to search for it. Now
+the command is gone, and I go back to the first window to copy it again. Twenty times a
+day, for twenty years, on every machine I have owned.
+
+Jumpcut fixed this on my Mac in 2004 and I never thought about it again. Press
+Ctrl+Alt+V, the last thing you copied appears in a small window. Press it again, the one
+before that. Let go, it is pasted. That is the whole product, and I have not found a
+better one.
+
+Then I moved to Omarchy. Omarchy has a clipboard panel, and it is fine. A list you pick
+from with a mouse is a different tool, though. Jumpcut is a keyboard reflex, and after
+twenty years I wanted the reflex back.
+
+## The solution
+
+The same reflex, done the Omarchy way.
+
+**A watcher that records.** `wl-paste --watch blanca store` runs from Hyprland's
+autostart and hands Blanca every text copy. Blanca keeps the last 99 in a plain JSON
+file, drops whitespace, anything over 50,000 characters, and anything a password
+manager has tagged as secret.
+
+**A bezel that shows one thing.** `Ctrl+Alt+V` opens a small floating terminal in the
+middle of the screen with the newest clipping and its position, `1/42`. Press the hotkey
+again to step back. Arrow keys, Home, End and the digits do what you expect. Backspace
+deletes the clipping. Esc closes. Because it is a terminal, it already has your Omarchy
+theme and transparency.
+
+**Return pastes.** Blanca copies the clipping and, once the bezel has closed and focus is
+back where you were, sends Shift+Insert through `wtype`. The same chord Omarchy's own
+clipboard tools use, so it works in terminals too.
+
+That is it. There is no tray icon and no preferences window. There is a JSON file with
+nine keys.
+
+## The first minute
+
+Copy three things. Press `Ctrl+Alt+V`. You see the third. Press it again, the second.
+Press Return. It is pasted where your cursor was, and the bezel is gone.
+
+Keys in the bezel, the same as Jumpcut's:
+
+| Key | Does |
+|---|---|
+| hotkey again, `↓`, `→` | next (older) clipping |
+| `Ctrl+Alt+Shift+V`, `↑`, `←` | previous (newer) clipping |
+| `PgDn`, `PgUp` | ten at a time |
+| `Home`, `End` | newest, oldest |
+| `1` to `9`, `0` | jump to that position, `0` is tenth |
+| `Return` | copy and paste |
+| `Backspace`, `Delete` | forget this clipping |
+| `Esc`, `q` | close |
+
+## Install
+
+No Go toolchain needed. Blanca is a single static binary; the installer fetches the
+latest release, puts it in `~/.local/bin`, and installs the icons and desktop entry:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh
 ```
 
-Runtime dependencies are `wl-clipboard`, `wtype`, and `xdg-terminal-exec`, all
-already part of Omarchy. On plain Arch:
+Yes, curl into sh. The script is forty lines and I would read it first.
+
+Or build an Arch package from the release binary, which puts it under `/usr` and lets
+`pacman` track it:
 
 ```bash
-sudo pacman -S --needed wl-clipboard wtype
+git clone https://github.com/ezapmar/blanca && cd blanca/packaging/aur && makepkg -si
 ```
 
-To build from source instead: `go install github.com/ezapmar/blanca@latest`.
+Runtime dependencies are `wl-clipboard`, `wtype` and `xdg-terminal-exec`, all part of
+Omarchy already. On plain Arch: `sudo pacman -S --needed wl-clipboard wtype`. To build
+from source instead: `go install github.com/ezapmar/blanca@latest`.
 
-Then add to your Hyprland config:
+Then three lines in your Hyprland config. Omarchy's config is Lua, so:
 
 ```lua
 -- ~/.config/hypr/bindings.lua
@@ -63,34 +125,15 @@ o.window("org.omarchy.blanca", { center = true })
 o.window("org.omarchy.blanca", { size = { 640, 360 } })
 ```
 
-Reload with `hyprctl reload` and start the watcher once by hand (or log out
-and in):
+Reload, and start the watcher once by hand so you do not have to log out:
 
 ```bash
-setsid wl-paste --type text --watch blanca store &
+hyprctl reload && setsid wl-paste --type text --watch blanca store &
 ```
 
-## Commands
+## Configure
 
-```
-blanca store          read one clipping from stdin into the history
-blanca pick           show the bezel in the current terminal
-blanca bezel [--up]   hotkey entry: advance an open bezel, or open one
-blanca list [N]       print the first N clippings, shortened (default 10)
-blanca get N          print clipping N in full
-blanca clear          forget all clippings
-```
-
-`list` and `get` let you build a menu with walker, fuzzel, or fzf if you want
-Jumpcut's status-bar menu too:
-
-```bash
-blanca get "$(blanca list 99 | fzf | cut -f1)" | wl-copy
-```
-
-## Configuration
-
-`~/.config/blanca/config.json`, every key optional. Defaults shown:
+`~/.config/blanca/config.json`. Every key is optional. These are the defaults:
 
 ```json
 {
@@ -106,51 +149,75 @@ blanca get "$(blanca list 99 | fzf | cut -f1)" | wl-copy
 }
 ```
 
-`paste_mode` can be `ctrl-v` for apps that do not accept Shift+Insert.
-`ignore_sensitive` skips clippings tagged `x-kde-passwordManagerHint` by
-password managers such as KeePassXC.
+`paste_mode` can be `ctrl-v` for the odd app that ignores Shift+Insert. `paste: false`
+only copies and leaves the pasting to you. `move_to_top` puts a clipping back at the
+top after you use it, which Jumpcut users either love or switch off in the first hour.
 
-## Icon
+## Commands
 
-The logo lives in `assets/`: `blanca.svg` is the app icon (white face, black
-line art, transparent background, so it works on dark and light themes),
-`blanca-symbolic.svg` is the single-colour toolbar/tray glyph for 16 to 32 px,
-`blanca-tile.svg` is the same art on a rounded graphite tile for the launcher,
-and `png/` holds rasterised sizes. To register Blanca in the app launcher:
-
-```bash
-install -Dm644 assets/blanca.svg ~/.local/share/icons/hicolor/scalable/apps/blanca.svg
-install -Dm644 assets/blanca-tile.svg ~/.local/share/icons/hicolor/scalable/apps/blanca-tile.svg
-install -Dm644 assets/blanca-symbolic.svg ~/.local/share/icons/hicolor/symbolic/apps/blanca-symbolic.svg
-install -Dm644 assets/blanca.desktop ~/.local/share/applications/blanca.desktop
+```
+blanca store          read one clipping from stdin into the history
+blanca pick           show the bezel in the current terminal
+blanca bezel [--up]   hotkey entry: advance an open bezel, or open one
+blanca list [N]       print the first N clippings, shortened
+blanca get N          print clipping N in full
+blanca clear          forget all clippings
 ```
 
-## Differences from Jumpcut
+`list` and `get` are there so you can build a menu if you miss Jumpcut's status-bar
+list. With fzf, for instance:
 
-- No "release the modifier to paste": terminals do not see key-up events, so
-  Return selects. Everything else in the bezel behaves the same.
-- No status-bar menu, Sparkle updates, or preferences window.
-- The bezel cursor starts at the newest clipping each time it opens.
+```bash
+blanca get "$(blanca list 99 | fzf | cut -f1)" | wl-copy
+```
 
-See [docs/PLAN.md](docs/PLAN.md) for the reverse-engineering notes and the
-full mapping from Jumpcut to Blanca.
+## Where this came from
 
-## Credits
+Jumpcut is a Swift app with a status-bar menu, a translucent bezel and twenty settings.
+I read all of it before writing a line, and the notes are in [docs/PLAN.md](docs/PLAN.md):
+what each file does, which behaviours matter, and what each one became on Linux. Most
+of the mapping is boring in the good way. The pasteboard poller became `wl-paste`. The
+plist became JSON. The global hotkey became a Hyprland bind. The bezel window became a
+floating terminal, because Omarchy already knows how to launch and style those, and a
+terminal needs no GTK and no compositor protocols.
 
-Blanca is derived from **Jumpcut** by Steve Cook, released under the MIT
-License. Jumpcut's original copyright and permission notice are reproduced
-in [LICENSE](LICENSE). Jumpcut itself traces part of its lineage to Brent
-Simmons' TigerLaunch.
+One thing did not survive. Jumpcut pastes when you release the modifier keys. A
+terminal cannot see a key going up, so Blanca pastes on Return instead. Everything else
+in the bezel behaves the same.
 
-Blanca uses [golang.org/x/term](https://pkg.go.dev/golang.org/x/term) and,
-at runtime, [wl-clipboard](https://github.com/bugaevc/wl-clipboard) and
-[wtype](https://github.com/atx/wtype). It leans on Omarchy's TUI launcher for
-its floating window.
+Jumpcut is MIT licensed and its notice is reproduced in [LICENSE](LICENSE). Jumpcut
+itself traces part of its lineage to Brent Simmons' TigerLaunch. Blanca is independent
+and is not affiliated with the Jumpcut author or with Omarchy; the Jumpcut name and icon
+belong to their owners and are not used here.
 
-Blanca is an independent project and is not affiliated with or endorsed by
-the Jumpcut author or by Omarchy. The Jumpcut name and icon belong to their
-respective owners and are not used here.
+## Honest limits
 
-## License
+- Text only. Images and files are not recorded.
+- Tested on Omarchy with Hyprland. Other wlroots compositors should work with their own
+  keybind and floating rule, but I have not tried them.
+- Wayland hands Blanca the text, not the window it came from, so there is no
+  per-application ignore list.
+- Shift+Insert is what `wtype` sends by default. A few apps want Ctrl+V; that is one
+  line in the config.
+- The release is v0.1.0 and the wiring to a real desktop is a few days old. Expect edges.
+
+## Contributing
+
+Issues and pull requests are open. If the bezel opened in the wrong place, paste your
+window rules. If a paste landed in the wrong window, say which app. Both are more useful
+than a feature request. Tests run offline:
+
+```bash
+go test ./...
+```
+
+## Licence
 
 MIT. See [LICENSE](LICENSE).
+
+---
+
+<p align="center">
+  <img src="assets/png/blanca-64.png" alt="" width="40"><br>
+  <sub>Copy twice. Lose nothing. Press the key.</sub>
+</p>
