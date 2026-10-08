@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-const version = "0.1.0"
+var version = "dev" // set by -ldflags at release time
 
 // Config mirrors Jumpcut's preferences; every field is optional in config.json.
 type Config struct {

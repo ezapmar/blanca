@@ -30,16 +30,22 @@ remove the clipping, `Esc` or `q` close.
 
 ## Install (Arch / Omarchy)
 
-Dependencies: `go` to build, and at runtime `wl-clipboard`, `wtype`, and
-`xdg-terminal-exec` (all already part of Omarchy).
+No Go toolchain needed. Blanca is a single static binary; the installer fetches
+the latest release, puts it in `~/.local/bin`, and installs the icons and
+desktop entry:
 
 ```bash
-sudo pacman -S --needed go wl-clipboard wtype
+curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh
 ```
 
+Runtime dependencies are `wl-clipboard`, `wtype`, and `xdg-terminal-exec`, all
+already part of Omarchy. On plain Arch:
+
 ```bash
-go install github.com/ezapmar/blanca@latest
+sudo pacman -S --needed wl-clipboard wtype
 ```
+
+To build from source instead: `go install github.com/ezapmar/blanca@latest`.
 
 Then add to your Hyprland config:
 
