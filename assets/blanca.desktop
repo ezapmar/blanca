@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Blanca
+Comment=Clipboard history bezel
+Exec=blanca bezel
+Icon=blanca
+Terminal=false
+Categories=Utility;
+NoDisplay=false
