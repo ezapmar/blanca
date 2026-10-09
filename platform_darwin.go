@@ -60,7 +60,7 @@ func cmdWatch(cfg Config) {
 	C.bzRun(C.bool(cfg.Paste), unsafe.Pointer(&menuIcon[0]), C.int(len(menuIcon)))
 }
 
-// goMenu fills the opening menu with the first `display` clippings, as Jumpcut does.
+// goMenu fills the opening menu with the first `display` clippings.
 //
 //export goMenu
 func goMenu() {
@@ -155,7 +155,7 @@ func goUpdate(tag *C.char) {
 	}
 }
 
-// goRelease is every modifier key going up, which selects, as in Jumpcut.
+// goRelease is every modifier key going up, which selects.
 //
 //export goRelease
 func goRelease() {

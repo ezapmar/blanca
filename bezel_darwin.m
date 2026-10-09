@@ -1,11 +1,11 @@
-// The macOS half of Blanca: pasteboard poller, global hotkey and bezel panel, after
-// Jumpcut's Pasteboard.swift and Bezel.swift. Everything here runs on the main thread.
+// The macOS half of Blanca: pasteboard poller, global hotkey and bezel panel.
+// Everything here runs on the main thread.
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
 #import <ServiceManagement/ServiceManagement.h>
 #include "_cgo_export.h"
 
-static const CGFloat side = 325; // Jumpcut's bezel size
+static const CGFloat side = 325; // the bezel is a square
 static NSTextField *title, *body;
 
 static BOOL hasType(NSArray<NSString *> *names) {
@@ -25,7 +25,7 @@ void bzCopy(const char *text) {
 
 void bzClear(void) { [NSPasteboard.generalPasteboard clearContents]; }
 
-// bzPaste is Jumpcut's fakeCommandV. macOS drops the events unless Accessibility is granted.
+// bzPaste sends Cmd+V to the frontmost app. macOS drops the events unless Accessibility is granted.
 void bzPaste(void) {
 	CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
 	for (int down = 1; down >= 0; down--) {
@@ -116,7 +116,7 @@ void bzShow(const char *text, const char *head) {
 
 void bzHide(void) { [bezel orderOut:nil]; }
 
-// Menu is the menu bar item's menu, after Jumpcut's MenuManager: the newest clippings,
+// Menu is the menu bar item's menu: the newest clippings,
 // Clear, Settings, Check for Updates and Quit. It is rebuilt from the history every time it opens.
 @interface Menu : NSObject <NSMenuDelegate>
 @end
@@ -142,7 +142,7 @@ static NSMenu *spans;  // the Clear submenu
 }
 - (void)pick:(NSMenuItem *)i { goMenuPick((int)i.tag); }
 - (void)set:(NSMenuItem *)i { goSet((int)i.tag); }
-- (void)clear:(NSMenuItem *)i { // Jumpcut asks first
+- (void)clear:(NSMenuItem *)i { // ask first
 	NSAlert *a = [NSAlert new];
 	a.messageText = [NSString stringWithFormat:@"Clear clippings: %@?", i.title.lowercaseString];
 	[a addButtonWithTitle:@"Clear"];
@@ -235,7 +235,7 @@ void bzRun(bool paste, const void *icon, int iconLen) {
 	RegisterEventHotKey(kVK_ANSI_V, controlKey | optionKey, (EventHotKeyID){'BLNC', 1}, GetApplicationEventTarget(), 0, &ref);
 	RegisterEventHotKey(kVK_ANSI_V, controlKey | optionKey | shiftKey, (EventHotKeyID){'BLNC', 2}, GetApplicationEventTarget(), 0, &ref);
 
-	// Jumpcut's poll: the pasteboard has no change notification, only a counter.
+	// A poll: the pasteboard has no change notification, only a counter.
 	__block NSInteger seen = NSPasteboard.generalPasteboard.changeCount;
 	[NSTimer scheduledTimerWithTimeInterval:0.5 repeats:YES block:^(NSTimer *t) {
 		NSPasteboard *pb = NSPasteboard.generalPasteboard;

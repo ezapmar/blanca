@@ -74,7 +74,7 @@ func platformSettings(c *Config) []setting {
 		}}}
 }
 
-// cmdMenu is the Waybar button's click, after Jumpcut's status menu: the first `display`
+// cmdMenu is the Waybar button's click: the first `display`
 // clippings, Clear, Settings and Check for Updates, shown in Walker. Choosing a clipping places it like the bezel.
 func cmdMenu(cfg Config) {
 	items, err := readHistory()
@@ -104,7 +104,7 @@ func cmdMenu(cfg Config) {
 	}
 }
 
-// menuClear offers how far back to clear and, as Jumpcut does, asks before doing it.
+// menuClear offers how far back to clear and asks before doing it.
 func menuClear() {
 	var names []string
 	for _, o := range clearOptions {
@@ -212,7 +212,7 @@ func sendPaste(cfg Config) {
 }
 
 // sensitive reports whether the current clipboard carries the password-manager hint
-// (KeePassXC and friends), the Wayland counterpart of Jumpcut's ConcealedType check.
+// (KeePassXC and friends), the Wayland counterpart of macOS's ConcealedType.
 func sensitive() bool {
 	out, err := exec.Command("wl-paste", "--list-types").Output()
 	return err == nil && strings.Contains(string(out), "x-kde-passwordManagerHint")

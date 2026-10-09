@@ -2,7 +2,7 @@
 pkgname=blanca-bin
 pkgver=0.3.0
 pkgrel=1
-pkgdesc="Clipboard history bezel for Omarchy and Hyprland, a Go port of Jumpcut"
+pkgdesc="Clipboard history bezel for Omarchy and Hyprland"
 arch=('x86_64' 'aarch64')
 url="https://github.com/ezapmar/blanca"
 license=('MIT')

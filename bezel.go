@@ -12,7 +12,7 @@ import (
 )
 
 // cmdBezel is the hotkey entry point. Pressing the hotkey while the bezel is open
-// advances it (Shift goes back), exactly like Jumpcut; otherwise a bezel is opened
+// advances it (Shift goes back); otherwise a bezel is opened
 // in a floating terminal the Omarchy way. On macOS `blanca watch` owns the hotkey.
 func cmdBezel(up bool) {
 	pidfile := filepath.Join(runtimeDir(), "pick.pid")
@@ -53,7 +53,7 @@ func place(cfg Config, text string) {
 	p.Start()
 }
 
-// cmdPaste is Jumpcut's fakeCommandV: wait for focus to settle, then send the paste chord.
+// cmdPaste is the paste after a selection: wait for focus to settle, then send the paste chord.
 func cmdPaste(cfg Config) {
 	time.Sleep(200 * time.Millisecond)
 	sendPaste(cfg)
