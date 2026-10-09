@@ -75,7 +75,7 @@ func platformSettings(c *Config) []setting {
 }
 
 // cmdMenu is the Waybar button's click, after Jumpcut's status menu: the first `display`
-// clippings and Clear All, shown in Walker. Choosing a clipping places it like the bezel.
+// clippings, Clear, Settings and Check for Updates, shown in Walker. Choosing a clipping places it like the bezel.
 func cmdMenu(cfg Config) {
 	items, err := readHistory()
 	if err != nil {
@@ -86,20 +86,36 @@ func cmdMenu(cfg Config) {
 	for i, s := range items {
 		fmt.Fprintf(&b, "%d  %s\n", i+1, shorten(s, 40))
 	}
-	sel := dmenu("Blanca…", b.String()+"Clear All\nSettings\n")
+	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nCheck for Updates\n")
 	switch sel {
-	case "Clear All":
-		if dmenu("Clear all clippings?", "Cancel\nClear\n") == "Clear" { // Jumpcut asks first
-			clearAll()
-		}
+	case "Clear":
+		menuClear()
 		return
 	case "Settings":
 		menuSettings(cfg)
+		return
+	case "Check for Updates":
+		menuUpdate()
 		return
 	}
 	var i int
 	if fmt.Sscanf(sel, "%d", &i); i >= 1 && i <= len(items) {
 		use(cfg, items[i-1], i-1)
+	}
+}
+
+// menuClear offers how far back to clear and, as Jumpcut does, asks before doing it.
+func menuClear() {
+	var names []string
+	for _, o := range clearOptions {
+		names = append(names, o.name)
+	}
+	i := slices.Index(names, dmenu("Clear…", strings.Join(names, "\n")+"\n"))
+	if i < 0 || dmenu("Clear clippings: "+strings.ToLower(names[i])+"?", "Cancel\nClear\n") != "Clear" {
+		return
+	}
+	if err := clearSpan(clearOptions[i].span); err != nil {
+		fatal(err)
 	}
 }
 
@@ -133,6 +149,27 @@ func menuSettings(cfg Config) {
 	}
 }
 
+// menuUpdate looks for a newer release and offers it. The update itself runs in a
+// terminal, `blanca update`, where pacman can ask for a password and the installer can
+// be read.
+func menuUpdate() {
+	tag, note := checkUpdate()
+	if tag == "" {
+		dmenu(note, "OK\n")
+		return
+	}
+	if dmenu("Blanca "+strings.TrimPrefix(tag, "v")+" is available", "Update\nLater\n") != "Update" {
+		return
+	}
+	self, err := os.Executable()
+	if err == nil {
+		err = launchTUI("sh", "-c", `"$0" update; printf '\nReturn closes this. '; read _`, self)
+	}
+	if err != nil {
+		fatal(err)
+	}
+}
+
 // dmenu shows lines in Walker the way Omarchy's own menus do and returns the chosen one.
 func dmenu(prompt, lines string) string {
 	walker := "walker"
@@ -145,12 +182,13 @@ func dmenu(prompt, lines string) string {
 	return strings.TrimSpace(string(out))
 }
 
-func launchBezel(self string) error {
-	var cmd *exec.Cmd
+func launchBezel(self string) error { return launchTUI(self, "pick") }
+
+// launchTUI runs a command in Blanca's floating terminal.
+func launchTUI(args ...string) error {
+	cmd := exec.Command("xdg-terminal-exec", append([]string{"--app-id=" + appID, "-e"}, args...)...)
 	if _, err := exec.LookPath("omarchy-launch-tui"); err == nil {
-		cmd = exec.Command("omarchy-launch-tui", "--app-id="+appID, self, "pick")
-	} else {
-		cmd = exec.Command("xdg-terminal-exec", "--app-id="+appID, "-e", self, "pick")
+		cmd = exec.Command("omarchy-launch-tui", append([]string{"--app-id=" + appID}, args...)...)
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	return cmd.Start()

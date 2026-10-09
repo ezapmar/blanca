@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -44,5 +45,8 @@ func store(cfg Config, s string, sensitive func() bool) (bool, error) {
 	}
 	added := false
 	_, err := withHistory(func(h *History) bool { added = h.Add(s, cfg.Remember); return added })
+	if err == nil && added {
+		err = setTime(s, time.Now())
+	}
 	return added, err
 }

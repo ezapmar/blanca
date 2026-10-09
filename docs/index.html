@@ -106,6 +106,7 @@
   dl.keys dt { font: 0.85rem/1.9 var(--mono); padding-right: 40px; }
   dl.keys dd { color: var(--ash); }
   dl.keys dt:first-of-type, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
+  .keys-note { margin-top: 24px; color: var(--ash); font-size: 0.98rem; max-width: 60ch; }
 
   /* folds */
   details { border-top: 1px solid var(--line); }
@@ -155,7 +156,8 @@
       <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
       <button type="button" id="copy">Copy</button>
     </div>
-    <p class="after">The same line on Omarchy and on macOS. Then copy something and press <code>Ctrl+Alt+V</code>. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
+    <p class="after">The same line on Omarchy and on macOS. Then copy something and press <code>Ctrl+Alt+V</code>; on a Mac that is Control + Option + V. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
+    <p class="after">To update later, on either system: <code>blanca update</code>, or Check for Updates in the menu.</p>
   </div>
 </header>
 
@@ -182,7 +184,7 @@
           <svg data-motif="horn" viewBox="0 0 15 15" aria-hidden="true"></svg>
           <span class="name">koçboynuzu · the ram's horn</span>
           <h3>Return pastes</h3>
-          <p>The bezel closes and the clipping lands where you were typing.</p>
+          <p>The bezel closes and the clipping lands where you were typing. Clear, in the menu, forgets the last hour, the last 24 hours, the last month or everything.</p>
         </div>
       </div>
     </div>
@@ -213,6 +215,7 @@
         <dt>Backspace  Delete</dt><dd>Forget this clipping</dd>
         <dt>Esc  q</dt><dd>Close</dd>
       </dl>
+      <p class="keys-note">On a Mac keyboard <code>Ctrl+Alt+V</code> is Control (⌃) + Option (⌥) + V. Alt is the Option key, and it is Control, not Command. Hold Control and Option, tap <code>V</code> until the clipping you want is showing, and let go: it pastes.</p>
     </div>
   </section>
 
@@ -220,11 +223,18 @@
     <div class="wrap">
       <details>
         <summary>Other ways to install</summary>
-        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It is not notarised, so the first time macOS makes you allow it under Privacy &amp; Security, Open Anyway.</p>
+        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It needs macOS 13 or later. It is not notarised, so the first time macOS makes you allow it under Privacy &amp; Security, Open Anyway.</p>
         <p>Arch package, built from the release binary:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
         <p>From source:</p>
         <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
+        <p>Or build it from a clone, with Go 1.26 or newer. On Omarchy:</p>
+        <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca
+go build -o ~/.local/bin/blanca . &amp;&amp; blanca setup</code></pre>
+        <p>On macOS, with the Xcode command line tools installed, <code>scripts/macapp</code> builds a universal <code>dist/Blanca.app</code> and a <code>dist/Blanca.dmg</code> beside it. The app is signed ad hoc and targets macOS 13.</p>
+        <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca
+scripts/macapp 0.2.0
+cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</code></pre>
         <p>On Linux it needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
       </details>
       <details>

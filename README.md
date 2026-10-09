@@ -31,10 +31,14 @@ and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
 
 The same line works on macOS. There it puts `Blanca.app` in Applications, starts it and
 links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
-permission, which is what lets Blanca paste for you. Or take `Blanca.dmg` from the
+permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or take `Blanca.dmg` from the
 [latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
 across; it is not notarised, so the first time macOS makes you allow it under
 Privacy & Security > Open Anyway.
+
+To update, on either system: `blanca update`, or Check for Updates in the menu. It asks
+GitHub for the newest release and, if that is ahead of yours, installs it the way the
+first one came.
 
 ## What's new in 0.2
 
@@ -69,6 +73,10 @@ has the same reaction to the word "paste".
 | `Backspace`, `Delete` | forget this clipping |
 | `Esc`, `q` | close |
 
+On a Mac keyboard `Ctrl+Alt+V` is Control (⌃) + Option (⌥) + V. Alt is the Option key,
+and it is Control, not Command. Hold Control and Option, tap `V` until the clipping you
+want is showing, and let go: it pastes.
+
 ---
 
 <details>
@@ -85,6 +93,26 @@ sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.2.0/blanca
 The same package can be built locally from `packaging/aur` with `makepkg -si`.
 
 From source: `go install github.com/ezapmar/blanca@latest && blanca setup`.
+
+Or build it from a clone. You need Go 1.26 or newer. On Omarchy:
+
+```bash
+git clone https://github.com/ezapmar/blanca && cd blanca
+go build -o ~/.local/bin/blanca . && blanca setup
+```
+
+On macOS, with the Xcode command line tools installed (`xcode-select --install`),
+`scripts/macapp` builds a universal `dist/Blanca.app` and a `dist/Blanca.dmg` beside it:
+
+```bash
+git clone https://github.com/ezapmar/blanca && cd blanca
+scripts/macapp 0.2.0
+cp -R dist/Blanca.app /Applications/ && open /Applications/Blanca.app
+```
+
+The app is signed ad hoc and targets macOS 13, the first release with the login item
+API it uses. A build of your own is a new app as far as macOS is concerned, so it asks
+for Accessibility again.
 
 Runtime dependencies are `wl-clipboard`, `wtype` and `xdg-terminal-exec`, all part of
 Omarchy. On plain Arch: `sudo pacman -S --needed wl-clipboard wtype xdg-terminal-exec`.
@@ -124,8 +152,12 @@ is back where you were, sends Shift+Insert through `wtype`, the same chord Omarc
 own clipboard tools use, so it works in terminals too.
 
 **The bar has a menu.** Jumpcut's other half is its menu bar icon: click it and the
-newest clippings drop down, with Clear All underneath. On Omarchy that is a Waybar
+newest clippings drop down, with Clear underneath. On Omarchy that is a Waybar
 button which runs `blanca menu`, a Walker list. `blanca setup` adds the button.
+
+**Clear goes back as far as you say.** The last hour, the last 24 hours, the last month,
+or all of it. Blanca notes when each clipping was copied, as a hash beside the history.
+Clippings from before it kept times have none, and only All forgets those.
 
 **Copies from your iPhone are marked.** With Handoff on, what you copy on an iPhone or
 iPad lands in the list like anything else, with a small phone beside it in the menu.
@@ -175,8 +207,10 @@ blanca bezel [--up]   hotkey entry: advance an open bezel, or open one
 blanca menu           Waybar button entry: the newest clippings as a Walker menu
 blanca list [N]       print the first N clippings, shortened
 blanca get N          print clipping N in full
-blanca clear          forget all clippings
+blanca clear [hour|day|month]
+                      forget all clippings, or those of the last hour, 24 hours or month
 blanca setup          Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
+blanca update         install the newest release, if there is one
 ```
 
 `list` and `get` let you build a menu, with fzf for instance:
