@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
-# Build dist/Blanca.app: a universal, ad-hoc signed bundle whose executable is the blanca
-# binary. Opened from Finder it runs `blanca watch`. Also dist/Blanca.dmg, the app beside
-# an Applications shortcut to drag it onto. Usage: scripts/macapp [version]
+# Build dist/Blanca.app: a universal bundle whose executable is the blanca binary. Opened
+# from Finder it runs `blanca watch`. Also dist/Blanca.dmg, the app beside an Applications
+# shortcut to drag it onto. Usage: scripts/macapp [version]
+#
+# Signed ad hoc unless BLANCA_SIGN names a Developer ID Application identity. Give its
+# SHA-1 from `security find-identity -v -p codesigning` rather than its name: a name with
+# a letter like ç in it does not survive the trip through the shell. With BLANCA_NOTARY,
+# a profile saved by `xcrun notarytool store-credentials`, the app and the dmg are
+# notarised and stapled as well.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 ver=${1:-0.0.0}
+sign=${BLANCA_SIGN:--}
+notary=${BLANCA_NOTARY:-}
+[[ -z $notary || $sign != - ]] || { echo "BLANCA_NOTARY needs BLANCA_SIGN" >&2; exit 1; }
 export MACOSX_DEPLOYMENT_TARGET=13.0 # SMAppService, the login item, needs macOS 13
 app=dist/Blanca.app
 rm -rf "$app" dist/Blanca.iconset
@@ -43,7 +52,17 @@ cat > "$app/Contents/Info.plist" <<EOF
 </dict>
 </plist>
 EOF
-codesign --force --sign - "$app"
+if [[ $sign == - ]]; then
+  codesign --force --sign - "$app"
+else
+  codesign --force --options runtime --timestamp --sign "$sign" "$app"
+fi
+if [[ -n $notary ]]; then
+  ditto -c -k --keepParent "$app" dist/Blanca-notarise.zip
+  xcrun notarytool submit dist/Blanca-notarise.zip --keychain-profile "$notary" --wait
+  rm dist/Blanca-notarise.zip
+  xcrun stapler staple "$app"
+fi
 
 rm -rf dist/dmg dist/Blanca.dmg
 mkdir dist/dmg
@@ -51,4 +70,11 @@ cp -R "$app" dist/dmg/
 ln -s /Applications dist/dmg/Applications
 hdiutil create -quiet -volname Blanca -srcfolder dist/dmg -format UDZO dist/Blanca.dmg
 rm -rf dist/dmg
+if [[ $sign != - ]]; then
+  codesign --timestamp --sign "$sign" dist/Blanca.dmg
+fi
+if [[ -n $notary ]]; then
+  xcrun notarytool submit dist/Blanca.dmg --keychain-profile "$notary" --wait
+  xcrun stapler staple dist/Blanca.dmg
+fi
 echo "$app"
