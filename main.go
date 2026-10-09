@@ -90,6 +90,7 @@ func usage() {
   get N         print clipping N in full
   clear         forget all clippings
   setup         Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
+  update        install the newest release, if there is one
   version
 `)
 	os.Exit(2)
@@ -149,6 +150,8 @@ func main() {
 		}
 	case "setup":
 		cmdSetup()
+	case "update":
+		cmdUpdate()
 	case "version", "--version":
 		fmt.Println("blanca", version)
 	default:
