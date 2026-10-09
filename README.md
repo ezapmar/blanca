@@ -15,9 +15,9 @@
   <img alt="macos" src="https://img.shields.io/badge/macos-13%2B-F9EBDB?style=flat-square&labelColor=262626">
 </p>
 
-> **New in 0.2: the macOS version is here.** A menu bar app with the same bezel and
-> hotkey, your clippings and the settings one click away, and a small phone beside
-> whatever you copied on your iPhone. [What's new](#whats-new-in-02)
+> **New in 0.3: the macOS app is signed and notarised.** It opens like any other app,
+> with no Gatekeeper detour, and it updates itself from the menu.
+> [What's new](#whats-new-in-03)
 
 ## Install
 
@@ -33,14 +33,22 @@ The same line works on macOS. There it puts `Blanca.app` in Applications, starts
 links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
 permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or take `Blanca.dmg` from the
 [latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
-across; it is not notarised, so the first time macOS makes you allow it under
-Privacy & Security > Open Anyway.
+across. It is signed with a Developer ID and notarised by Apple, so it opens like any
+other app.
 
 To update, on either system: `blanca update`, or Check for Updates in the menu. It asks
 GitHub for the newest release and, if that is ahead of yours, installs it the way the
 first one came.
 
-## What's new in 0.2
+## What's new in 0.3
+
+- **Signed and notarised on macOS.** The app and the `.dmg` carry a Developer ID and
+  Apple's notarisation, so there is no Open Anyway step.
+- **Updates.** `blanca update`, or Check for Updates in the menu, installs the newest
+  release.
+- **Clear by age.** Clear the last hour, 24 hours, month, or all of it.
+
+Since 0.2:
 
 - **Blanca for macOS.** A native app with the same bezel and the same hotkey. Let go of
   the keys and it pastes, as in Jumpcut.
@@ -106,7 +114,7 @@ On macOS, with the Xcode command line tools installed (`xcode-select --install`)
 
 ```bash
 git clone https://github.com/ezapmar/blanca && cd blanca
-scripts/macapp 0.2.0
+scripts/macapp 0.3.0
 cp -R dist/Blanca.app /Applications/ && open /Applications/Blanca.app
 ```
 
@@ -246,12 +254,12 @@ belong to their owners and are not used here.
 - Wayland hands Blanca the text, not the window it came from, so there is no
   per-application ignore list.
 - A few apps want Ctrl+V instead of Shift+Insert; that is one line in the config.
-- macOS builds are not signed with a Developer ID, so the Accessibility permission
-  has to be granted again after each update. The hotkey there is fixed at Ctrl+Alt+V,
-  the same one Jumpcut uses, so quit Jumpcut first.
+- Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed
+  with a Developer ID, which macOS treats as a new app. The hotkey there is fixed at
+  Ctrl+Alt+V, the same one Jumpcut uses, so quit Jumpcut first.
 - iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not
   part of it.
-- This is v0.2. Expect edges.
+- This is v0.3. Expect edges.
 </details>
 
 <details>

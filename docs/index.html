@@ -146,7 +146,7 @@
 </head>
 <body>
 
-<a class="news-bar" href="https://github.com/ezapmar/blanca/releases/latest"><b>New in 0.2</b> · The macOS version is here: a menu bar app with your clippings, settings and iPhone copies. <u>Get it</u></a>
+<a class="news-bar" href="https://github.com/ezapmar/blanca/releases/latest"><b>New in 0.3</b> · The macOS app is now signed and notarised, and updates itself from the menu. <u>Get it</u></a>
 
 <header class="hero">
   <div class="wrap">
@@ -192,8 +192,11 @@
 
   <section style="padding-top:0">
     <div class="wrap">
-      <h2>New in 0.2</h2>
+      <h2>New in 0.3</h2>
       <ul class="news">
+        <li><b>Signed and notarised on macOS.</b> The app and the <code>.dmg</code> carry a Developer ID and Apple's notarisation, so they open like any other app.</li>
+        <li><b>Updates.</b> <code>blanca update</code>, or Check for Updates in the menu, installs the newest release.</li>
+        <li><b>Clear by age.</b> Clear the last hour, 24 hours, month, or all of it.</li>
         <li><b>Blanca for macOS.</b> A native app with the same bezel and the same hotkey. Let go of the keys and it pastes, as in Jumpcut.</li>
         <li><b>A menu in the bar.</b> Click the dog for your newest clippings and Clear All: the menu bar on macOS, a Waybar button on Omarchy.</li>
         <li><b>Settings in that menu.</b> Every option is a switch there, Launch on login included. No file to edit.</li>
@@ -223,7 +226,7 @@
     <div class="wrap">
       <details>
         <summary>Other ways to install</summary>
-        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It needs macOS 13 or later. It is not notarised, so the first time macOS makes you allow it under Privacy &amp; Security, Open Anyway.</p>
+        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It needs macOS 13 or later. It is signed with a Developer ID and notarised by Apple.</p>
         <p>Arch package, built from the release binary:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
         <p>From source:</p>
@@ -233,7 +236,7 @@
 go build -o ~/.local/bin/blanca . &amp;&amp; blanca setup</code></pre>
         <p>On macOS, with the Xcode command line tools installed, <code>scripts/macapp</code> builds a universal <code>dist/Blanca.app</code> and a <code>dist/Blanca.dmg</code> beside it. The app is signed ad hoc and targets macOS 13.</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca
-scripts/macapp 0.2.0
+scripts/macapp 0.3.0
 cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</code></pre>
         <p>On Linux it needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
       </details>
@@ -260,9 +263,9 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
           <li>Text only. Images and files are not recorded.</li>
           <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
           <li>No per-application ignore list; Wayland does not say which window a copy came from.</li>
-          <li>The macOS app is not signed with a Developer ID, so Accessibility has to be allowed again after each update. Its hotkey is fixed at Ctrl+Alt+V, the one Jumpcut uses, so quit Jumpcut first.</li>
+          <li>Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed with a Developer ID, which macOS treats as a new app. Its hotkey is fixed at Ctrl+Alt+V, the one Jumpcut uses, so quit Jumpcut first.</li>
           <li>iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not part of it.</li>
-          <li>This is v0.2. Expect edges.</li>
+          <li>This is v0.3. Expect edges.</li>
         </ul>
       </details>
     </div>
