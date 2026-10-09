@@ -12,7 +12,12 @@
   <a href="LICENSE"><img alt="licence" src="https://img.shields.io/badge/licence-MIT-0C9794?style=flat-square&labelColor=262626"></a>
   <img alt="go" src="https://img.shields.io/badge/go-static%20binary-FBA335?style=flat-square&labelColor=262626">
   <img alt="omarchy" src="https://img.shields.io/badge/omarchy-hyprland%20%2B%20wayland-F9EBDB?style=flat-square&labelColor=262626">
+  <img alt="macos" src="https://img.shields.io/badge/macos-13%2B-F9EBDB?style=flat-square&labelColor=262626">
 </p>
+
+> **New in 0.2: the macOS version is here.** A menu bar app with the same bezel and
+> hotkey, your clippings and the settings one click away, and a small phone beside
+> whatever you copied on your iPhone. [What's new](#whats-new-in-02)
 
 ## Install
 
@@ -30,6 +35,18 @@ permission, which is what lets Blanca paste for you. Or take `Blanca.dmg` from t
 [latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
 across; it is not notarised, so the first time macOS makes you allow it under
 Privacy & Security > Open Anyway.
+
+## What's new in 0.2
+
+- **Blanca for macOS.** A native app with the same bezel and the same hotkey. Let go of
+  the keys and it pastes, as in Jumpcut.
+- **A menu in the bar.** Click the dog for your newest clippings and Clear All: the menu
+  bar on macOS, a Waybar button on Omarchy.
+- **Settings in that menu.** Every option is a switch there, Launch on login included.
+- **Copies from your iPhone.** On macOS they land in the list with a small phone beside
+  them.
+- **Installers.** The one line above installs `Blanca.app` on a Mac, and each release
+  also carries a `.dmg`.
 
 ## What it is
 
@@ -198,7 +215,9 @@ belong to their owners and are not used here.
 - macOS builds are not signed with a Developer ID, so the Accessibility permission
   has to be granted again after each update. The hotkey there is fixed at Ctrl+Alt+V,
   the same one Jumpcut uses, so quit Jumpcut first.
-- This is v0.1. Expect edges.
+- iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not
+  part of it.
+- This is v0.2. Expect edges.
 </details>
 
 <details>

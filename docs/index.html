@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Blanca · Clipboard manager for Omarchy</title>
+<title>Blanca · Clipboard manager for Omarchy and macOS</title>
 <meta name="description" content="Everything you copy, kept. One hotkey brings it back, one clipping at a time, and Return pastes it where you were.">
 <meta property="og:title" content="Blanca">
 <meta property="og:description" content="Everything you copy, kept. One hotkey brings it back, and Return pastes it where you were.">
@@ -55,6 +55,12 @@
   h2 { margin: 0 0 32px; font: 800 clamp(1.5rem, 1.2rem + 1.4vw, 2rem)/1.1 var(--display); letter-spacing: -0.01em; }
   .muted { color: var(--ash); }
 
+  /* announcement bar: one line of news above the hero */
+  .news-bar { display: block; background: var(--saffron); color: var(--graphite); text-align: center; padding: 9px 16px; font: 600 0.95rem/1.4 var(--body); }
+  .news-bar b { font: 800 0.95rem/1.4 var(--display); letter-spacing: 0.02em; }
+  .news-bar u { text-underline-offset: 3px; white-space: nowrap; }
+  a.news-bar:hover, a.news-bar:focus-visible { text-decoration: none; background: var(--bone); }
+
   /* hero: one face, the banner wordmark, the one action */
   .hero { padding-block: 56px 64px; }
   .hero .wrap { display: grid; gap: 24px; justify-items: center; text-align: center; }
@@ -87,6 +93,12 @@
   .knot .name { font: 0.78rem/1.4 var(--mono); color: var(--ash); }
   .knot h3 { margin: 0; font: 700 1.15rem/1.2 var(--display); }
   .knot p { color: var(--ash); font-size: 0.98rem; }
+
+  /* news */
+  ul.news { margin: 0; padding: 0; list-style: none; display: grid; }
+  ul.news li { padding: 12px 0; border-top: 1px solid var(--line); color: var(--ash); }
+  ul.news li:first-child { border-top: 0; padding-top: 0; }
+  ul.news b { color: var(--bone); font-weight: 600; }
 
   /* keys */
   dl.keys { margin: 0; display: grid; grid-template-columns: max-content 1fr; }
@@ -133,6 +145,8 @@
 </head>
 <body>
 
+<a class="news-bar" href="https://github.com/ezapmar/blanca/releases/latest"><b>New in 0.2</b> · The macOS version is here: a menu bar app with your clippings, settings and iPhone copies. <u>Get it</u></a>
+
 <header class="hero">
   <div class="wrap">
     <img src="assets/blanca-banner.png" alt="Blanca. The clipboard bezel for Omarchy" width="1520" height="400">
@@ -141,7 +155,7 @@
       <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
       <button type="button" id="copy">Copy</button>
     </div>
-    <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
+    <p class="after">The same line on Omarchy and on macOS. Then copy something and press <code>Ctrl+Alt+V</code>. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
   </div>
 </header>
 
@@ -162,7 +176,7 @@
           <svg data-motif="star" viewBox="0 0 15 15" aria-hidden="true"></svg>
           <span class="name">yıldız · the star</span>
           <h3>A bezel shows one thing</h3>
-          <p>The hotkey opens a small floating terminal with your newest clipping. Press again for the one before.</p>
+          <p>The hotkey opens a small floating window with your newest clipping. Press again for the one before.</p>
         </div>
         <div class="knot">
           <svg data-motif="horn" viewBox="0 0 15 15" aria-hidden="true"></svg>
@@ -171,6 +185,19 @@
           <p>The bezel closes and the clipping lands where you were typing.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>New in 0.2</h2>
+      <ul class="news">
+        <li><b>Blanca for macOS.</b> A native app with the same bezel and the same hotkey. Let go of the keys and it pastes, as in Jumpcut.</li>
+        <li><b>A menu in the bar.</b> Click the dog for your newest clippings and Clear All: the menu bar on macOS, a Waybar button on Omarchy.</li>
+        <li><b>Settings in that menu.</b> Every option is a switch there, Launch on login included. No file to edit.</li>
+        <li><b>Copies from your iPhone.</b> On macOS, what you copy on an iPhone or iPad lands in the list with a small phone beside it.</li>
+        <li><b>Installers.</b> The one line above installs <code>Blanca.app</code> on a Mac; each release also carries a <code>.dmg</code>.</li>
+      </ul>
     </div>
   </section>
 
@@ -193,27 +220,29 @@
     <div class="wrap">
       <details>
         <summary>Other ways to install</summary>
+        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It is not notarised, so the first time macOS makes you allow it under Privacy &amp; Security, Open Anyway.</p>
         <p>Arch package, built from the release binary:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
         <p>From source:</p>
         <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
-        <p>Needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
+        <p>On Linux it needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
       </details>
       <details>
         <summary>Configure</summary>
-        <p><code>~/.config/blanca/config.json</code>. Every key is optional; these are the defaults.</p>
+        <p>Use Settings in the menu, or edit <code>~/.config/blanca/config.json</code>. Every key is optional; these are the defaults.</p>
 <pre><code>{
   "remember": 99,
   "display": 10,
   "wraparound": false,
   "paste": true,
   "paste_mode": "shift-insert",
+  "sticky": false,
   "move_to_top": false,
   "allow_whitespace": false,
   "ignore_large": true,
   "ignore_sensitive": true
 }</code></pre>
-        <p>Set <code>paste_mode</code> to <code>ctrl-v</code> for apps that ignore Shift+Insert.</p>
+        <p>Set <code>paste_mode</code> to <code>ctrl-v</code> for apps that ignore Shift+Insert. On macOS, <code>sticky</code> keeps the bezel open when you let go of the keys.</p>
       </details>
       <details>
         <summary>Honest limits</summary>
@@ -221,7 +250,9 @@
           <li>Text only. Images and files are not recorded.</li>
           <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
           <li>No per-application ignore list; Wayland does not say which window a copy came from.</li>
-          <li>This is v0.1. Expect edges.</li>
+          <li>The macOS app is not signed with a Developer ID, so Accessibility has to be allowed again after each update. Its hotkey is fixed at Ctrl+Alt+V, the one Jumpcut uses, so quit Jumpcut first.</li>
+          <li>iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not part of it.</li>
+          <li>This is v0.2. Expect edges.</li>
         </ul>
       </details>
     </div>
