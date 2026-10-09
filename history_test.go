@@ -30,3 +30,29 @@ func TestHistory(t *testing.T) {
 		t.Fatal("delete missing")
 	}
 }
+
+func TestRemote(t *testing.T) {
+	isolate(t)
+	add := func(s string, remote bool) {
+		withHistory(func(h *History) bool { return h.Add(s, 99) })
+		if err := setRemote(s, remote); err != nil {
+			t.Fatal(err)
+		}
+	}
+	add("mac", false)
+	add("phone", true)
+	add("other", false)
+	if m := readRemote(); len(m) != 1 || !m[hash("phone")] {
+		t.Fatalf("only the phone clipping is remote: %v", m)
+	}
+	add("phone", false) // copied again on this machine
+	if m := readRemote(); len(m) != 0 {
+		t.Fatalf("a local copy is not remote: %v", m)
+	}
+	add("gone", true)
+	withHistory(func(h *History) bool { return h.Delete("gone", 0) })
+	add("next", false)
+	if m := readRemote(); len(m) != 0 {
+		t.Fatalf("deleted clippings are forgotten: %v", m)
+	}
+}

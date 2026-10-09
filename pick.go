@@ -80,30 +80,37 @@ func cmdPick(cfg Config) {
 	pos := 0
 	for {
 		render(items, pos, cfg.Paste)
-		e := <-ev
-		switch e.k {
-		case kNext, kPrev, kPgDn, kPgUp, kHome, kEnd, kDigit:
-			pos = move(pos, len(items), e, cfg.Wraparound)
-		case kEnter:
-			cur := items[pos]
-			place(cfg, cur)
-			if cfg.MoveToTop {
-				withHistory(func(h *History) bool { return h.ToTop(cur, pos) })
-			}
-			return
-		case kDelete:
-			cur := items[pos]
-			items, _ = withHistory(func(h *History) bool { return h.Delete(cur, pos) })
-			if len(items) == 0 {
-				return
-			}
-			if pos > 0 { // Jumpcut moves up after deleting the current item
-				pos--
-			}
-			pos = min(pos, len(items)-1)
-		case kQuit:
+		var done bool
+		if items, pos, done = act(cfg, items, pos, <-ev); done {
 			return
 		}
+	}
+}
+
+// act applies one event to the bezel. done reports that the bezel should close.
+func act(cfg Config, items []string, pos int, e event) (_ []string, _ int, done bool) {
+	switch e.k {
+	case kEnter:
+		use(cfg, items[pos], pos)
+		return items, pos, true
+	case kDelete:
+		cur := items[pos]
+		items, _ = withHistory(func(h *History) bool { return h.Delete(cur, pos) })
+		if pos > 0 { // Jumpcut moves up after deleting the current item
+			pos--
+		}
+		return items, min(pos, len(items)-1), len(items) == 0
+	case kQuit:
+		return items, pos, true
+	}
+	return items, move(pos, len(items), e, cfg.Wraparound), false
+}
+
+// use places the clipping found at pos and, if configured, moves it to the top.
+func use(cfg Config, s string, pos int) {
+	place(cfg, s)
+	if cfg.MoveToTop {
+		withHistory(func(h *History) bool { return h.ToTop(s, pos) })
 	}
 }
 

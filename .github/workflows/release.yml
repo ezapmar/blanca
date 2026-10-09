@@ -53,3 +53,27 @@ jobs:
           su builder -c "makepkg -fd --noconfirm --config makepkg-aarch64.conf"
           ls -l *.pkg.tar.zst
           gh release upload --repo "${GITHUB_REPOSITORY}" "${tag}" *.pkg.tar.zst --clobber
+  macos:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build universal binary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tag="${GITHUB_REF_NAME}"
+          out="dist/blanca-${tag}-darwin-universal"
+          mkdir -p "$out"
+          scripts/macapp "${tag#v}"
+          cp dist/Blanca.app/Contents/MacOS/blanca "$out/blanca"
+          codesign --force --sign - "$out/blanca"
+          cp LICENSE README.md "$out/"
+          tar -C dist -czf "$out.tar.gz" "$(basename "$out")"
+          ditto -c -k --keepParent dist/Blanca.app "dist/Blanca-${tag}.zip"
+          (cd dist && shasum -a 256 "$(basename "$out").tar.gz" > "$(basename "$out").tar.gz.sha256")
+          gh release upload "$tag" "$out.tar.gz" "$out.tar.gz.sha256" "dist/Blanca-${tag}.zip" --clobber

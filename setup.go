@@ -3,30 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
-	"syscall"
 )
-
-// cmdSetup wires Blanca into an Omarchy Hyprland config: keybinds, autostart watcher and
-// floating window rules. Idempotent: a file that already mentions blanca is left alone.
-func cmdSetup() {
-	for _, line := range writeHyprSnippets(filepath.Join(xdg("XDG_CONFIG_HOME", ".config"), "hypr")) {
-		fmt.Println(line)
-	}
-	if err := exec.Command("hyprctl", "reload").Run(); err == nil {
-		fmt.Println("ok   hyprctl reload")
-	}
-	if exec.Command("pgrep", "-f", "wl-paste.*blanca store").Run() != nil {
-		w := exec.Command("wl-paste", "--type", "text", "--watch", "blanca", "store")
-		w.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
-		if w.Start() == nil {
-			fmt.Println("ok   clipboard watcher started")
-		}
-	}
-	fmt.Println("done Press Ctrl+Alt+V after copying something.")
-}
 
 // writeHyprSnippets appends Blanca's lines to each Hyprland file in dir that exists and
 // does not mention blanca yet. It returns one report line per file.
@@ -59,5 +39,58 @@ o.window("org.omarchy.blanca", { size = { 640, 360 } })`,
 		f.Close()
 		out = append(out, "add  "+p)
 	}
+	return out
+}
+
+var modulesRight = regexp.MustCompile(`"modules-right"\s*:\s*\[`)
+
+// writeWaybar adds a Blanca button to the Waybar config in dir: the module, its place at
+// the head of modules-right, the icon and its style. Like writeHyprSnippets it leaves a
+// file that already mentions blanca alone and returns one report line per file.
+func writeWaybar(dir string, icon []byte) []string {
+	var out []string
+	edit := func(name string, change func(string) (string, bool)) {
+		p := filepath.Join(dir, name)
+		b, err := os.ReadFile(p)
+		if err != nil {
+			out = append(out, "skip "+p+" (not found)")
+			return
+		}
+		if strings.Contains(string(b), "blanca") {
+			out = append(out, "ok   "+p+" already set up")
+			return
+		}
+		s, ok := change(string(b))
+		if !ok {
+			out = append(out, "skip "+p+" (no modules-right; add custom/blanca by hand)")
+			return
+		}
+		if err := os.WriteFile(p, []byte(s), 0o644); err != nil {
+			fatal(err)
+		}
+		out = append(out, "add  "+p)
+	}
+	edit("config.jsonc", func(s string) (string, bool) {
+		loc := modulesRight.FindStringIndex(s)
+		if loc == nil {
+			return s, false
+		}
+		return s[:loc[0]] + `"custom/blanca": { "format": " ", "on-click": "blanca menu", "tooltip-format": "Blanca clipboard" },
+  ` + s[loc[0]:loc[1]] + `"custom/blanca", ` + s[loc[1]:], true
+	})
+	edit("style.css", func(s string) (string, bool) {
+		os.WriteFile(filepath.Join(dir, "blanca-symbolic.svg"), icon, 0o644)
+		return s + `
+/* Blanca clipboard (added by blanca setup): the icon takes the bar's text colour */
+#custom-blanca {
+  min-width: 16px;
+  margin: 0 7.5px;
+  background-image: -gtk-recolor(url("blanca-symbolic.svg"));
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px 16px;
+}
+`, true
+	})
 	return out
 }

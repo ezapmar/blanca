@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Build dist/Blanca.app: a universal, ad-hoc signed bundle whose executable is the blanca
+# binary. Opened from Finder it runs `blanca watch`. Usage: scripts/macapp [version]
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+ver=${1:-0.0.0}
+app=dist/Blanca.app
+rm -rf "$app" dist/Blanca.iconset
+mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" dist/Blanca.iconset
+
+for arch in amd64 arm64; do
+  CGO_ENABLED=1 GOOS=darwin GOARCH=$arch go build -trimpath -ldflags "-s -w -X main.version=$ver" -o "dist/blanca-$arch" .
+done
+lipo -create -output "$app/Contents/MacOS/blanca" dist/blanca-amd64 dist/blanca-arm64
+rm dist/blanca-amd64 dist/blanca-arm64
+
+for s in 16 32 128 256; do
+  sips -z $s $s assets/png/blanca-tile-512.png --out "dist/Blanca.iconset/icon_${s}x${s}.png" >/dev/null
+  sips -z $((s * 2)) $((s * 2)) assets/png/blanca-tile-512.png --out "dist/Blanca.iconset/icon_${s}x${s}@2x.png" >/dev/null
+done
+cp assets/png/blanca-tile-512.png dist/Blanca.iconset/icon_512x512.png
+iconutil -c icns -o "$app/Contents/Resources/Blanca.icns" dist/Blanca.iconset
+rm -rf dist/Blanca.iconset
+
+cat > "$app/Contents/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key><string>Blanca</string>
+	<key>CFBundleIdentifier</key><string>com.github.ezapmar.blanca</string>
+	<key>CFBundleExecutable</key><string>blanca</string>
+	<key>CFBundleIconFile</key><string>Blanca</string>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<key>CFBundleShortVersionString</key><string>$ver</string>
+	<key>CFBundleVersion</key><string>$ver</string>
+	<key>LSMinimumSystemVersion</key><string>11.0</string>
+	<key>LSUIElement</key><true/>
+	<key>LSMultipleInstancesProhibited</key><true/>
+	<key>NSHighResolutionCapable</key><true/>
+</dict>
+</plist>
+EOF
+codesign --force --sign - "$app"
+echo "$app"

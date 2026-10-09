@@ -49,3 +49,27 @@ func TestShortenAndPaths(t *testing.T) {
 		t.Error("runtimeDir must be created:", err)
 	}
 }
+
+func TestSettingsSave(t *testing.T) {
+	isolate(t)
+	c := loadConfig()
+	for _, s := range settings(&c) {
+		switch s.name {
+		case "Wraparound bezel":
+			if s.value() != "off" {
+				t.Fatal(s.value())
+			}
+			s.pick(0)
+		case "Clippings in menu":
+			s.pick(3)
+		}
+	}
+	if err := saveConfig(c); err != nil {
+		t.Fatal(err)
+	}
+	want := Config{Remember: 99, Display: 20, Wraparound: true, Paste: true, PasteMode: "shift-insert",
+		IgnoreLarge: true, IgnoreSensitive: true}
+	if got := loadConfig(); got != want {
+		t.Fatalf("saved: %+v", got)
+	}
+}

@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"unicode/utf8"
@@ -46,11 +45,4 @@ func store(cfg Config, s string, sensitive func() bool) (bool, error) {
 	added := false
 	_, err := withHistory(func(h *History) bool { added = h.Add(s, cfg.Remember); return added })
 	return added, err
-}
-
-// sensitive reports whether the current clipboard carries the password-manager hint
-// (KeePassXC and friends), the Wayland counterpart of Jumpcut's ConcealedType check.
-func sensitive() bool {
-	out, err := exec.Command("wl-paste", "--list-types").Output()
-	return err == nil && strings.Contains(string(out), "x-kde-passwordManagerHint")
 }

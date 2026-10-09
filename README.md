@@ -24,9 +24,13 @@ That is all of it. The script puts one static binary in `~/.local/bin`, installs
 icons, adds the keybind, autostart and window rules to your Hyprland config, reloads it
 and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
 
+The same line works on macOS. There it installs a universal binary and a LaunchAgent
+that runs `blanca watch`. macOS asks once for Accessibility permission, which is what
+lets Blanca paste for you.
+
 ## What it is
 
-Blanca is a clipboard manager for [Omarchy](https://omarchy.org), ported from
+Blanca is a clipboard manager for [Omarchy](https://omarchy.org) and macOS, ported from
 [Jumpcut](https://github.com/snark/jumpcut), the macOS clipboard manager Steve Cook has
 kept alive since 2002. Press the hotkey and the last thing you copied appears in a small
 window. Press it again, the one before that. Return pastes it. No daemon of its own, no
@@ -98,6 +102,18 @@ has your Omarchy theme and transparency, and needs no GTK.
 **Return pastes.** Blanca copies the clipping and, once the bezel has closed and focus
 is back where you were, sends Shift+Insert through `wtype`, the same chord Omarchy's
 own clipboard tools use, so it works in terminals too.
+
+**The bar has a menu.** Jumpcut's other half is its menu bar icon: click it and the
+newest clippings drop down, with Clear All underneath. On Omarchy that is a Waybar
+button which runs `blanca menu`, a Walker list. `blanca setup` adds the button.
+
+**Copies from your iPhone are marked.** With Handoff on, what you copy on an iPhone or
+iPad lands in the list like anything else, with a small phone beside it in the menu.
+
+**On macOS it is one process.** `blanca watch` polls the pasteboard twice a second,
+owns the hotkey and the menu bar icon, and draws the bezel as a native panel, all in one
+Objective-C file behind cgo. Releasing the modifier keys pastes, as in Jumpcut, and the
+paste is Cmd+V.
 </details>
 
 <details>
@@ -112,6 +128,7 @@ own clipboard tools use, so it works in terminals too.
   "wraparound": false,
   "paste": true,
   "paste_mode": "shift-insert",
+  "sticky": false,
   "move_to_top": false,
   "allow_whitespace": false,
   "ignore_large": true,
@@ -119,8 +136,12 @@ own clipboard tools use, so it works in terminals too.
 }
 ```
 
+Every one of these is also under Settings in the menu: a submenu of the menu bar icon
+on macOS, an entry in `blanca menu` on Omarchy. Changing one there rewrites this file.
+
 `paste_mode` can be `ctrl-v` for the odd app that ignores Shift+Insert. `paste: false`
-only copies. `move_to_top` puts a clipping back at the top after you use it.
+only copies. `move_to_top` puts a clipping back at the top after you use it. `sticky`
+is for macOS: the bezel stays open when you let go of the modifiers, until Return or Esc.
 </details>
 
 <details>
@@ -128,12 +149,14 @@ only copies. `move_to_top` puts a clipping back at the top after you use it.
 
 ```
 blanca store          read one clipping from stdin into the history
+blanca watch          record every text copy; on macOS also the hotkey and the bezel
 blanca pick           show the bezel in the current terminal
 blanca bezel [--up]   hotkey entry: advance an open bezel, or open one
+blanca menu           Waybar button entry: the newest clippings as a Walker menu
 blanca list [N]       print the first N clippings, shortened
 blanca get N          print clipping N in full
 blanca clear          forget all clippings
-blanca setup          add the Hyprland keybind, autostart and window rules
+blanca setup          Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
 ```
 
 `list` and `get` let you build a menu, with fzf for instance:
@@ -169,6 +192,9 @@ belong to their owners and are not used here.
 - Wayland hands Blanca the text, not the window it came from, so there is no
   per-application ignore list.
 - A few apps want Ctrl+V instead of Shift+Insert; that is one line in the config.
+- macOS builds are not signed with a Developer ID, so the Accessibility permission
+  has to be granted again after each update. The hotkey there is fixed at Ctrl+Alt+V,
+  the same one Jumpcut uses, so quit Jumpcut first.
 - This is v0.1. Expect edges.
 </details>
 

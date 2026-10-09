@@ -32,3 +32,36 @@ func TestWriteHyprSnippets(t *testing.T) {
 		t.Fatalf("second run must be a no-op: %v", out)
 	}
 }
+
+func TestWriteWaybar(t *testing.T) {
+	dir := t.TempDir()
+	cfg := "{\n  // bar\n  \"modules-right\": [\n    \"network\"\n  ],\n  \"network\": {}\n}\n"
+	os.WriteFile(filepath.Join(dir, "config.jsonc"), []byte(cfg), 0o644)
+	os.WriteFile(filepath.Join(dir, "style.css"), []byte("* { color: red; }\n"), 0o644)
+	out := writeWaybar(dir, []byte("<svg/>"))
+	if len(out) != 2 || !strings.HasPrefix(out[0], "add ") || !strings.HasPrefix(out[1], "add ") {
+		t.Fatalf("first run: %v", out)
+	}
+	b, _ := os.ReadFile(filepath.Join(dir, "config.jsonc"))
+	want := "{\n  // bar\n  \"custom/blanca\": { \"format\": \" \", \"on-click\": \"blanca menu\", \"tooltip-format\": \"Blanca clipboard\" },\n" +
+		"  \"modules-right\": [\"custom/blanca\", \n    \"network\"\n  ],\n  \"network\": {}\n}\n"
+	if string(b) != want {
+		t.Fatalf("config:\n%s", b)
+	}
+	css, _ := os.ReadFile(filepath.Join(dir, "style.css"))
+	if !strings.HasPrefix(string(css), "* { color: red; }\n") || !strings.Contains(string(css), "#custom-blanca") {
+		t.Fatalf("style not appended: %s", css)
+	}
+	if icon, _ := os.ReadFile(filepath.Join(dir, "blanca-symbolic.svg")); string(icon) != "<svg/>" {
+		t.Fatalf("icon not written: %s", icon)
+	}
+	// Second run must change nothing; a config without modules-right is left alone.
+	if out = writeWaybar(dir, nil); !strings.HasPrefix(out[0], "ok ") || !strings.HasPrefix(out[1], "ok ") {
+		t.Fatalf("second run must be a no-op: %v", out)
+	}
+	os.WriteFile(filepath.Join(dir, "config.jsonc"), []byte("{}\n"), 0o644)
+	os.Remove(filepath.Join(dir, "style.css"))
+	if out = writeWaybar(dir, nil); !strings.HasPrefix(out[0], "skip ") || !strings.HasPrefix(out[1], "skip ") {
+		t.Fatalf("unknown config: %v", out)
+	}
+}
