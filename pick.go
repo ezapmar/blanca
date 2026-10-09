@@ -34,7 +34,7 @@ type event struct {
 	n int // digit for kDigit
 }
 
-// cmdPick is the bezel: one clipping at a time, driven by Jumpcut's keys.
+// cmdPick is the bezel: one clipping at a time, driven by the keyboard.
 func cmdPick(cfg Config) {
 	items, err := readHistory()
 	if err != nil {
@@ -96,7 +96,7 @@ func act(cfg Config, items []string, pos int, e event) (_ []string, _ int, done 
 	case kDelete:
 		cur := items[pos]
 		items, _ = withHistory(func(h *History) bool { return h.Delete(cur, pos) })
-		if pos > 0 { // Jumpcut moves up after deleting the current item
+		if pos > 0 { // move up after deleting the current item
 			pos--
 		}
 		return items, min(pos, len(items)-1), len(items) == 0
@@ -114,7 +114,7 @@ func use(cfg Config, s string, pos int) {
 	}
 }
 
-// move applies one navigation event to the cursor, with Jumpcut's rules: up/down may
+// move applies one navigation event to the cursor: up/down may
 // wrap when enabled, page moves clamp, digits are one-based positions and 0 is tenth.
 func move(pos, n int, e event, wrap bool) int {
 	switch e.k {
@@ -210,7 +210,7 @@ func render(items []string, pos int, paste bool) {
 	os.Stdout.WriteString(b.String())
 }
 
-// wrap breaks text into lines of at most w runes, like Jumpcut's clipping text view.
+// wrap breaks text into lines of at most w runes.
 func wrap(s string, w int) []string {
 	s = strings.NewReplacer("\r", "", "\t", "    ").Replace(s)
 	var out []string

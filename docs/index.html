@@ -197,7 +197,7 @@
         <li><b>Signed and notarised on macOS.</b> The app and the <code>.dmg</code> carry a Developer ID and Apple's notarisation, so they open like any other app.</li>
         <li><b>Updates.</b> <code>blanca update</code>, or Check for Updates in the menu, installs the newest release.</li>
         <li><b>Clear by age.</b> Clear the last hour, 24 hours, month, or all of it.</li>
-        <li><b>Blanca for macOS.</b> A native app with the same bezel and the same hotkey. Let go of the keys and it pastes, as in Jumpcut.</li>
+        <li><b>Blanca for macOS.</b> A native app with the same bezel and the same hotkey. Let go of the keys and it pastes.</li>
         <li><b>A menu in the bar.</b> Click the dog for your newest clippings and Clear All: the menu bar on macOS, a Waybar button on Omarchy.</li>
         <li><b>Settings in that menu.</b> Every option is a switch there, Launch on login included. No file to edit.</li>
         <li><b>Copies from your iPhone.</b> On macOS, what you copy on an iPhone or iPad lands in the list with a small phone beside it.</li>
@@ -263,7 +263,7 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
           <li>Text only. Images and files are not recorded.</li>
           <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
           <li>No per-application ignore list; Wayland does not say which window a copy came from.</li>
-          <li>Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed with a Developer ID, which macOS treats as a new app. Its hotkey is fixed at Ctrl+Alt+V, the one Jumpcut uses, so quit Jumpcut first.</li>
+          <li>Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed with a Developer ID, which macOS treats as a new app. Its hotkey is fixed at Ctrl+Alt+V, so quit any other app that uses it first.</li>
           <li>iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not part of it.</li>
           <li>This is v0.3. Expect edges.</li>
         </ul>
@@ -283,7 +283,7 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
       <svg data-motif="star" viewBox="0 0 15 15"></svg>
     </div>
     <p>Named after my dog, an Anatolian sighthound crossed with a Russell terrier. The motifs are kilim knots from the looms of Anatolia, shared with <a href="https://github.com/ezapmar/brainless-public">brainless</a>.</p>
-    <p>MIT. Ported from <a href="https://github.com/snark/jumpcut">Jumpcut</a> by Steve Cook; not affiliated with Jumpcut or <a href="https://omarchy.org">Omarchy</a>.</p>
+    <p>MIT. Derived from <a href="https://github.com/snark/jumpcut">Jumpcut</a> by Steve Cook, whose notice is in the licence; not affiliated with its author or <a href="https://omarchy.org">Omarchy</a>.</p>
   </div>
 </footer>
 

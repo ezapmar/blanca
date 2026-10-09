@@ -10,7 +10,7 @@ import (
 )
 
 // cmdStore is run by `wl-paste --type text --watch blanca store` with the clipping on stdin.
-// It applies Jumpcut's filters: whitespace, size, sensitive source, and self-copies.
+// It applies the filters: whitespace, size, sensitive source, and self-copies.
 func cmdStore(cfg Config) {
 	b, err := io.ReadAll(os.Stdin)
 	if err != nil || !utf8.Valid(b) {

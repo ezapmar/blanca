@@ -110,7 +110,7 @@ func (h *History) DeleteSince(times map[string]int64, cutoff int64) bool {
 	return changed
 }
 
-// shorten renders a clipping as Jumpcut's menu did: trimmed, first line, n runes + ellipsis.
+// shorten renders a clipping for a menu: trimmed, first line, n runes + ellipsis.
 func shorten(s string, n int) string {
 	s = strings.TrimSpace(s)
 	if i := strings.IndexAny(s, "\r\n"); i >= 0 {

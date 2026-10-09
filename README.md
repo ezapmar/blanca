@@ -51,7 +51,7 @@ first one came.
 Since 0.2:
 
 - **Blanca for macOS.** A native app with the same bezel and the same hotkey. Let go of
-  the keys and it pastes, as in Jumpcut.
+  the keys and it pastes.
 - **A menu in the bar.** Click the dog for your newest clippings and Clear All: the menu
   bar on macOS, a Waybar button on Omarchy.
 - **Settings in that menu.** Every option is a switch there, Launch on login included.
@@ -62,10 +62,8 @@ Since 0.2:
 
 ## What it is
 
-Blanca is a clipboard manager for [Omarchy](https://omarchy.org) and macOS, ported from
-[Jumpcut](https://github.com/snark/jumpcut), the macOS clipboard manager Steve Cook has
-kept alive since 2002. Press the hotkey and the last thing you copied appears in a small
-window. Press it again, the one before that. Return pastes it. No daemon of its own, no
+Blanca is a clipboard manager for [Omarchy](https://omarchy.org) and macOS. Press the
+hotkey and the last thing you copied appears in a small window. Press it again, the one before that. Return pastes it. No daemon of its own, no
 account, nothing leaves your machine.
 
 It is named after my dog, an Anatolian sighthound crossed with a Russell terrier. She
@@ -159,7 +157,7 @@ has your Omarchy theme and transparency, and needs no GTK.
 is back where you were, sends Shift+Insert through `wtype`, the same chord Omarchy's
 own clipboard tools use, so it works in terminals too.
 
-**The bar has a menu.** Jumpcut's other half is its menu bar icon: click it and the
+**The bar has a menu.** Click the icon in the bar and the
 newest clippings drop down, with Clear underneath. On Omarchy that is a Waybar
 button which runs `blanca menu`, a Walker list. `blanca setup` adds the button.
 
@@ -172,8 +170,7 @@ iPad lands in the list like anything else, with a small phone beside it in the m
 
 **On macOS it is one process.** `blanca watch` polls the pasteboard twice a second,
 owns the hotkey and the menu bar icon, and draws the bezel as a native panel, all in one
-Objective-C file behind cgo. Releasing the modifier keys pastes, as in Jumpcut, and the
-paste is Cmd+V.
+Objective-C file behind cgo. Releasing the modifier keys pastes, and the paste is Cmd+V.
 </details>
 
 <details>
@@ -229,20 +226,12 @@ blanca get "$(blanca list 99 | fzf | cut -f1)" | wl-copy
 </details>
 
 <details>
-<summary><b>Where this came from</b></summary>
+<summary><b>Credits</b></summary>
 
-Jumpcut is a Swift app with a status-bar menu, a translucent bezel and twenty settings.
-I read all of it before writing a line; the notes and the mapping to Linux are in
-[docs/PLAN.md](docs/PLAN.md). The pasteboard poller became `wl-paste`, the plist became
-JSON, the global hotkey became a Hyprland bind, the bezel became a floating terminal.
-
-One thing did not survive. Jumpcut pastes when you release the modifier keys. A
-terminal cannot see a key going up, so Blanca pastes on Return.
-
-Jumpcut is MIT licensed and its notice is reproduced in [LICENSE](LICENSE). Jumpcut
-itself traces part of its lineage to Brent Simmons' TigerLaunch. Blanca is independent
-and not affiliated with the Jumpcut author or with Omarchy; the Jumpcut name and icon
-belong to their owners and are not used here.
+Blanca is derived from [Jumpcut](https://github.com/snark/jumpcut) by Steve Cook, which
+is MIT licensed; its notice is reproduced in [LICENSE](LICENSE). Blanca is independent
+and not affiliated with its author or with Omarchy. The design notes are in
+[docs/PLAN.md](docs/PLAN.md).
 </details>
 
 <details>
@@ -256,7 +245,7 @@ belong to their owners and are not used here.
 - A few apps want Ctrl+V instead of Shift+Insert; that is one line in the config.
 - Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed
   with a Developer ID, which macOS treats as a new app. The hotkey there is fixed at
-  Ctrl+Alt+V, the same one Jumpcut uses, so quit Jumpcut first.
+  Ctrl+Alt+V, so quit any other app that uses it first.
 - iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not
   part of it.
 - This is v0.3. Expect edges.

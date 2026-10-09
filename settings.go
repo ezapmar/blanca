@@ -35,7 +35,7 @@ func number(name string, n *int, nums ...int) setting {
 	return setting{name: name, num: n, nums: nums, pick: func(i int) { *n = nums[i] }}
 }
 
-// settings lists what the menu offers, named after Jumpcut's preferences where it has them.
+// settings lists what the menu offers.
 func settings(c *Config) []setting {
 	return append(platformSettings(c),
 		toggle("Selection pastes", &c.Paste),

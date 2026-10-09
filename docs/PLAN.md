@@ -1,16 +1,17 @@
 # Blanca plan
 
-Port of Jumpcut (macOS, Swift) to Omarchy / Arch Linux (Hyprland, Wayland) in Go.
+A Go clipboard manager for Omarchy / Arch Linux (Hyprland, Wayland), ported from a macOS
+Swift app (credited in LICENSE).
 Goal: minimal, dependency-light, idiomatic to how Omarchy already launches TUIs.
 
-## 1. Jumpcut, reverse engineered
+## 1. The original, reverse engineered
 
-Source: `Jumpcut/Jumpcut/*.swift` (0.84). Six moving parts.
+Source: the original's Swift files (0.84). Six moving parts.
 
 **Pasteboard** (`Pasteboard.swift`). Polls `NSPasteboard.general.changeCount` every 0.5s.
 On change, takes the first string item unless it is: whitespace-only (unless allowed),
 a transient type (TextExpander etc.), a sensitive type (password managers, unless allowed),
-> 50 000 chars (unless allowed), or marked with Jumpcut's own internal type (self-copy).
+> 50 000 chars (unless allowed), or marked with the app's own internal type (self-copy).
 `set(text)` writes string + internal marker. `fakeCommandV()` posts a Cmd-V key event.
 
 **ClippingStore / ClippingStack** (`Clippings.swift`). Array of strings, newest first,
@@ -48,7 +49,7 @@ Sauce keyboard-layout mapping, Accessibility prompt, Preferences window.
 
 ## 2. Mapping to Omarchy
 
-| Jumpcut                    | Blanca                                                        |
+| Original                   | Blanca                                                        |
 |----------------------------|---------------------------------------------------------------|
 | NSPasteboard polling       | `wl-paste --type text --watch blanca store` (Omarchy autostart)|
 | internal marker type       | `$XDG_RUNTIME_DIR/blanca/placed` marker file, consumed once   |
@@ -127,13 +128,13 @@ Native panel through cgo, one Objective-C file. `blanca watch` is the only proce
 
 | Omarchy                         | macOS                                                    |
 |---------------------------------|----------------------------------------------------------|
-| `wl-paste --watch blanca store` | `NSTimer` polling `changeCount` every 0.5s, as Jumpcut   |
+| `wl-paste --watch blanca store` | `NSTimer` polling `changeCount` every 0.5s, as the original|
 | Hyprland autostart              | LaunchAgent `com.github.ezapmar.blanca`, by `blanca setup`|
 | Hyprland bind                   | Carbon `RegisterEventHotKey`, fixed Ctrl+Alt+V (+Shift)  |
 | floating terminal + `pick`      | non-activating borderless `NSPanel`, 325x325             |
 | Return selects                  | Return or releasing all modifiers (`sticky` turns it off)|
 | `wtype` Shift+Insert            | `CGEventPost` Cmd+V, needs Accessibility                 |
-| `x-kde-passwordManagerHint`     | `org.nspasteboard.ConcealedType` and Jumpcut's other types|
+| `x-kde-passwordManagerHint`     | `org.nspasteboard.ConcealedType` and the other such types |
 
 Files: `platform_linux.go`, `platform_darwin.go`, `bezel_darwin.m`. The event handling
 (`act`, `move`), history, config and store filters are shared. Paths stay XDG-style on
@@ -146,7 +147,7 @@ icon from the tile PNG). Run with no arguments from inside a bundle, `blanca` me
 
 ## 9. Status menu (2026-10-09)
 
-Jumpcut's `MenuManager`: first `display` clippings shortened to 40 characters, a click
+The original's status menu: first `display` clippings shortened to 40 characters, a click
 places one (and pastes, per `paste`), then Clear All (asks first) and Quit. No About or
 Preferences, Blanca has neither.
 

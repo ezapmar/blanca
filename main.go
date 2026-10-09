@@ -1,4 +1,4 @@
-// Blanca is a clipboard manager for Omarchy Linux and macOS, derived from Jumpcut.
+// Blanca is a clipboard manager for Omarchy Linux and macOS.
 package main
 
 import (
@@ -13,7 +13,7 @@ import (
 
 var version = "dev" // set by -ldflags at release time
 
-// Config mirrors Jumpcut's preferences; every field is optional in config.json.
+// Config is the preferences; every field is optional in config.json.
 type Config struct {
 	Remember        int    `json:"remember"`         // clippings kept (min 10)
 	Display         int    `json:"display"`          // clippings shown by `list`

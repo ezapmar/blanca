@@ -1,5 +1,5 @@
 pkgbase = blanca-bin
-	pkgdesc = Clipboard history bezel for Omarchy and Hyprland, a Go port of Jumpcut
+	pkgdesc = Clipboard history bezel for Omarchy and Hyprland
 	pkgver = 0.3.0
 	pkgrel = 1
 	url = https://github.com/ezapmar/blanca
