@@ -116,6 +116,29 @@ func goSet(tag C.int) {
 	}
 }
 
+// goUpdateCheck is the menu's Check for Updates, called off the main thread because it
+// waits on the network. It returns the tag of a newer release, or NULL and a note to
+// show instead. The caller frees both.
+//
+//export goUpdateCheck
+func goUpdateCheck(note **C.char) *C.char {
+	tag, n := checkUpdate()
+	if tag == "" {
+		*note = C.CString(n)
+		return nil
+	}
+	return C.CString(tag)
+}
+
+// goUpdate installs release tag over this Blanca, which the installer stops and reopens.
+//
+//export goUpdate
+func goUpdate(tag *C.char) {
+	if err := startUpdate(C.GoString(tag)); err != nil {
+		fmt.Fprintln(os.Stderr, "blanca:", err)
+	}
+}
+
 // goRelease is every modifier key going up, which selects, as in Jumpcut.
 //
 //export goRelease

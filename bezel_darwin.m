@@ -117,7 +117,7 @@ void bzShow(const char *text, const char *head) {
 void bzHide(void) { [bezel orderOut:nil]; }
 
 // Menu is the menu bar item's menu, after Jumpcut's MenuManager: the newest clippings,
-// Clear All, Settings and Quit. It is rebuilt from the history every time it opens.
+// Clear All, Settings, Check for Updates and Quit. It is rebuilt from the history every time it opens.
 @interface Menu : NSObject <NSMenuDelegate>
 @end
 
@@ -134,6 +134,7 @@ static NSMenu *prefs; // the Settings submenu
 	[m addItemWithTitle:@"Clear All" action:@selector(clear:) keyEquivalent:@""].target = self;
 	[m addItemWithTitle:@"Settings" action:nil keyEquivalent:@""].submenu = prefs = [NSMenu new];
 	goSettings();
+	[m addItemWithTitle:@"Check for Updates…" action:@selector(update:) keyEquivalent:@""].target = self;
 	[m addItem:NSMenuItem.separatorItem];
 	[m addItemWithTitle:@"Quit Blanca" action:@selector(terminate:) keyEquivalent:@""];
 }
@@ -146,6 +147,26 @@ static NSMenu *prefs; // the Settings submenu
 	[a addButtonWithTitle:@"Cancel"];
 	[NSApp activateIgnoringOtherApps:YES];
 	if ([a runModal] == NSAlertFirstButtonReturn) goMenuClear();
+}
+- (void)update:(id)sender { // the check waits on the network, so not on the main thread
+	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+		char *note = NULL, *tag = goUpdateCheck(&note);
+		dispatch_async(dispatch_get_main_queue(), ^{
+			NSAlert *a = [NSAlert new];
+			if (tag) {
+				a.messageText = [NSString stringWithFormat:@"Blanca %s is available", tag + 1];
+				a.informativeText = @"Blanca restarts when it is installed. macOS then asks you to allow it under Accessibility again.";
+				[a addButtonWithTitle:@"Update"];
+				[a addButtonWithTitle:@"Later"];
+			} else {
+				a.messageText = @(note) ?: @"";
+			}
+			[NSApp activateIgnoringOtherApps:YES];
+			if ([a runModal] == NSAlertFirstButtonReturn && tag) goUpdate(tag);
+			free(tag);
+			free(note);
+		});
+	});
 }
 @end
 

@@ -36,8 +36,9 @@ permission, which is what lets Blanca paste for you. It needs macOS 13 or later.
 across; it is not notarised, so the first time macOS makes you allow it under
 Privacy & Security > Open Anyway.
 
-To update, on either system: `blanca update`. It asks GitHub for the newest release and,
-if that is ahead of yours, installs it the way the first one came.
+To update, on either system: `blanca update`, or Check for Updates in the menu. It asks
+GitHub for the newest release and, if that is ahead of yours, installs it the way the
+first one came.
 
 ## What's new in 0.2
 

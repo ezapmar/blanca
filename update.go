@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
@@ -92,6 +93,32 @@ func updateCommand(tag, self, goos, goarch string) string {
 			repo, tag, ver, arch)
 	}
 	return fmt.Sprintf("curl -fsSL https://raw.githubusercontent.com/%s/%s/install.sh | sh -s %s", repo, tag, tag)
+}
+
+// checkUpdate is the menu's Check for Updates. It returns the tag of a release ahead of
+// this one, or no tag and a line to show instead: that this is the latest, or why the
+// check failed.
+func checkUpdate() (tag, note string) {
+	tag, err := latestTag()
+	if err != nil {
+		return "", "Could not check for updates: " + err.Error()
+	}
+	if !newer(tag, version) {
+		return "", "Blanca " + version + " is the latest"
+	}
+	return tag, ""
+}
+
+// startUpdate runs the installer for tag in a session of its own, so that it outlives
+// the blanca it replaces.
+func startUpdate(tag string) error {
+	self, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command("/bin/sh", "-c", updateCommand(tag, self, runtime.GOOS, runtime.GOARCH))
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	return cmd.Start()
 }
 
 // cmdUpdate installs the newest release if it is ahead of this one.
