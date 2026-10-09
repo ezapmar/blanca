@@ -52,8 +52,18 @@ func cmdWatch(Config) {
 	fatal(syscall.Exec(wl, []string{wl, "--type", "text", "--watch", self, "store"}, os.Environ()))
 }
 
+// platformSettings: "Launch on login" is the watcher line in Hyprland's autostart.lua.
+// The running watcher is left as it is.
 func platformSettings(c *Config) []setting {
-	return []setting{{name: "Paste with Ctrl+V",
+	hypr := filepath.Join(xdg("XDG_CONFIG_HOME", ".config"), "hypr")
+	login := setting{name: "Launch on login",
+		on: func() bool { return autostarts(hypr) },
+		pick: func(int) {
+			if err := setAutostart(hypr, !autostarts(hypr)); err != nil {
+				fmt.Fprintln(os.Stderr, "blanca:", err)
+			}
+		}}
+	return []setting{login, {name: "Paste with Ctrl+V",
 		on: func() bool { return c.PasteMode == "ctrl-v" },
 		pick: func(int) {
 			if c.PasteMode == "ctrl-v" {

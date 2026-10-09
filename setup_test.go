@@ -65,3 +65,30 @@ func TestWriteWaybar(t *testing.T) {
 		t.Fatalf("unknown config: %v", out)
 	}
 }
+
+func TestSetAutostart(t *testing.T) {
+	hypr := t.TempDir()
+	p := filepath.Join(hypr, "autostart.lua")
+	os.WriteFile(p, []byte("-- user config\no.launch_on_start(\"mako\")\n"), 0o644)
+	if autostarts(hypr) {
+		t.Fatal("not set up yet")
+	}
+	writeHyprSnippets(hypr)
+	set, _ := os.ReadFile(p)
+	if !autostarts(hypr) {
+		t.Fatalf("setup must turn it on: %s", set)
+	}
+	if err := setAutostart(hypr, false); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(p); string(b) != "-- user config\no.launch_on_start(\"mako\")\n" {
+		t.Fatalf("off must leave only the user's lines: %q", b)
+	}
+	setAutostart(hypr, true)
+	if b, _ := os.ReadFile(p); string(b) != string(set) || !autostarts(hypr) {
+		t.Fatalf("on must restore what setup wrote: %q", b)
+	}
+	if setAutostart(t.TempDir(), true) == nil {
+		t.Fatal("no autostart.lua is an error")
+	}
+}

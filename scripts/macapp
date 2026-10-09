@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Build dist/Blanca.app: a universal, ad-hoc signed bundle whose executable is the blanca
-# binary. Opened from Finder it runs `blanca watch`. Usage: scripts/macapp [version]
+# binary. Opened from Finder it runs `blanca watch`. Also dist/Blanca.dmg, the app beside
+# an Applications shortcut to drag it onto. Usage: scripts/macapp [version]
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 ver=${1:-0.0.0}
+export MACOSX_DEPLOYMENT_TARGET=13.0 # SMAppService, the login item, needs macOS 13
 app=dist/Blanca.app
 rm -rf "$app" dist/Blanca.iconset
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" dist/Blanca.iconset
@@ -34,7 +36,7 @@ cat > "$app/Contents/Info.plist" <<EOF
 	<key>CFBundlePackageType</key><string>APPL</string>
 	<key>CFBundleShortVersionString</key><string>$ver</string>
 	<key>CFBundleVersion</key><string>$ver</string>
-	<key>LSMinimumSystemVersion</key><string>11.0</string>
+	<key>LSMinimumSystemVersion</key><string>13.0</string>
 	<key>LSUIElement</key><true/>
 	<key>LSMultipleInstancesProhibited</key><true/>
 	<key>NSHighResolutionCapable</key><true/>
@@ -42,4 +44,11 @@ cat > "$app/Contents/Info.plist" <<EOF
 </plist>
 EOF
 codesign --force --sign - "$app"
+
+rm -rf dist/dmg dist/Blanca.dmg
+mkdir dist/dmg
+cp -R "$app" dist/dmg/
+ln -s /Applications dist/dmg/Applications
+hdiutil create -quiet -volname Blanca -srcfolder dist/dmg -format UDZO dist/Blanca.dmg
+rm -rf dist/dmg
 echo "$app"

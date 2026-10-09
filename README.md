@@ -24,9 +24,12 @@ That is all of it. The script puts one static binary in `~/.local/bin`, installs
 icons, adds the keybind, autostart and window rules to your Hyprland config, reloads it
 and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
 
-The same line works on macOS. There it installs a universal binary and a LaunchAgent
-that runs `blanca watch`. macOS asks once for Accessibility permission, which is what
-lets Blanca paste for you.
+The same line works on macOS. There it puts `Blanca.app` in Applications, starts it and
+links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
+permission, which is what lets Blanca paste for you. Or take `Blanca.dmg` from the
+[latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
+across; it is not notarised, so the first time macOS makes you allow it under
+Privacy & Security > Open Anyway.
 
 ## What it is
 

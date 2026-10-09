@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+// The lines Blanca adds to Hyprland's autostart.lua, under hyprNote.
+const (
+	hyprNote     = "-- Blanca clipboard (added by `blanca setup`)"
+	autostartLua = `o.launch_on_start("wl-paste --type text --watch blanca store")`
+)
+
 // writeHyprSnippets appends Blanca's lines to each Hyprland file in dir that exists and
 // does not mention blanca yet. It returns one report line per file.
 func writeHyprSnippets(hypr string) []string {
@@ -15,7 +21,7 @@ func writeHyprSnippets(hypr string) []string {
 	snippets := map[string]string{
 		"bindings.lua": `o.bind("CTRL + ALT + V", "Blanca clipboard", "blanca bezel")
 o.bind("CTRL + ALT + SHIFT + V", "Blanca clipboard (back)", "blanca bezel --up")`,
-		"autostart.lua": `o.launch_on_start("wl-paste --type text --watch blanca store")`,
+		"autostart.lua": autostartLua,
 		"hyprland.lua": `o.window("org.omarchy.blanca", { float = true })
 o.window("org.omarchy.blanca", { center = true })
 o.window("org.omarchy.blanca", { size = { 640, 360 } })`,
@@ -35,11 +41,38 @@ o.window("org.omarchy.blanca", { size = { 640, 360 } })`,
 		if err != nil {
 			fatal(err)
 		}
-		fmt.Fprintf(f, "\n-- Blanca clipboard (added by `blanca setup`)\n%s\n", snippets[name])
+		fmt.Fprintf(f, "\n%s\n%s\n", hyprNote, snippets[name])
 		f.Close()
 		out = append(out, "add  "+p)
 	}
 	return out
+}
+
+// autostarts reports whether Hyprland starts the clipboard watcher at login.
+func autostarts(hypr string) bool {
+	b, _ := os.ReadFile(filepath.Join(hypr, "autostart.lua"))
+	return strings.Contains(string(b), "blanca store")
+}
+
+// setAutostart is the "Launch on login" switch on Omarchy: it takes Blanca's lines out
+// of autostart.lua and, when on, puts them back at the end.
+func setAutostart(hypr string, on bool) error {
+	p := filepath.Join(hypr, "autostart.lua")
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return err
+	}
+	var keep []string
+	for _, l := range strings.Split(string(b), "\n") {
+		if !strings.Contains(l, "blanca") && l != hyprNote {
+			keep = append(keep, l)
+		}
+	}
+	s := strings.TrimRight(strings.Join(keep, "\n"), "\n") + "\n"
+	if on {
+		s += "\n" + hyprNote + "\n" + autostartLua + "\n"
+	}
+	return os.WriteFile(p, []byte(s), 0o644)
 }
 
 var modulesRight = regexp.MustCompile(`"modules-right"\s*:\s*\[`)

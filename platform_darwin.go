@@ -2,7 +2,7 @@ package main
 
 /*
 #cgo CFLAGS: -fobjc-arc
-#cgo LDFLAGS: -framework Cocoa -framework Carbon
+#cgo LDFLAGS: -framework Cocoa -framework Carbon -framework ServiceManagement
 #include <stdbool.h>
 #include <stdlib.h>
 void bzRun(bool paste, const void *icon, int iconLen);
@@ -14,6 +14,8 @@ void bzCopy(const char *text);
 void bzClear(void);
 void bzPaste(void);
 bool bzSensitive(void);
+bool bzLogin(void);
+bool bzSetLogin(bool on);
 */
 import "C"
 
@@ -27,6 +29,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"unsafe"
 )
 
@@ -50,6 +53,9 @@ var bz struct {
 // Ctrl+Alt+V hotkey, the menu bar item and the bezel. It never returns.
 func cmdWatch(cfg Config) {
 	bz.cfg = cfg
+	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
+		os.Remove(agentPath()) // a LaunchAgent from before Blanca.app could be a login item
+	}
 	C.bzRun(C.bool(cfg.Paste), unsafe.Pointer(&menuIcon[0]), C.int(len(menuIcon)))
 }
 
@@ -227,18 +233,30 @@ func writeAgent() error {
 `, label, html.EscapeString(self))), 0o644)
 }
 
-// platformSettings: "Launch on login" is the LaunchAgent file itself. The switch only
-// writes or removes it, so the running Blanca is left as it is until the next login.
+// inApp reports whether this is the binary inside Blanca.app.
+func inApp() bool {
+	self, _ := os.Executable()
+	return strings.Contains(self, ".app/Contents/MacOS/")
+}
+
+// platformSettings: "Launch on login" makes Blanca.app one of the Open at Login items in
+// System Settings. The bare binary cannot be one, so there the switch writes or removes
+// the LaunchAgent file. Either way the running Blanca is left as it is.
 func platformSettings(c *Config) []setting {
 	login := func() bool { _, err := os.Stat(agentPath()); return err == nil }
+	pick := func(int) {
+		if login() {
+			os.Remove(agentPath())
+		} else if err := writeAgent(); err != nil {
+			fmt.Fprintln(os.Stderr, "blanca:", err)
+		}
+	}
+	if inApp() {
+		login = func() bool { return bool(C.bzLogin()) }
+		pick = func(int) { C.bzSetLogin(C.bool(!login())) }
+	}
 	return []setting{
-		{name: "Launch on login", on: login, pick: func(int) {
-			if login() {
-				os.Remove(agentPath())
-			} else if err := writeAgent(); err != nil {
-				fmt.Fprintln(os.Stderr, "blanca:", err)
-			}
-		}},
+		{name: "Launch on login", on: login, pick: pick},
 		toggle("Sticky bezel", &c.Sticky),
 	}
 }

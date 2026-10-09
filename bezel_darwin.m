@@ -2,6 +2,7 @@
 // Jumpcut's Pasteboard.swift and Bezel.swift. Everything here runs on the main thread.
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
+#import <ServiceManagement/ServiceManagement.h>
 #include "_cgo_export.h"
 
 static const CGFloat side = 325; // Jumpcut's bezel size
@@ -34,6 +35,18 @@ void bzPaste(void) {
 		CFRelease(e);
 	}
 	CFRelease(src);
+}
+
+// bzLogin reports whether Blanca.app is one of the user's Open at Login items, and
+// bzSetLogin adds or removes it. Both are for the app bundle only.
+bool bzLogin(void) { return SMAppService.mainAppService.status == SMAppServiceStatusEnabled; }
+
+bool bzSetLogin(bool on) {
+	NSError *err;
+	SMAppService *s = SMAppService.mainAppService;
+	BOOL ok = on ? [s registerAndReturnError:&err] : [s unregisterAndReturnError:&err];
+	if (!ok) NSLog(@"blanca: open at login: %@", err.localizedDescription);
+	return ok;
 }
 
 // Bezel takes the keyboard without activating Blanca, so closing it returns focus

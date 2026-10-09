@@ -162,6 +162,14 @@ Preferences, Blanca has neither.
 - Universal Clipboard: a copy on an iPhone reaches the Mac pasteboard as a normal change
   carrying `com.apple.is-remote-clipboard` (seen live, 2026-10-09). Such clippings get a
   phone icon in the macOS menu; their hashes live in `remote.json` beside the history.
+- Launch on login: Blanca.app registers itself with `SMAppService.mainAppService`, so it
+  is listed under Open at Login. The bare binary keeps the LaunchAgent; the app replaces
+  one it finds with the login item when it starts.
+  On Omarchy the same switch adds or removes the watcher line in Hyprland's
+  `autostart.lua`.
+- Installers: `install.sh` on macOS puts `Blanca.app` in Applications from the release zip
+  (curl leaves no quarantine flag) and links `blanca` into `~/.local/bin`; the release
+  also carries `Blanca.dmg` for dragging. Linux is unchanged: binary, icons, `setup`.
 - Not run on Omarchy yet: the Walker flags, the Waybar edit and the recoloured icon.
 
 ## Decisions
