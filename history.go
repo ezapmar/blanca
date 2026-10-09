@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 )
 
 // History is the clipping list, newest first. It is a JSON array of strings on disk.
@@ -91,6 +92,24 @@ func (h *History) ToTop(s string, hint int) bool {
 	return true
 }
 
+// DeleteSince drops the clippings copied at or after cutoff, going by times, which maps
+// a clipping's hash to the second it was last copied. Of a clipping that is in the list
+// twice only the newer one has that time, so only it goes, and its time with it.
+func (h *History) DeleteSince(times map[string]int64, cutoff int64) bool {
+	var keep []string
+	for _, s := range h.Items {
+		k := hash(s)
+		if t, ok := times[k]; ok && t >= cutoff {
+			delete(times, k)
+			continue
+		}
+		keep = append(keep, s)
+	}
+	changed := len(keep) != len(h.Items)
+	h.Items = keep
+	return changed
+}
+
 // shorten renders a clipping as Jumpcut's menu did: trimmed, first line, n runes + ellipsis.
 func shorten(s string, n int) string {
 	s = strings.TrimSpace(s)
@@ -151,4 +170,78 @@ func setRemote(s string, remote bool) error {
 	}
 	b, _ := json.Marshal(hashes)
 	return os.WriteFile(remotePath(), b, 0o600)
+}
+
+// Copy times are what Clear goes by when it is asked for the last hour only. times.json
+// beside the history maps a clipping's hash to the second it was copied, for the same
+// reasons remote.json holds hashes. A clipping from before Blanca kept times has none,
+// and only Clear All forgets it.
+func timesPath() string { return filepath.Join(filepath.Dir(dataPath()), "times.json") }
+
+func readTimes() map[string]int64 {
+	m := map[string]int64{}
+	if b, err := os.ReadFile(timesPath()); err == nil {
+		json.Unmarshal(b, &m)
+	}
+	return m
+}
+
+// setTime records that the newly added clipping s was copied at now, and forgets
+// clippings that have left the history.
+func setTime(s string, now time.Time) error {
+	old := readTimes()
+	items, err := readHistory()
+	if err != nil {
+		return err
+	}
+	keep := map[string]int64{}
+	for _, it := range items {
+		if t, ok := old[hash(it)]; ok {
+			keep[hash(it)] = t
+		}
+	}
+	keep[hash(s)] = now.Unix()
+	return writeTimes(keep)
+}
+
+func writeTimes(m map[string]int64) error {
+	b, _ := json.Marshal(m)
+	return os.WriteFile(timesPath(), b, 0o600)
+}
+
+// clearOptions are what Clear offers in the menu and on the command line. A span of
+// zero is everything.
+type clearOption struct {
+	name, arg string
+	span      time.Duration
+}
+
+var clearOptions = []clearOption{
+	{"Last hour", "hour", time.Hour},
+	{"Last 24 hours", "day", 24 * time.Hour},
+	{"Last month", "month", 30 * 24 * time.Hour},
+	{"All", "", 0},
+}
+
+// clearSpan forgets the clippings copied within span of now, or all of them for zero.
+// The clipboard is emptied with them if what it holds is among them.
+func clearSpan(span time.Duration) error {
+	if span == 0 {
+		return clearAll()
+	}
+	var top string
+	times := readTimes()
+	items, err := withHistory(func(h *History) bool {
+		if len(h.Items) > 0 {
+			top = h.Items[0]
+		}
+		return h.DeleteSince(times, time.Now().Add(-span).Unix())
+	})
+	if err != nil {
+		return err
+	}
+	if top != "" && (len(items) == 0 || items[0] != top) {
+		clearClipboard()
+	}
+	return writeTimes(times)
 }

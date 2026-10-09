@@ -7,6 +7,7 @@ package main
 #include <stdlib.h>
 void bzRun(bool paste, const void *icon, int iconLen);
 void bzMenuAdd(const char *title, bool remote);
+void bzClearAdd(const char *title);
 void bzSetting(const char *title, bool on, int tag, bool sub);
 void bzShow(const char *text, const char *title);
 void bzHide(void);
@@ -80,8 +81,23 @@ func goMenuPick(i C.int) {
 	}
 }
 
+// goClearMenu fills the Clear submenu with how far back to clear.
+//
+//export goClearMenu
+func goClearMenu() {
+	for _, o := range clearOptions {
+		t := C.CString(o.name)
+		C.bzClearAdd(t)
+		C.free(unsafe.Pointer(t))
+	}
+}
+
 //export goMenuClear
-func goMenuClear() { clearAll() }
+func goMenuClear(i C.int) {
+	if err := clearSpan(clearOptions[i].span); err != nil {
+		fmt.Fprintln(os.Stderr, "blanca:", err)
+	}
+}
 
 // goSettings fills the Settings submenu: a ticked line per switch, and for a number a
 // submenu of its values. A line's tag is 100 times the setting plus the value's index.

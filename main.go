@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -69,6 +70,7 @@ func runtimeDir() string {
 func clearAll() error {
 	_, err := withHistory(func(h *History) bool { h.Items = nil; return true })
 	os.Remove(remotePath())
+	os.Remove(timesPath())
 	clearClipboard()
 	return err
 }
@@ -88,7 +90,8 @@ func usage() {
   menu          Waybar button entry: the newest clippings and the settings as a Walker menu
   list [N]      print the first N clippings, shortened
   get N         print clipping N in full
-  clear         forget all clippings
+  clear [hour|day|month]
+                forget all clippings, or those of the last hour, 24 hours or month
   setup         Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
   update        install the newest release, if there is one
   version
@@ -145,7 +148,11 @@ func main() {
 		}
 		fmt.Print(items[i-1])
 	case "clear":
-		if err := clearAll(); err != nil {
+		i := slices.IndexFunc(clearOptions, func(o clearOption) bool { return o.arg == arg })
+		if i < 0 {
+			usage()
+		}
+		if err := clearSpan(clearOptions[i].span); err != nil {
 			fatal(err)
 		}
 	case "setup":

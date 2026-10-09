@@ -117,13 +117,14 @@ void bzShow(const char *text, const char *head) {
 void bzHide(void) { [bezel orderOut:nil]; }
 
 // Menu is the menu bar item's menu, after Jumpcut's MenuManager: the newest clippings,
-// Clear All, Settings, Check for Updates and Quit. It is rebuilt from the history every time it opens.
+// Clear, Settings, Check for Updates and Quit. It is rebuilt from the history every time it opens.
 @interface Menu : NSObject <NSMenuDelegate>
 @end
 
 static NSStatusItem *item;
 static Menu *menu;
-static NSMenu *prefs; // the Settings submenu
+static NSMenu *prefs;  // the Settings submenu
+static NSMenu *spans;  // the Clear submenu
 
 @implementation Menu
 - (void)menuNeedsUpdate:(NSMenu *)m {
@@ -131,7 +132,8 @@ static NSMenu *prefs; // the Settings submenu
 	goMenu();
 	if (!m.numberOfItems) [m addItemWithTitle:@"<None>" action:nil keyEquivalent:@""];
 	[m addItem:NSMenuItem.separatorItem];
-	[m addItemWithTitle:@"Clear All" action:@selector(clear:) keyEquivalent:@""].target = self;
+	[m addItemWithTitle:@"Clear" action:nil keyEquivalent:@""].submenu = spans = [NSMenu new];
+	goClearMenu();
 	[m addItemWithTitle:@"Settings" action:nil keyEquivalent:@""].submenu = prefs = [NSMenu new];
 	goSettings();
 	[m addItemWithTitle:@"Check for Updates…" action:@selector(update:) keyEquivalent:@""].target = self;
@@ -140,13 +142,13 @@ static NSMenu *prefs; // the Settings submenu
 }
 - (void)pick:(NSMenuItem *)i { goMenuPick((int)i.tag); }
 - (void)set:(NSMenuItem *)i { goSet((int)i.tag); }
-- (void)clear:(id)sender { // Jumpcut asks first
+- (void)clear:(NSMenuItem *)i { // Jumpcut asks first
 	NSAlert *a = [NSAlert new];
-	a.messageText = @"Clear all clippings?";
+	a.messageText = [NSString stringWithFormat:@"Clear clippings: %@?", i.title.lowercaseString];
 	[a addButtonWithTitle:@"Clear"];
 	[a addButtonWithTitle:@"Cancel"];
 	[NSApp activateIgnoringOtherApps:YES];
-	if ([a runModal] == NSAlertFirstButtonReturn) goMenuClear();
+	if ([a runModal] == NSAlertFirstButtonReturn) goMenuClear((int)i.tag);
 }
 - (void)update:(id)sender { // the check waits on the network, so not on the main thread
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
@@ -182,6 +184,13 @@ void bzMenuAdd(const char *text, bool remote) {
 	}
 	i.target = menu;
 	i.tag = item.menu.numberOfItems - 1;
+}
+
+// bzClearAdd adds a line to the Clear submenu: how far back to clear.
+void bzClearAdd(const char *text) {
+	NSMenuItem *i = [spans addItemWithTitle:@(text) ?: @"" action:@selector(clear:) keyEquivalent:@""];
+	i.target = menu;
+	i.tag = spans.numberOfItems - 1;
 }
 
 // bzSetting adds a line to the Settings submenu or, with sub, to the last line's own submenu.

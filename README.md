@@ -152,8 +152,12 @@ is back where you were, sends Shift+Insert through `wtype`, the same chord Omarc
 own clipboard tools use, so it works in terminals too.
 
 **The bar has a menu.** Jumpcut's other half is its menu bar icon: click it and the
-newest clippings drop down, with Clear All underneath. On Omarchy that is a Waybar
+newest clippings drop down, with Clear underneath. On Omarchy that is a Waybar
 button which runs `blanca menu`, a Walker list. `blanca setup` adds the button.
+
+**Clear goes back as far as you say.** The last hour, the last 24 hours, the last month,
+or all of it. Blanca notes when each clipping was copied, as a hash beside the history.
+Clippings from before it kept times have none, and only All forgets those.
 
 **Copies from your iPhone are marked.** With Handoff on, what you copy on an iPhone or
 iPad lands in the list like anything else, with a small phone beside it in the menu.
@@ -203,7 +207,8 @@ blanca bezel [--up]   hotkey entry: advance an open bezel, or open one
 blanca menu           Waybar button entry: the newest clippings as a Walker menu
 blanca list [N]       print the first N clippings, shortened
 blanca get N          print clipping N in full
-blanca clear          forget all clippings
+blanca clear [hour|day|month]
+                      forget all clippings, or those of the last hour, 24 hours or month
 blanca setup          Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
 blanca update         install the newest release, if there is one
 ```

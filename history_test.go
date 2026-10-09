@@ -3,6 +3,7 @@ package main
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestHistory(t *testing.T) {
@@ -53,6 +54,42 @@ func TestRemote(t *testing.T) {
 	withHistory(func(h *History) bool { return h.Delete("gone", 0) })
 	add("next", false)
 	if m := readRemote(); len(m) != 0 {
+		t.Fatalf("deleted clippings are forgotten: %v", m)
+	}
+}
+
+func TestDeleteSince(t *testing.T) {
+	// Newest first. "again" was copied long ago and once more just now; "old" has no time.
+	h := &History{Items: []string{"now", "again", "today", "week", "again", "old"}}
+	times := map[string]int64{hash("now"): 1000, hash("again"): 990, hash("today"): 500, hash("week"): 100}
+	if !h.DeleteSince(times, 900) || !reflect.DeepEqual(h.Items, []string{"today", "week", "again", "old"}) {
+		t.Fatalf("last hour: %v", h.Items)
+	}
+	if h.DeleteSince(times, 900) {
+		t.Fatal("nothing recent is left to delete")
+	}
+	if !h.DeleteSince(times, 0) || !reflect.DeepEqual(h.Items, []string{"again", "old"}) {
+		t.Fatalf("clippings without a time stay: %v", h.Items)
+	}
+}
+
+func TestTimes(t *testing.T) {
+	isolate(t)
+	at := time.Unix(1000, 0)
+	for _, s := range []string{"a", "b"} {
+		withHistory(func(h *History) bool { return h.Add(s, 99) })
+		if err := setTime(s, at); err != nil {
+			t.Fatal(err)
+		}
+		at = at.Add(time.Minute)
+	}
+	if m := readTimes(); len(m) != 2 || m[hash("a")] != 1000 || m[hash("b")] != 1060 {
+		t.Fatalf("times: %v", m)
+	}
+	withHistory(func(h *History) bool { return h.Delete("a", 1) })
+	withHistory(func(h *History) bool { return h.Add("c", 99) })
+	setTime("c", at)
+	if m := readTimes(); len(m) != 2 || m[hash("a")] != 0 {
 		t.Fatalf("deleted clippings are forgotten: %v", m)
 	}
 }
