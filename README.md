@@ -31,10 +31,13 @@ and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
 
 The same line works on macOS. There it puts `Blanca.app` in Applications, starts it and
 links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
-permission, which is what lets Blanca paste for you. Or take `Blanca.dmg` from the
+permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or take `Blanca.dmg` from the
 [latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
 across; it is not notarised, so the first time macOS makes you allow it under
 Privacy & Security > Open Anyway.
+
+To update, on either system: `blanca update`. It asks GitHub for the newest release and,
+if that is ahead of yours, installs it the way the first one came.
 
 ## What's new in 0.2
 
@@ -69,6 +72,10 @@ has the same reaction to the word "paste".
 | `Backspace`, `Delete` | forget this clipping |
 | `Esc`, `q` | close |
 
+On a Mac keyboard `Ctrl+Alt+V` is Control (⌃) + Option (⌥) + V. Alt is the Option key,
+and it is Control, not Command. Hold Control and Option, tap `V` until the clipping you
+want is showing, and let go: it pastes.
+
 ---
 
 <details>
@@ -85,6 +92,26 @@ sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.2.0/blanca
 The same package can be built locally from `packaging/aur` with `makepkg -si`.
 
 From source: `go install github.com/ezapmar/blanca@latest && blanca setup`.
+
+Or build it from a clone. You need Go 1.26 or newer. On Omarchy:
+
+```bash
+git clone https://github.com/ezapmar/blanca && cd blanca
+go build -o ~/.local/bin/blanca . && blanca setup
+```
+
+On macOS, with the Xcode command line tools installed (`xcode-select --install`),
+`scripts/macapp` builds a universal `dist/Blanca.app` and a `dist/Blanca.dmg` beside it:
+
+```bash
+git clone https://github.com/ezapmar/blanca && cd blanca
+scripts/macapp 0.2.0
+cp -R dist/Blanca.app /Applications/ && open /Applications/Blanca.app
+```
+
+The app is signed ad hoc and targets macOS 13, the first release with the login item
+API it uses. A build of your own is a new app as far as macOS is concerned, so it asks
+for Accessibility again.
 
 Runtime dependencies are `wl-clipboard`, `wtype` and `xdg-terminal-exec`, all part of
 Omarchy. On plain Arch: `sudo pacman -S --needed wl-clipboard wtype xdg-terminal-exec`.
@@ -177,6 +204,7 @@ blanca list [N]       print the first N clippings, shortened
 blanca get N          print clipping N in full
 blanca clear          forget all clippings
 blanca setup          Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
+blanca update         install the newest release, if there is one
 ```
 
 `list` and `get` let you build a menu, with fzf for instance:
