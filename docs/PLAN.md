@@ -121,6 +121,57 @@ history_test.go   stack semantics
 - TUI smoke-tested in a macOS terminal with a seeded history.
 - Real Omarchy test needed for: wl-paste watch, wtype paste, Hyprland rules, focus return.
 
+## 8. macOS (2026-10-09)
+
+Native panel through cgo, one Objective-C file. `blanca watch` is the only process:
+
+| Omarchy                         | macOS                                                    |
+|---------------------------------|----------------------------------------------------------|
+| `wl-paste --watch blanca store` | `NSTimer` polling `changeCount` every 0.5s, as Jumpcut   |
+| Hyprland autostart              | LaunchAgent `com.github.ezapmar.blanca`, by `blanca setup`|
+| Hyprland bind                   | Carbon `RegisterEventHotKey`, fixed Ctrl+Alt+V (+Shift)  |
+| floating terminal + `pick`      | non-activating borderless `NSPanel`, 325x325             |
+| Return selects                  | Return or releasing all modifiers (`sticky` turns it off)|
+| `wtype` Shift+Insert            | `CGEventPost` Cmd+V, needs Accessibility                 |
+| `x-kde-passwordManagerHint`     | `org.nspasteboard.ConcealedType` and Jumpcut's other types|
+
+Files: `platform_linux.go`, `platform_darwin.go`, `bezel_darwin.m`. The event handling
+(`act`, `move`), history, config and store filters are shared. Paths stay XDG-style on
+macOS so a history or config file can be copied between machines. Linux stays
+`CGO_ENABLED=0`; the darwin release is a universal binary built on a macOS runner.
+
+`scripts/macapp` wraps the same binary as `dist/Blanca.app` (`LSUIElement`, ad-hoc signed,
+icon from the tile PNG). Run with no arguments from inside a bundle, `blanca` means
+`blanca watch`, so opening the app starts the watcher. The release attaches it as a zip.
+
+## 9. Status menu (2026-10-09)
+
+Jumpcut's `MenuManager`: first `display` clippings shortened to 40 characters, a click
+places one (and pastes, per `paste`), then Clear All (asks first) and Quit. No About or
+Preferences, Blanca has neither.
+
+- macOS: `NSStatusItem` in `bezel_darwin.m`, template image from the embedded
+  `blanca-symbolic-36.png`, menu rebuilt in `menuNeedsUpdate`.
+- Omarchy: Waybar `custom/blanca` button whose click runs `blanca menu`, a Walker
+  `--dmenu` list. `blanca setup` inserts the module ahead of `modules-right`, appends the
+  style and writes `blanca-symbolic.svg` next to it; the style uses `-gtk-recolor` so the
+  icon follows the theme. For that the symbolic SVG is one plain path, no mask.
+- Settings (`settings.go`): one shared list of switches and preset numbers over `Config`,
+  written back with `saveConfig`. macOS shows it as a submenu with ticks, Omarchy as a
+  second Walker list that returns after each change.
+- Universal Clipboard: a copy on an iPhone reaches the Mac pasteboard as a normal change
+  carrying `com.apple.is-remote-clipboard` (seen live, 2026-10-09). Such clippings get a
+  phone icon in the macOS menu; their hashes live in `remote.json` beside the history.
+- Launch on login: Blanca.app registers itself with `SMAppService.mainAppService`, so it
+  is listed under Open at Login. The bare binary keeps the LaunchAgent; the app replaces
+  one it finds with the login item when it starts.
+  On Omarchy the same switch adds or removes the watcher line in Hyprland's
+  `autostart.lua`.
+- Installers: `install.sh` on macOS puts `Blanca.app` in Applications from the release zip
+  (curl leaves no quarantine flag) and links `blanca` into `~/.local/bin`; the release
+  also carries `Blanca.dmg` for dragging. Linux is unchanged: binary, icons, `setup`.
+- Not run on Omarchy yet: the Walker flags, the Waybar edit and the recoloured icon.
+
 ## Decisions
 
 - Module path: `github.com/ezapmar/blanca`, public repo (2026-10-08).

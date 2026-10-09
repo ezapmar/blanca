@@ -1,13 +1,13 @@
-// Blanca is a clipboard manager for Omarchy Linux, derived from Jumpcut.
+// Blanca is a clipboard manager for Omarchy Linux and macOS, derived from Jumpcut.
 package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 var version = "dev" // set by -ldflags at release time
@@ -18,6 +18,7 @@ type Config struct {
 	Display         int    `json:"display"`          // clippings shown by `list`
 	Wraparound      bool   `json:"wraparound"`       // bezel wraps at the ends
 	Paste           bool   `json:"paste"`            // selecting also pastes
+	Sticky          bool   `json:"sticky"`           // macOS: releasing the modifiers does not select
 	PasteMode       string `json:"paste_mode"`       // "shift-insert" | "ctrl-v"
 	MoveToTop       bool   `json:"move_to_top"`      // move clipping to top after use
 	AllowWhitespace bool   `json:"allow_whitespace"` // keep whitespace-only clippings
@@ -28,7 +29,7 @@ type Config struct {
 func loadConfig() Config {
 	c := Config{Remember: 99, Display: 10, Paste: true, PasteMode: "shift-insert",
 		IgnoreLarge: true, IgnoreSensitive: true}
-	p := filepath.Join(xdg("XDG_CONFIG_HOME", ".config"), "blanca", "config.json")
+	p := configPath()
 	if b, err := os.ReadFile(p); err == nil {
 		if err := json.Unmarshal(b, &c); err != nil {
 			fatal(fmt.Errorf("%s: %w", p, err))
@@ -36,6 +37,10 @@ func loadConfig() Config {
 	}
 	c.Remember = max(c.Remember, 10)
 	return c
+}
+
+func configPath() string {
+	return filepath.Join(xdg("XDG_CONFIG_HOME", ".config"), "blanca", "config.json")
 }
 
 func xdg(env, fallback string) string {
@@ -60,6 +65,14 @@ func runtimeDir() string {
 	return d
 }
 
+// clearAll forgets every clipping, the one on the clipboard included.
+func clearAll() error {
+	_, err := withHistory(func(h *History) bool { h.Items = nil; return true })
+	os.Remove(remotePath())
+	clearClipboard()
+	return err
+}
+
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "blanca:", err)
 	os.Exit(1)
@@ -69,12 +82,14 @@ func usage() {
 	fmt.Fprint(os.Stderr, `usage: blanca <command>
 
   store         read a clipping from stdin into the history (for wl-paste --watch)
+  watch         record every text copy; on macOS also the hotkey and the bezel
   pick          show the bezel in this terminal
   bezel [--up]  hotkey entry: advance an open bezel, or open one
+  menu          Waybar button entry: the newest clippings and the settings as a Walker menu
   list [N]      print the first N clippings, shortened
   get N         print clipping N in full
   clear         forget all clippings
-  setup         add the Hyprland keybind, autostart and window rules
+  setup         Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
   version
 `)
 	os.Exit(2)
@@ -82,7 +97,11 @@ func usage() {
 
 func main() {
 	if len(os.Args) < 2 {
-		usage()
+		self, _ := os.Executable()
+		if !strings.Contains(self, ".app/Contents/MacOS/") {
+			usage()
+		}
+		os.Args = append(os.Args, "watch") // Blanca.app opened from Finder
 	}
 	cfg := loadConfig()
 	arg := ""
@@ -92,10 +111,14 @@ func main() {
 	switch os.Args[1] {
 	case "store":
 		cmdStore(cfg)
+	case "watch":
+		cmdWatch(cfg)
 	case "pick":
 		cmdPick(cfg)
 	case "bezel":
 		cmdBezel(arg == "--up")
+	case "menu":
+		cmdMenu(cfg)
 	case "paste":
 		cmdPaste(cfg)
 	case "list":
@@ -121,10 +144,9 @@ func main() {
 		}
 		fmt.Print(items[i-1])
 	case "clear":
-		if _, err := withHistory(func(h *History) bool { h.Items = nil; return true }); err != nil {
+		if err := clearAll(); err != nil {
 			fatal(err)
 		}
-		exec.Command("wl-copy", "--clear").Run()
 	case "setup":
 		cmdSetup()
 	case "version", "--version":

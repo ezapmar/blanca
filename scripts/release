@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Cut a Blanca release: tag, push, wait for the workflow, then sync the AUR files and
+# README to the new version and checksums. Usage: scripts/release 0.1.4 ["notes"]
+set -euo pipefail
+repo=ezapmar/blanca
+ver=${1:?usage: scripts/release <version> [message]}
+msg=${2:-"Blanca $ver"}
+[[ $ver =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "version must look like 0.1.4" >&2; exit 1; }
+cd "$(git rev-parse --show-toplevel)"
+[[ -z $(git status --porcelain) ]] || { echo "working tree not clean" >&2; exit 1; }
+[[ $(git branch --show-current) == master ]] || { echo "release from master" >&2; exit 1; }
+git pull -q --ff-only
+go vet ./... && go test -count=1 ./...
+
+sub() { sed -i.bak "$1" "$2" && rm -f "$2.bak"; }   # portable in-place sed
+prev=$(sed -n 's/^pkgver=//p' packaging/aur/PKGBUILD)
+
+echo "Tagging v$ver"
+git tag -a "v$ver" -m "$msg"
+git push -q origin "v$ver"
+sleep 10
+id=$(gh run list --repo "$repo" --workflow release --limit 1 --json databaseId -q '.[0].databaseId')
+echo "Waiting for release workflow $id"
+gh run watch "$id" --repo "$repo" --exit-status >/dev/null
+gh release view "v$ver" --repo "$repo" --json assets -q '.assets[] | "  " + .name'
+
+sums=$(curl -fsSL "https://github.com/$repo/releases/download/v$ver/SHA256SUMS")
+a=$(grep amd64 <<<"$sums" | cut -d' ' -f1); b=$(grep arm64 <<<"$sums" | cut -d' ' -f1)
+sub "s/^pkgver=.*/pkgver=$ver/" packaging/aur/PKGBUILD
+sub "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('$a')/" packaging/aur/PKGBUILD
+sub "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('$b')/" packaging/aur/PKGBUILD
+sub "s/pkgver = .*/pkgver = $ver/" packaging/aur/.SRCINFO
+sub "s#v$prev#v$ver#g" packaging/aur/.SRCINFO
+sub "s/sha256sums_x86_64 = .*/sha256sums_x86_64 = $a/" packaging/aur/.SRCINFO
+sub "s/sha256sums_aarch64 = .*/sha256sums_aarch64 = $b/" packaging/aur/.SRCINFO
+sub "s#v$prev/blanca-bin-$prev-1#v$ver/blanca-bin-$ver-1#" README.md
+git add packaging/aur README.md
+git commit -q -m "AUR and README: $ver"
+git push -q
+echo "Released v$ver. If blanca-bin is on the AUR, push packaging/aur/{PKGBUILD,.SRCINFO} there too."

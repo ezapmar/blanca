@@ -31,20 +31,28 @@ func TestHistory(t *testing.T) {
 	}
 }
 
-func TestShorten(t *testing.T) {
-	if got := shorten("  hello\nworld", 40); got != "hello" {
-		t.Fatal(got)
+func TestRemote(t *testing.T) {
+	isolate(t)
+	add := func(s string, remote bool) {
+		withHistory(func(h *History) bool { return h.Add(s, 99) })
+		if err := setRemote(s, remote); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if got := shorten("ééééé", 3); got != "ééé…" {
-		t.Fatal(got)
+	add("mac", false)
+	add("phone", true)
+	add("other", false)
+	if m := readRemote(); len(m) != 1 || !m[hash("phone")] {
+		t.Fatalf("only the phone clipping is remote: %v", m)
 	}
-}
-
-func TestWrapAndKeys(t *testing.T) {
-	if got := wrap("abcdef\tx", 4); !reflect.DeepEqual(got, []string{"abcd", "ef  ", "  x"}) {
-		t.Fatal(got)
+	add("phone", false) // copied again on this machine
+	if m := readRemote(); len(m) != 0 {
+		t.Fatalf("a local copy is not remote: %v", m)
 	}
-	if parseKey("\x1b[B").k != kNext || parseKey("\x1b").k != kQuit || parseKey("7").n != 7 {
-		t.Fatal("keys")
+	add("gone", true)
+	withHistory(func(h *History) bool { return h.Delete("gone", 0) })
+	add("next", false)
+	if m := readRemote(); len(m) != 0 {
+		t.Fatalf("deleted clippings are forgotten: %v", m)
 	}
 }

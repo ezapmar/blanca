@@ -80,56 +80,72 @@ func cmdPick(cfg Config) {
 	pos := 0
 	for {
 		render(items, pos, cfg.Paste)
-		e := <-ev
-		n := len(items)
-		switch e.k {
-		case kNext:
-			if pos+1 < n {
-				pos++
-			} else if cfg.Wraparound {
-				pos = 0
-			}
-		case kPrev:
-			if pos > 0 {
-				pos--
-			} else if cfg.Wraparound {
-				pos = n - 1
-			}
-		case kPgDn:
-			pos = min(pos+10, n-1)
-		case kPgUp:
-			pos = max(pos-10, 0)
-		case kHome:
-			pos = 0
-		case kEnd:
-			pos = n - 1
-		case kDigit:
-			d := e.n
-			if d == 0 {
-				d = 10
-			}
-			pos = min(d, n) - 1
-		case kEnter:
-			cur := items[pos]
-			place(cfg, cur)
-			if cfg.MoveToTop {
-				withHistory(func(h *History) bool { return h.ToTop(cur, pos) })
-			}
-			return
-		case kDelete:
-			cur := items[pos]
-			items, _ = withHistory(func(h *History) bool { return h.Delete(cur, pos) })
-			if len(items) == 0 {
-				return
-			}
-			if pos > 0 { // Jumpcut moves up after deleting the current item
-				pos--
-			}
-			pos = min(pos, len(items)-1)
-		case kQuit:
+		var done bool
+		if items, pos, done = act(cfg, items, pos, <-ev); done {
 			return
 		}
 	}
+}
+
+// act applies one event to the bezel. done reports that the bezel should close.
+func act(cfg Config, items []string, pos int, e event) (_ []string, _ int, done bool) {
+	switch e.k {
+	case kEnter:
+		use(cfg, items[pos], pos)
+		return items, pos, true
+	case kDelete:
+		cur := items[pos]
+		items, _ = withHistory(func(h *History) bool { return h.Delete(cur, pos) })
+		if pos > 0 { // Jumpcut moves up after deleting the current item
+			pos--
+		}
+		return items, min(pos, len(items)-1), len(items) == 0
+	case kQuit:
+		return items, pos, true
+	}
+	return items, move(pos, len(items), e, cfg.Wraparound), false
+}
+
+// use places the clipping found at pos and, if configured, moves it to the top.
+func use(cfg Config, s string, pos int) {
+	place(cfg, s)
+	if cfg.MoveToTop {
+		withHistory(func(h *History) bool { return h.ToTop(s, pos) })
+	}
+}
+
+// move applies one navigation event to the cursor, with Jumpcut's rules: up/down may
+// wrap when enabled, page moves clamp, digits are one-based positions and 0 is tenth.
+func move(pos, n int, e event, wrap bool) int {
+	switch e.k {
+	case kNext:
+		if pos+1 < n {
+			return pos + 1
+		} else if wrap {
+			return 0
+		}
+	case kPrev:
+		if pos > 0 {
+			return pos - 1
+		} else if wrap {
+			return n - 1
+		}
+	case kPgDn:
+		return min(pos+10, n-1)
+	case kPgUp:
+		return max(pos-10, 0)
+	case kHome:
+		return 0
+	case kEnd:
+		return n - 1
+	case kDigit:
+		d := e.n
+		if d == 0 {
+			d = 10
+		}
+		return min(d, n) - 1
+	}
+	return pos
 }
 
 func readKeys(ev chan<- event) {

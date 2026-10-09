@@ -12,7 +12,12 @@
   <a href="LICENSE"><img alt="licence" src="https://img.shields.io/badge/licence-MIT-0C9794?style=flat-square&labelColor=262626"></a>
   <img alt="go" src="https://img.shields.io/badge/go-static%20binary-FBA335?style=flat-square&labelColor=262626">
   <img alt="omarchy" src="https://img.shields.io/badge/omarchy-hyprland%20%2B%20wayland-F9EBDB?style=flat-square&labelColor=262626">
+  <img alt="macos" src="https://img.shields.io/badge/macos-13%2B-F9EBDB?style=flat-square&labelColor=262626">
 </p>
+
+> **New in 0.2: the macOS version is here.** A menu bar app with the same bezel and
+> hotkey, your clippings and the settings one click away, and a small phone beside
+> whatever you copied on your iPhone. [What's new](#whats-new-in-02)
 
 ## Install
 
@@ -24,9 +29,28 @@ That is all of it. The script puts one static binary in `~/.local/bin`, installs
 icons, adds the keybind, autostart and window rules to your Hyprland config, reloads it
 and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
 
+The same line works on macOS. There it puts `Blanca.app` in Applications, starts it and
+links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
+permission, which is what lets Blanca paste for you. Or take `Blanca.dmg` from the
+[latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
+across; it is not notarised, so the first time macOS makes you allow it under
+Privacy & Security > Open Anyway.
+
+## What's new in 0.2
+
+- **Blanca for macOS.** A native app with the same bezel and the same hotkey. Let go of
+  the keys and it pastes, as in Jumpcut.
+- **A menu in the bar.** Click the dog for your newest clippings and Clear All: the menu
+  bar on macOS, a Waybar button on Omarchy.
+- **Settings in that menu.** Every option is a switch there, Launch on login included.
+- **Copies from your iPhone.** On macOS they land in the list with a small phone beside
+  them.
+- **Installers.** The one line above installs `Blanca.app` on a Mac, and each release
+  also carries a `.dmg`.
+
 ## What it is
 
-Blanca is a clipboard manager for [Omarchy](https://omarchy.org), ported from
+Blanca is a clipboard manager for [Omarchy](https://omarchy.org) and macOS, ported from
 [Jumpcut](https://github.com/snark/jumpcut), the macOS clipboard manager Steve Cook has
 kept alive since 2002. Press the hotkey and the last thing you copied appears in a small
 window. Press it again, the one before that. Return pastes it. No daemon of its own, no
@@ -55,7 +79,7 @@ x86_64 and aarch64; take the file for your machine from the
 [latest release](https://github.com/ezapmar/blanca/releases/latest):
 
 ```bash
-sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.1.2/blanca-bin-0.1.2-1-x86_64.pkg.tar.zst && blanca setup
+sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.2.0/blanca-bin-0.2.0-1-x86_64.pkg.tar.zst && blanca setup
 ```
 
 The same package can be built locally from `packaging/aur` with `makepkg -si`.
@@ -98,6 +122,18 @@ has your Omarchy theme and transparency, and needs no GTK.
 **Return pastes.** Blanca copies the clipping and, once the bezel has closed and focus
 is back where you were, sends Shift+Insert through `wtype`, the same chord Omarchy's
 own clipboard tools use, so it works in terminals too.
+
+**The bar has a menu.** Jumpcut's other half is its menu bar icon: click it and the
+newest clippings drop down, with Clear All underneath. On Omarchy that is a Waybar
+button which runs `blanca menu`, a Walker list. `blanca setup` adds the button.
+
+**Copies from your iPhone are marked.** With Handoff on, what you copy on an iPhone or
+iPad lands in the list like anything else, with a small phone beside it in the menu.
+
+**On macOS it is one process.** `blanca watch` polls the pasteboard twice a second,
+owns the hotkey and the menu bar icon, and draws the bezel as a native panel, all in one
+Objective-C file behind cgo. Releasing the modifier keys pastes, as in Jumpcut, and the
+paste is Cmd+V.
 </details>
 
 <details>
@@ -112,6 +148,7 @@ own clipboard tools use, so it works in terminals too.
   "wraparound": false,
   "paste": true,
   "paste_mode": "shift-insert",
+  "sticky": false,
   "move_to_top": false,
   "allow_whitespace": false,
   "ignore_large": true,
@@ -119,8 +156,12 @@ own clipboard tools use, so it works in terminals too.
 }
 ```
 
+Every one of these is also under Settings in the menu: a submenu of the menu bar icon
+on macOS, an entry in `blanca menu` on Omarchy. Changing one there rewrites this file.
+
 `paste_mode` can be `ctrl-v` for the odd app that ignores Shift+Insert. `paste: false`
-only copies. `move_to_top` puts a clipping back at the top after you use it.
+only copies. `move_to_top` puts a clipping back at the top after you use it. `sticky`
+is for macOS: the bezel stays open when you let go of the modifiers, until Return or Esc.
 </details>
 
 <details>
@@ -128,12 +169,14 @@ only copies. `move_to_top` puts a clipping back at the top after you use it.
 
 ```
 blanca store          read one clipping from stdin into the history
+blanca watch          record every text copy; on macOS also the hotkey and the bezel
 blanca pick           show the bezel in the current terminal
 blanca bezel [--up]   hotkey entry: advance an open bezel, or open one
+blanca menu           Waybar button entry: the newest clippings as a Walker menu
 blanca list [N]       print the first N clippings, shortened
 blanca get N          print clipping N in full
 blanca clear          forget all clippings
-blanca setup          add the Hyprland keybind, autostart and window rules
+blanca setup          Hyprland keybind, autostart, window rules and Waybar button; on macOS a LaunchAgent
 ```
 
 `list` and `get` let you build a menu, with fzf for instance:
@@ -169,7 +212,12 @@ belong to their owners and are not used here.
 - Wayland hands Blanca the text, not the window it came from, so there is no
   per-application ignore list.
 - A few apps want Ctrl+V instead of Shift+Insert; that is one line in the config.
-- This is v0.1. Expect edges.
+- macOS builds are not signed with a Developer ID, so the Accessibility permission
+  has to be granted again after each update. The hotkey there is fixed at Ctrl+Alt+V,
+  the same one Jumpcut uses, so quit Jumpcut first.
+- iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not
+  part of it.
+- This is v0.2. Expect edges.
 </details>
 
 <details>

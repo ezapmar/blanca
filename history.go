@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -99,4 +101,54 @@ func shorten(s string, n int) string {
 		return string(r[:n]) + "…"
 	}
 	return s
+}
+
+// Remote clippings are the ones that arrived from another device over Universal
+// Clipboard. remote.json beside the history lists their hashes, so the history stays a
+// plain list of strings and a deleted clipping leaves no text behind.
+func remotePath() string { return filepath.Join(filepath.Dir(dataPath()), "remote.json") }
+
+func hash(s string) string {
+	h := sha256.Sum256([]byte(s))
+	return hex.EncodeToString(h[:8])
+}
+
+func readRemote() map[string]bool {
+	var hashes []string
+	if b, err := os.ReadFile(remotePath()); err == nil {
+		json.Unmarshal(b, &hashes)
+	}
+	m := map[string]bool{}
+	for _, h := range hashes {
+		m[h] = true
+	}
+	return m
+}
+
+// setRemote records where the newly added clipping s came from, and forgets clippings
+// that have left the history.
+func setRemote(s string, remote bool) error {
+	old := readRemote()
+	if !remote && len(old) == 0 {
+		return nil
+	}
+	items, err := readHistory()
+	if err != nil {
+		return err
+	}
+	keep := map[string]bool{}
+	for _, it := range items {
+		if h := hash(it); old[h] {
+			keep[h] = true
+		}
+	}
+	if delete(keep, hash(s)); remote {
+		keep[hash(s)] = true
+	}
+	hashes := make([]string, 0, len(keep))
+	for h := range keep {
+		hashes = append(hashes, h)
+	}
+	b, _ := json.Marshal(hashes)
+	return os.WriteFile(remotePath(), b, 0o600)
 }
