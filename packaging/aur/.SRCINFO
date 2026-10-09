@@ -1,6 +1,6 @@
 pkgbase = blanca-bin
 	pkgdesc = Clipboard history bezel for Omarchy and Hyprland, a Go port of Jumpcut
-	pkgver = 0.1.3
+	pkgver = 0.1.4
 	pkgrel = 1
 	url = https://github.com/ezapmar/blanca
 	arch = x86_64
@@ -13,9 +13,9 @@ pkgbase = blanca-bin
 	provides = blanca
 	conflicts = blanca
 	options = !strip
-	source_x86_64 = https://github.com/ezapmar/blanca/releases/download/v0.1.3/blanca-v0.1.3-linux-amd64.tar.gz
-	sha256sums_x86_64 = ae991b643b4d5da9b8c2b0f3a858e226076ce99222e12f866d15dffc6edf70cb
-	source_aarch64 = https://github.com/ezapmar/blanca/releases/download/v0.1.3/blanca-v0.1.3-linux-arm64.tar.gz
-	sha256sums_aarch64 = 2cb8df3b39128b371c5d8bb71aa6156ca378ac262d56d8c7085f614b07c77e2c
+	source_x86_64 = https://github.com/ezapmar/blanca/releases/download/v0.1.4/blanca-v0.1.4-linux-amd64.tar.gz
+	sha256sums_x86_64 = a561fc4a9ef53d7b0f2d7cb699f68e0d82fd23982960d7a723f34a32bfce8da5
+	source_aarch64 = https://github.com/ezapmar/blanca/releases/download/v0.1.4/blanca-v0.1.4-linux-arm64.tar.gz
+	sha256sums_aarch64 = 5bd7b674a6af0c4019c6aa212b22d4d095e5a9a03fa189af017dfaf753c5174a
 
 pkgname = blanca-bin
