@@ -61,6 +61,37 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      # With the signing secrets set, the app and the dmg come out signed with the
+      # Developer ID and notarised. Without them (a fork, say) the build is ad hoc.
+      - name: Signing identity
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+        run: |
+          set -eu
+          [ -n "$MACOS_CERT_P12" ] || { echo "No signing secrets, building ad hoc"; exit 0; }
+          kc="$RUNNER_TEMP/blanca.keychain-db"; pw=$(uuidgen)
+          security create-keychain -p "$pw" "$kc"
+          security set-keychain-settings -lut 3600 "$kc"
+          security unlock-keychain -p "$pw" "$kc"
+          echo "$MACOS_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$kc" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/cert.p12"
+          for ca in DeveloperIDCA DeveloperIDG2CA; do # the intermediates a .p12 leaves out
+            curl -fsSL "https://www.apple.com/certificateauthority/$ca.cer" -o "$RUNNER_TEMP/$ca.cer"
+            security import "$RUNNER_TEMP/$ca.cer" -k "$kc" || true
+          done
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$pw" "$kc" >/dev/null
+          security list-keychains -d user -s "$kc"
+          security default-keychain -s "$kc"
+          sha=$(security find-identity -v -p codesigning "$kc" | awk '/Developer ID Application/ {print $2; exit}')
+          [ -n "$sha" ] || { echo "No Developer ID Application identity in MACOS_CERT_P12" >&2; exit 1; }
+          xcrun notarytool store-credentials blanca-notary --apple-id "$NOTARY_APPLE_ID" --team-id "$NOTARY_TEAM_ID" --password "$NOTARY_PASSWORD"
+          echo "BLANCA_SIGN=$sha" >> "$GITHUB_ENV"
+          echo "BLANCA_NOTARY=blanca-notary" >> "$GITHUB_ENV"
       - name: Build universal binary
         env:
           GH_TOKEN: ${{ github.token }}
@@ -71,7 +102,11 @@ jobs:
           mkdir -p "$out"
           scripts/macapp "${tag#v}"
           cp dist/Blanca.app/Contents/MacOS/blanca "$out/blanca"
-          codesign --force --sign - "$out/blanca"
+          if [ -n "${BLANCA_SIGN:-}" ]; then
+            codesign --force --options runtime --timestamp --sign "$BLANCA_SIGN" "$out/blanca"
+          else
+            codesign --force --sign - "$out/blanca"
+          fi
           cp LICENSE README.md "$out/"
           tar -C dist -czf "$out.tar.gz" "$(basename "$out")"
           ditto -c -k --keepParent dist/Blanca.app "dist/Blanca-${tag}.zip"

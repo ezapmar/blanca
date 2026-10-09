@@ -29,8 +29,8 @@ if [ "$(uname -s)" = Darwin ]; then
   ln -sf "$apps/Blanca.app/Contents/MacOS/blanca" "$HOME/.local/bin/blanca"
   open "$apps/Blanca.app"
   echo "Installed Blanca $tag to $apps and started it: look for the dog in the menu bar."
-  echo "Allow Blanca under Privacy & Security > Accessibility so it can paste (again after"
-  echo "each update), and switch on Launch on login under Settings in its menu."
+  echo "Allow Blanca under Privacy & Security > Accessibility so it can paste, and switch"
+  echo "on Launch on login under Settings in its menu."
   exit 0
 fi
 
