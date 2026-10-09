@@ -93,7 +93,7 @@ x86_64 and aarch64; take the file for your machine from the
 [latest release](https://github.com/ezapmar/blanca/releases/latest):
 
 ```bash
-sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.3.0/blanca-bin-0.3.0-1-x86_64.pkg.tar.zst && blanca setup
+sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.3.1/blanca-bin-0.3.1-1-x86_64.pkg.tar.zst && blanca setup
 ```
 
 The same package can be built locally from `packaging/aur` with `makepkg -si`.
