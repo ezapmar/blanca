@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -110,15 +111,25 @@ func checkUpdate() (tag, note string) {
 }
 
 // startUpdate runs the installer for tag in a session of its own, so that it outlives
-// the blanca it replaces.
-func startUpdate(tag string) error {
+// the blanca it replaces. The installer stops this blanca on its way, so one that is
+// still here when the installer ends was not updated: failed is then told why.
+func startUpdate(tag string, failed func(why string)) error {
 	self, err := os.Executable()
 	if err != nil {
 		return err
 	}
+	var out bytes.Buffer
 	cmd := exec.Command("/bin/sh", "-c", updateCommand(tag, self, runtime.GOOS, runtime.GOARCH))
+	cmd.Stderr = &out
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
-	return cmd.Start()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	go func() {
+		cmd.Wait()
+		failed(strings.TrimSpace(out.String()))
+	}()
+	return nil
 }
 
 // cmdUpdate installs the newest release if it is ahead of this one.

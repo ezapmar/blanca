@@ -8,19 +8,35 @@
 # a letter like ç in it does not survive the trip through the shell. With BLANCA_NOTARY,
 # a profile saved by `xcrun notarytool store-credentials`, the app and the dmg are
 # notarised and stapled as well.
+#
+# With --store it builds the Mac App Store's Blanca instead, into dist/store: the same
+# app with `-tags mas`, in the App Sandbox. Usage: scripts/macapp --store [version [build]],
+# where build, a number that must rise with every upload, defaults to the time. It is
+# signed ad hoc, which runs here, unless these are set:
+#   BLANCA_STORE_SIGN       the Apple Distribution identity, for the app
+#   BLANCA_STORE_PROFILE    the Mac App Store provisioning profile, a .provisionprofile
+#   BLANCA_STORE_INSTALLER  the Mac Installer Distribution identity: with it the app is
+#                           wrapped in dist/store/Blanca.pkg, the file to upload
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
+store=
+[[ ${1:-} != --store ]] || { store=1; shift; }
 ver=${1:-0.0.0}
 sign=${BLANCA_SIGN:--}
 notary=${BLANCA_NOTARY:-}
 [[ -z $notary || $sign != - ]] || { echo "BLANCA_NOTARY needs BLANCA_SIGN" >&2; exit 1; }
 export MACOSX_DEPLOYMENT_TARGET=13.0 # SMAppService, the login item, needs macOS 13
 app=dist/Blanca.app
+build=$ver
+if [[ -n $store ]]; then
+  app=dist/store/Blanca.app
+  build=${2:-$(date +%Y%m%d%H%M)}
+fi
 rm -rf "$app" dist/Blanca.iconset
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" dist/Blanca.iconset
 
 for arch in amd64 arm64; do
-  CGO_ENABLED=1 GOOS=darwin GOARCH=$arch go build -trimpath -ldflags "-s -w -X main.version=$ver" -o "dist/blanca-$arch" .
+  CGO_ENABLED=1 GOOS=darwin GOARCH=$arch go build ${store:+-tags mas} -trimpath -ldflags "-s -w -X main.version=$ver" -o "dist/blanca-$arch" .
 done
 lipo -create -output "$app/Contents/MacOS/blanca" dist/blanca-amd64 dist/blanca-arm64
 rm dist/blanca-amd64 dist/blanca-arm64
@@ -30,6 +46,7 @@ for s in 16 32 128 256; do
   sips -z $((s * 2)) $((s * 2)) assets/png/blanca-tile-512.png --out "dist/Blanca.iconset/icon_${s}x${s}@2x.png" >/dev/null
 done
 cp assets/png/blanca-tile-512.png dist/Blanca.iconset/icon_512x512.png
+cp assets/png/blanca-tile-1024.png dist/Blanca.iconset/icon_512x512@2x.png # the Store asks for it
 iconutil -c icns -o "$app/Contents/Resources/Blanca.icns" dist/Blanca.iconset
 rm -rf dist/Blanca.iconset
 
@@ -44,14 +61,46 @@ cat > "$app/Contents/Info.plist" <<EOF
 	<key>CFBundleIconFile</key><string>Blanca</string>
 	<key>CFBundlePackageType</key><string>APPL</string>
 	<key>CFBundleShortVersionString</key><string>$ver</string>
-	<key>CFBundleVersion</key><string>$ver</string>
+	<key>CFBundleVersion</key><string>$build</string>
 	<key>LSMinimumSystemVersion</key><string>13.0</string>
+	<key>LSApplicationCategoryType</key><string>public.app-category.productivity</string>
+	<key>ITSAppUsesNonExemptEncryption</key><false/>
 	<key>LSUIElement</key><true/>
 	<key>LSMultipleInstancesProhibited</key><true/>
 	<key>NSHighResolutionCapable</key><true/>
 </dict>
 </plist>
 EOF
+if [[ -n $store ]]; then
+  # The sandbox, and from the profile the identifiers the Store checks the signature for.
+  ids=
+  if [[ -n ${BLANCA_STORE_PROFILE:-} ]]; then
+    cp "$BLANCA_STORE_PROFILE" "$app/Contents/embedded.provisionprofile"
+    security cms -D -i "$BLANCA_STORE_PROFILE" > dist/store/profile.plist
+    for key in com.apple.application-identifier com.apple.developer.team-identifier; do
+      ids+="	<key>$key</key><string>$(/usr/libexec/PlistBuddy -c "Print :Entitlements:$key" dist/store/profile.plist)</string>"$'\n'
+    done
+    rm dist/store/profile.plist
+  fi
+  cat > dist/store/Blanca.entitlements <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key><true/>
+$ids</dict>
+</plist>
+EOF
+  xattr -cr "$app" # a downloaded profile is quarantined, and the Store refuses a package that carries that
+  codesign --force --entitlements dist/store/Blanca.entitlements --sign "${BLANCA_STORE_SIGN:--}" "$app"
+  rm -f dist/store/Blanca.pkg
+  if [[ -n ${BLANCA_STORE_INSTALLER:-} ]]; then
+    productbuild --component "$app" /Applications --sign "$BLANCA_STORE_INSTALLER" dist/store/Blanca.pkg
+    echo dist/store/Blanca.pkg
+  fi
+  echo "$app"
+  exit
+fi
 if [[ $sign == - ]]; then
   codesign --force --sign - "$app"
 else

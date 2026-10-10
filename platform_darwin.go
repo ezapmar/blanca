@@ -5,7 +5,9 @@ package main
 #cgo LDFLAGS: -framework Cocoa -framework Carbon -framework ServiceManagement
 #include <stdbool.h>
 #include <stdlib.h>
-void bzRun(bool paste, const void *icon, int iconLen);
+void bzRun(bool paste, const void *icon, int iconLen, const char *installed);
+bool bzAskMove(const char *dir);
+void bzAbout(const char *head, const char *text, const char *url, const char *mail);
 void bzMenuAdd(const char *title, bool remote);
 void bzClearAdd(const char *title);
 void bzSetting(const char *title, bool on, int tag, bool sub);
@@ -31,6 +33,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 	"unsafe"
 )
 
@@ -54,10 +57,17 @@ var bz struct {
 // Ctrl+Alt+V hotkey, the menu bar item and the bezel. It never returns.
 func cmdWatch(cfg Config) {
 	bz.cfg = cfg
+	if !appStore && inApp() && onDiskImage() {
+		moveToApplications()
+	}
 	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
 		os.Remove(agentPath()) // a LaunchAgent from before Blanca.app could be a login item
 	}
-	C.bzRun(C.bool(cfg.Paste), unsafe.Pointer(&menuIcon[0]), C.int(len(menuIcon)))
+	var installed *C.char // install.sh opens Blanca.app with `watch installed`
+	if len(os.Args) > 2 && os.Args[2] == "installed" {
+		installed = C.CString("Blanca " + version + " is installed")
+	}
+	C.bzRun(C.bool(cfg.Paste), unsafe.Pointer(&menuIcon[0]), C.int(len(menuIcon)), installed)
 }
 
 // goMenu fills the opening menu with the first `display` clippings.
@@ -132,27 +142,17 @@ func goSet(tag C.int) {
 	}
 }
 
-// goUpdateCheck is the menu's Check for Updates, called off the main thread because it
-// waits on the network. It returns the tag of a newer release, or NULL and a note to
-// show instead. The caller frees both.
+// goAbout is the menu's About Blanca.
 //
-//export goUpdateCheck
-func goUpdateCheck(note **C.char) *C.char {
-	tag, n := checkUpdate()
-	if tag == "" {
-		*note = C.CString(n)
-		return nil
-	}
-	return C.CString(tag)
-}
-
-// goUpdate installs release tag over this Blanca, which the installer stops and reopens.
-//
-//export goUpdate
-func goUpdate(tag *C.char) {
-	if err := startUpdate(C.GoString(tag)); err != nil {
-		fmt.Fprintln(os.Stderr, "blanca:", err)
-	}
+//export goAbout
+func goAbout() {
+	head, text := C.CString("Blanca "+version), C.CString(aboutText+"\n\n"+aboutNote)
+	url, mail := C.CString(homepage), C.CString("mailto:"+email)
+	C.bzAbout(head, text, url, mail)
+	C.free(unsafe.Pointer(head))
+	C.free(unsafe.Pointer(text))
+	C.free(unsafe.Pointer(url))
+	C.free(unsafe.Pointer(mail))
 }
 
 // goRelease is every modifier key going up, which selects.
@@ -278,6 +278,44 @@ func inApp() bool {
 	return strings.Contains(self, ".app/Contents/MacOS/")
 }
 
+// onDiskImage reports whether this binary runs from a read-only volume: Blanca.app opened
+// inside its disk image instead of dragged out of it. Ejecting the image takes the
+// binary away from under the running Blanca, whose menu then never opens.
+func onDiskImage() bool {
+	self, _ := os.Executable()
+	var fs syscall.Statfs_t
+	return syscall.Statfs(self, &fs) == nil && fs.Flags&1 != 0 // MNT_RDONLY
+}
+
+// moveToApplications offers to copy Blanca.app off its disk image, over an older one if
+// there is one, and to carry on from the copy. Either way this Blanca ends here.
+func moveToApplications() {
+	self, _ := os.Executable()
+	app := self[:strings.Index(self, ".app/Contents/MacOS/")+len(".app")]
+	apps := "/Applications"
+	if syscall.Access(apps, 2) != nil { // not writable
+		home, _ := os.UserHomeDir()
+		apps = filepath.Join(home, "Applications")
+	}
+	dir := C.CString(apps)
+	move := bool(C.bzAskMove(dir))
+	C.free(unsafe.Pointer(dir))
+	if !move {
+		os.Exit(0)
+	}
+	to := filepath.Join(apps, filepath.Base(app))
+	os.RemoveAll(to)
+	if out, err := exec.Command("ditto", app, to).CombinedOutput(); err != nil {
+		fatal(fmt.Errorf("ditto: %s", out))
+	}
+	// Opened once this one is gone: Blanca.app runs one at a time.
+	open := exec.Command("/bin/sh", "-c", `while kill -0 "$0" 2>/dev/null; do sleep 0.1; done; open "$1"`,
+		strconv.Itoa(os.Getpid()), to)
+	open.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	open.Start()
+	os.Exit(0)
+}
+
 // platformSettings: "Launch on login" makes Blanca.app one of the Open at Login items in
 // System Settings. The bare binary cannot be one, so there the switch writes or removes
 // the LaunchAgent file. Either way the running Blanca is left as it is.
@@ -302,6 +340,9 @@ func platformSettings(c *Config) []setting {
 
 // cmdSetup installs the LaunchAgent and starts it now.
 func cmdSetup() {
+	if appStore {
+		fatal(errors.New("this Blanca is the App Store's: open Blanca.app, and switch on Launch on login in its menu"))
+	}
 	p := agentPath()
 	if err := writeAgent(); err != nil {
 		fatal(err)
