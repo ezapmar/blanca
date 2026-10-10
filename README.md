@@ -31,9 +31,9 @@ and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
 
 The same line works on macOS. There it puts `Blanca.app` in Applications, starts it and
 links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
-permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or take `Blanca.dmg` from the
-[latest release](https://github.com/ezapmar/blanca/releases/latest) and drag the app
-across. It is signed with a Developer ID and notarised by Apple, so it opens like any
+permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or download
+[Blanca.dmg](https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg) and
+drag the app across. It is signed with a Developer ID and notarised by Apple, so it opens like any
 other app.
 
 To update, on either system: `blanca update`, or Check for Updates in the menu. It asks
