@@ -1,6 +1,6 @@
 # Maintainer: Tunca Üçer (https://github.com/ezapmar)
 pkgname=blanca-bin
-pkgver=0.3.1
+pkgver=0.3.2
 pkgrel=1
 pkgdesc="Clipboard history bezel for Omarchy and Hyprland"
 arch=('x86_64' 'aarch64')
@@ -13,8 +13,8 @@ conflicts=('blanca')
 options=('!strip')
 source_x86_64=("${url}/releases/download/v${pkgver}/blanca-v${pkgver}-linux-amd64.tar.gz")
 source_aarch64=("${url}/releases/download/v${pkgver}/blanca-v${pkgver}-linux-arm64.tar.gz")
-sha256sums_x86_64=('555208cc0421d596be25995d782bcbc27e2ffcae67daacef0d8a8053285a6034')
-sha256sums_aarch64=('6e74ef41ca7921c89c075fa75329738bc91593ff899bbb48d294091b42eea47c')
+sha256sums_x86_64=('7ec67c1fda2a6c1d8792bbefaf0c4835d8d231100c68398cd6d0fa454b25feb5')
+sha256sums_aarch64=('5f396373cb33f3fcc33117474369a48c57b9cb1758b9ecd29855c8a3a66e9845')
 
 package() {
   local goarch=amd64
