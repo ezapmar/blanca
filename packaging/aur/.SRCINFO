@@ -1,6 +1,6 @@
 pkgbase = blanca-bin
 	pkgdesc = Clipboard history bezel for Omarchy and Hyprland
-	pkgver = 0.3.2
+	pkgver = 0.3.3
 	pkgrel = 1
 	url = https://github.com/ezapmar/blanca
 	arch = x86_64
@@ -13,9 +13,9 @@ pkgbase = blanca-bin
 	provides = blanca
 	conflicts = blanca
 	options = !strip
-	source_x86_64 = https://github.com/ezapmar/blanca/releases/download/v0.3.2/blanca-v0.3.2-linux-amd64.tar.gz
-	sha256sums_x86_64 = 7ec67c1fda2a6c1d8792bbefaf0c4835d8d231100c68398cd6d0fa454b25feb5
-	source_aarch64 = https://github.com/ezapmar/blanca/releases/download/v0.3.2/blanca-v0.3.2-linux-arm64.tar.gz
-	sha256sums_aarch64 = 5f396373cb33f3fcc33117474369a48c57b9cb1758b9ecd29855c8a3a66e9845
+	source_x86_64 = https://github.com/ezapmar/blanca/releases/download/v0.3.3/blanca-v0.3.3-linux-amd64.tar.gz
+	sha256sums_x86_64 = dda6a7f1f52453cc4a71f9fddc012c39c8dee67832eee63ed9ced974575f2d94
+	source_aarch64 = https://github.com/ezapmar/blanca/releases/download/v0.3.3/blanca-v0.3.3-linux-arm64.tar.gz
+	sha256sums_aarch64 = 41e4d49fcf1c644b50cca53fd8d822816b5e79e2bbd219790a23553976efef0f
 
 pkgname = blanca-bin
