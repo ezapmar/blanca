@@ -5,7 +5,8 @@ package main
 #cgo LDFLAGS: -framework Cocoa -framework Carbon -framework ServiceManagement
 #include <stdbool.h>
 #include <stdlib.h>
-void bzRun(bool paste, const void *icon, int iconLen);
+void bzRun(bool paste, const void *icon, int iconLen, const char *installed);
+void bzUpdating(const char *failed);
 bool bzAskMove(const char *dir);
 void bzAbout(const char *head, const char *text, const char *url);
 void bzMenuAdd(const char *title, bool remote);
@@ -63,7 +64,11 @@ func cmdWatch(cfg Config) {
 	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
 		os.Remove(agentPath()) // a LaunchAgent from before Blanca.app could be a login item
 	}
-	C.bzRun(C.bool(cfg.Paste), unsafe.Pointer(&menuIcon[0]), C.int(len(menuIcon)))
+	var installed *C.char // install.sh opens Blanca.app with `watch installed`
+	if len(os.Args) > 2 && os.Args[2] == "installed" {
+		installed = C.CString("Blanca " + version + " is installed")
+	}
+	C.bzRun(C.bool(cfg.Paste), unsafe.Pointer(&menuIcon[0]), C.int(len(menuIcon)), installed)
 }
 
 // goMenu fills the opening menu with the first `display` clippings.
@@ -167,8 +172,14 @@ func goUpdateCheck(note **C.char) *C.char {
 //
 //export goUpdate
 func goUpdate(tag *C.char) {
-	if err := startUpdate(C.GoString(tag)); err != nil {
-		fmt.Fprintln(os.Stderr, "blanca:", err)
+	failed := func(why string) {
+		s := C.CString(why)
+		C.bzUpdating(s)
+		C.free(unsafe.Pointer(s))
+	}
+	C.bzUpdating(nil)
+	if err := startUpdate(C.GoString(tag), failed); err != nil {
+		failed(err.Error())
 	}
 }
 

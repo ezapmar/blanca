@@ -27,7 +27,7 @@ if [ "$(uname -s)" = Darwin ]; then
   rm -rf "$apps/Blanca.app"
   mv "$tmp/Blanca.app" "$apps/Blanca.app"
   ln -sf "$apps/Blanca.app/Contents/MacOS/blanca" "$HOME/.local/bin/blanca"
-  open "$apps/Blanca.app"
+  open "$apps/Blanca.app" --args watch installed # it says so itself: an update from the menu has no terminal
   echo "Installed Blanca $tag to $apps and started it: look for the dog in the menu bar."
   echo "Allow Blanca under Privacy & Security > Accessibility so it can paste, and switch"
   echo "on Launch on login under Settings in its menu."
