@@ -152,7 +152,9 @@ static NSMenu *spans;  // the Clear submenu
 	[m addItemWithTitle:@"Settings" action:nil keyEquivalent:@""].submenu = prefs = [NSMenu new];
 	goSettings();
 	[m addItemWithTitle:@"About Blanca" action:@selector(about:) keyEquivalent:@""].target = self;
+#ifndef MAS // the App Store updates its Blanca
 	[m addItemWithTitle:@"Check for Updates…" action:@selector(update:) keyEquivalent:@""].target = self;
+#endif
 	[m addItem:NSMenuItem.separatorItem];
 	[m addItemWithTitle:@"Quit Blanca" action:@selector(terminate:) keyEquivalent:@""];
 }
@@ -167,6 +169,7 @@ static NSMenu *spans;  // the Clear submenu
 	if ([a runModal] == NSAlertFirstButtonReturn) goMenuClear((int)i.tag);
 }
 - (void)about:(id)sender { goAbout(); }
+#ifndef MAS
 - (void)update:(id)sender { // the check waits on the network, so not on the main thread
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
 		char *note = NULL, *tag = goUpdateCheck(&note);
@@ -187,18 +190,23 @@ static NSMenu *spans;  // the Clear submenu
 		});
 	});
 }
+#endif
 @end
 
-// bzAbout shows the name and version over a few words about Blanca, and offers its page.
-void bzAbout(const char *head, const char *text, const char *url) {
+// bzAbout shows the name and version over a few words about Blanca and who made it, and
+// offers its page and a letter to its maker.
+void bzAbout(const char *head, const char *text, const char *url, const char *mail) {
 	NSAlert *a = [NSAlert new];
 	a.messageText = @(head) ?: @"";
 	a.informativeText = @(text) ?: @"";
 	[a addButtonWithTitle:@"OK"];
 	[a addButtonWithTitle:@"Website"];
-	NSURL *page = [NSURL URLWithString:@(url) ?: @""];
+	[a addButtonWithTitle:@"Email"];
+	NSURL *page = [NSURL URLWithString:@(url) ?: @""], *letter = [NSURL URLWithString:@(mail) ?: @""];
 	[NSApp activateIgnoringOtherApps:YES];
-	if ([a runModal] == NSAlertSecondButtonReturn && page) [NSWorkspace.sharedWorkspace openURL:page];
+	NSModalResponse r = [a runModal];
+	if (r == NSAlertSecondButtonReturn && page) [NSWorkspace.sharedWorkspace openURL:page];
+	if (r == NSAlertThirdButtonReturn && letter) [NSWorkspace.sharedWorkspace openURL:letter];
 }
 
 // bzUpdating writes "Updating…" beside the dog while the installer runs. Given why the

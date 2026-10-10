@@ -121,6 +121,10 @@ The app is signed ad hoc and targets macOS 13, the first release with the login 
 API it uses. A build of your own is a new app as far as macOS is concerned, so it asks
 for Accessibility again.
 
+`scripts/macapp --store` builds the Mac App Store's Blanca into `dist/store`: the same
+app in the App Sandbox, without Check for Updates, since the Store updates it. The
+script's header lists the signing identities it takes.
+
 Runtime dependencies are `wl-clipboard`, `wtype` and `xdg-terminal-exec`, all part of
 Omarchy. On plain Arch: `sudo pacman -S --needed wl-clipboard wtype xdg-terminal-exec`.
 

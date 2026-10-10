@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,12 +14,14 @@ import (
 
 var version = "dev" // set by -ldflags at release time
 
-// What the menu's About shows under the name and version, and the page it offers to open.
+// What the menu's About shows under the name and version, and the page and the address
+// it offers to open.
 const (
-	aboutText = "A clipboard manager for Omarchy Linux and macOS. Everything you copy is kept, " +
+	aboutText = aboutWhat + " Everything you copy is kept, " +
 		"and Ctrl+Alt+V brings it back, one clipping at a time."
-	aboutNote = "MIT licence"
+	aboutNote = "Made by Tunca Üçer, " + email + "\nMIT licence"
 	homepage  = "https://github.com/" + repo
+	email     = "tuncaucer@gmail.com"
 )
 
 // Config is the preferences; every field is optional in config.json.
@@ -166,7 +169,11 @@ func main() {
 	case "setup":
 		cmdSetup()
 	case "update":
-		cmdUpdate()
+		if appStore {
+			fatal(errors.New("this Blanca is the App Store's, which updates it"))
+		} else {
+			cmdUpdate()
+		}
 	case "version", "--version":
 		fmt.Println("blanca", version)
 	default:

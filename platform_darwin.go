@@ -6,9 +6,8 @@ package main
 #include <stdbool.h>
 #include <stdlib.h>
 void bzRun(bool paste, const void *icon, int iconLen, const char *installed);
-void bzUpdating(const char *failed);
 bool bzAskMove(const char *dir);
-void bzAbout(const char *head, const char *text, const char *url);
+void bzAbout(const char *head, const char *text, const char *url, const char *mail);
 void bzMenuAdd(const char *title, bool remote);
 void bzClearAdd(const char *title);
 void bzSetting(const char *title, bool on, int tag, bool sub);
@@ -58,7 +57,7 @@ var bz struct {
 // Ctrl+Alt+V hotkey, the menu bar item and the bezel. It never returns.
 func cmdWatch(cfg Config) {
 	bz.cfg = cfg
-	if inApp() && onDiskImage() {
+	if !appStore && inApp() && onDiskImage() {
 		moveToApplications()
 	}
 	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
@@ -147,40 +146,13 @@ func goSet(tag C.int) {
 //
 //export goAbout
 func goAbout() {
-	head, text, url := C.CString("Blanca "+version), C.CString(aboutText+"\n\n"+aboutNote), C.CString(homepage)
-	C.bzAbout(head, text, url)
+	head, text := C.CString("Blanca "+version), C.CString(aboutText+"\n\n"+aboutNote)
+	url, mail := C.CString(homepage), C.CString("mailto:"+email)
+	C.bzAbout(head, text, url, mail)
 	C.free(unsafe.Pointer(head))
 	C.free(unsafe.Pointer(text))
 	C.free(unsafe.Pointer(url))
-}
-
-// goUpdateCheck is the menu's Check for Updates, called off the main thread because it
-// waits on the network. It returns the tag of a newer release, or NULL and a note to
-// show instead. The caller frees both.
-//
-//export goUpdateCheck
-func goUpdateCheck(note **C.char) *C.char {
-	tag, n := checkUpdate()
-	if tag == "" {
-		*note = C.CString(n)
-		return nil
-	}
-	return C.CString(tag)
-}
-
-// goUpdate installs release tag over this Blanca, which the installer stops and reopens.
-//
-//export goUpdate
-func goUpdate(tag *C.char) {
-	failed := func(why string) {
-		s := C.CString(why)
-		C.bzUpdating(s)
-		C.free(unsafe.Pointer(s))
-	}
-	C.bzUpdating(nil)
-	if err := startUpdate(C.GoString(tag), failed); err != nil {
-		failed(err.Error())
-	}
+	C.free(unsafe.Pointer(mail))
 }
 
 // goRelease is every modifier key going up, which selects.
@@ -368,6 +340,9 @@ func platformSettings(c *Config) []setting {
 
 // cmdSetup installs the LaunchAgent and starts it now.
 func cmdSetup() {
+	if appStore {
+		fatal(errors.New("this Blanca is the App Store's: open Blanca.app, and switch on Launch on login in its menu"))
+	}
 	p := agentPath()
 	if err := writeAgent(); err != nil {
 		fatal(err)

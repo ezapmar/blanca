@@ -152,10 +152,14 @@ func menuSettings(cfg Config) {
 	}
 }
 
-// menuAbout shows the version over a few words about Blanca, and offers its page.
+// menuAbout shows the version over a few words about Blanca and who made it, and offers
+// its page and a letter to its maker.
 func menuAbout() {
-	if dmenu("Blanca "+version, aboutText+"\n"+aboutNote+"\nWebsite\n") == "Website" {
+	switch dmenu("Blanca "+version, aboutText+"\n"+aboutNote+"\nWebsite\nEmail\n") {
+	case "Website":
 		exec.Command("xdg-open", homepage).Start()
+	case "Email":
+		exec.Command("xdg-open", "mailto:"+email).Start()
 	}
 }
 
