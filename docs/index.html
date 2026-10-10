@@ -79,6 +79,13 @@
     padding: 9px 13px; background: var(--vermilion); color: var(--graphite);
     clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
   }
+  .mac { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; font-size: 0.95rem; color: var(--ash); }
+  .mac a {
+    font: 700 0.95rem/1 var(--display); letter-spacing: 0.02em; padding: 12px 18px;
+    background: var(--bone); color: var(--graphite);
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+  }
+  .mac a:hover, .mac a:focus-visible { text-decoration: none; background: var(--saffron); }
   .hero .after { font-size: 0.95rem; color: var(--ash); }
 
   /* woven band between sections */
@@ -156,6 +163,7 @@
       <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
       <button type="button" id="copy">Copy</button>
     </div>
+    <p class="mac"><a href="https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg">Download for Mac</a> <span>Blanca.dmg · macOS 13 or later · signed and notarised</span></p>
     <p class="after">The same line on Omarchy and on macOS. Then copy something and press <code>Ctrl+Alt+V</code>; on a Mac that is Control + Option + V. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
     <p class="after">To update later, on either system: <code>blanca update</code>, or Check for Updates in the menu.</p>
   </div>
