@@ -51,6 +51,9 @@ jobs:
           chown -R builder .
           su builder -c "makepkg -fd --noconfirm"
           su builder -c "makepkg -fd --noconfirm --config makepkg-aarch64.conf"
+          for arch in x86_64 aarch64; do # fixed names too: the site's download links never change
+            cp "blanca-bin-${ver}-1-${arch}.pkg.tar.zst" "blanca-${arch}.pkg.tar.zst"
+          done
           ls -l *.pkg.tar.zst
           gh release upload --repo "${GITHUB_REPOSITORY}" "${tag}" *.pkg.tar.zst --clobber
   macos:

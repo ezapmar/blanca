@@ -15,8 +15,8 @@
   <img alt="macos" src="https://img.shields.io/badge/macos-13%2B-F9EBDB?style=flat-square&labelColor=262626">
 </p>
 
-> **New in 0.3: the macOS app is signed and notarised.** It opens like any other app,
-> with no Gatekeeper detour, and it updates itself from the menu.
+> **New in 0.3: the Mac app opens like any other.** No Gatekeeper detour, and it
+> updates itself from the menu.
 > [What's new](#whats-new-in-03)
 
 ## Install
@@ -33,8 +33,9 @@ The same line works on macOS. There it puts `Blanca.app` in Applications, starts
 links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
 permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or download
 [Blanca.dmg](https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg) and
-drag the app across. It is signed with a Developer ID and notarised by Apple, so it opens like any
-other app.
+drag the app across. On Omarchy there is a pacman package too:
+[x86_64](https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst),
+[aarch64](https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst).
 
 To update, on either system: `blanca update`, or Check for Updates in the menu. It asks
 GitHub for the newest release and, if that is ahead of yours, installs it the way the
@@ -42,8 +43,7 @@ first one came.
 
 ## What's new in 0.3
 
-- **Signed and notarised on macOS.** The app and the `.dmg` carry a Developer ID and
-  Apple's notarisation, so there is no Open Anyway step.
+- **No Open Anyway on a Mac.** The app and the `.dmg` open like any other.
 - **Updates.** `blanca update`, or Check for Updates in the menu, installs the newest
   release.
 - **Clear by age.** Clear the last hour, 24 hours, month, or all of it.
@@ -243,8 +243,8 @@ and not affiliated with its author or with Omarchy. The design notes are in
 - Wayland hands Blanca the text, not the window it came from, so there is no
   per-application ignore list.
 - A few apps want Ctrl+V instead of Shift+Insert; that is one line in the config.
-- Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed
-  with a Developer ID, which macOS treats as a new app. The hotkey there is fixed at
+- Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: macOS
+  treats 0.3 as a new app. The hotkey there is fixed at
   Ctrl+Alt+V, so quit any other app that uses it first.
 - iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not
   part of it.

@@ -153,7 +153,7 @@
 </head>
 <body>
 
-<a class="news-bar" href="https://github.com/ezapmar/blanca/releases/latest"><b>New in 0.3</b> · The macOS app is now signed and notarised, and updates itself from the menu. <u>Get it</u></a>
+<a class="news-bar" href="https://github.com/ezapmar/blanca/releases/latest"><b>New in 0.3</b> · The Mac app now opens like any other, and updates itself from the menu. <u>Get it</u></a>
 
 <header class="hero">
   <div class="wrap">
@@ -163,7 +163,11 @@
       <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
       <button type="button" id="copy">Copy</button>
     </div>
-    <p class="mac"><a href="https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg">Download for Mac</a> <span>Blanca.dmg · macOS 13 or later · signed and notarised</span></p>
+    <p class="mac">
+      <a href="https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg">Download for Mac</a>
+      <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst">Download for Omarchy</a>
+    </p>
+    <p class="after">Mac: macOS 13 or later. Omarchy: a pacman package for x86_64 (<a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a>); install it with <code>sudo pacman -U blanca-x86_64.pkg.tar.zst &amp;&amp; blanca setup</code></p>
     <p class="after">The same line on Omarchy and on macOS. Then copy something and press <code>Ctrl+Alt+V</code>; on a Mac that is Control + Option + V. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
     <p class="after">To update later, on either system: <code>blanca update</code>, or Check for Updates in the menu.</p>
   </div>
@@ -202,7 +206,7 @@
     <div class="wrap">
       <h2>New in 0.3</h2>
       <ul class="news">
-        <li><b>Signed and notarised on macOS.</b> The app and the <code>.dmg</code> carry a Developer ID and Apple's notarisation, so they open like any other app.</li>
+        <li><b>No Open Anyway on a Mac.</b> The app and the <code>.dmg</code> open like any other.</li>
         <li><b>Updates.</b> <code>blanca update</code>, or Check for Updates in the menu, installs the newest release.</li>
         <li><b>Clear by age.</b> Clear the last hour, 24 hours, month, or all of it.</li>
         <li><b>Blanca for macOS.</b> A native app with the same bezel and the same hotkey. Let go of the keys and it pastes.</li>
@@ -234,7 +238,7 @@
     <div class="wrap">
       <details>
         <summary>Other ways to install</summary>
-        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It needs macOS 13 or later. It is signed with a Developer ID and notarised by Apple.</p>
+        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It needs macOS 13 or later.</p>
         <p>Arch package, built from the release binary:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
         <p>From source:</p>
@@ -271,7 +275,7 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
           <li>Text only. Images and files are not recorded.</li>
           <li>Tested on Omarchy with Hyprland. Other wlroots compositors need their own keybind and floating rule.</li>
           <li>No per-application ignore list; Wayland does not say which window a copy came from.</li>
-          <li>Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: 0.3 is signed with a Developer ID, which macOS treats as a new app. Its hotkey is fixed at Ctrl+Alt+V, so quit any other app that uses it first.</li>
+          <li>Coming from 0.2 on a Mac, allow Blanca under Accessibility once more: macOS treats 0.3 as a new app. Its hotkey is fixed at Ctrl+Alt+V, so quit any other app that uses it first.</li>
           <li>iPhone copies reach a Mac only. That is Apple's Universal Clipboard, and Linux is not part of it.</li>
           <li>This is v0.3. Expect edges.</li>
         </ul>
