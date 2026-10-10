@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blanca · Privacy</title>
+<meta name="description" content="Blanca collects nothing. Your clippings stay on your computer.">
+<link rel="icon" href="assets/blanca-256.png" type="image/png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Hanken+Grotesk:wght@400;600&display=swap">
+<style>
+  /* Palette and type: docs/design.md, as on the front page. */
+  :root {
+    --graphite: #262626; --bone: #F9EBDB; --ash: #9B9B9B; --saffron: #FBA335; --link: #2FB5B1;
+    --display: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--graphite); color: var(--bone);
+    font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: min(680px, 100%); margin-inline: auto; padding: 56px 16px 72px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+  h1 { margin: 24px 0 8px; font: 800 clamp(2rem, 1.5rem + 2vw, 2.75rem)/1.1 var(--display); letter-spacing: -0.01em; }
+  h2 { margin: 40px 0 8px; font: 700 1.25rem/1.2 var(--display); }
+  p { margin: 0 0 14px; }
+  .muted { color: var(--ash); }
+  .lede { font-size: 1.15rem; }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a href="./"><img src="assets/blanca-256.png" alt="Blanca" width="64" height="64"></a>
+  <h1>Privacy</h1>
+  <p class="muted">10 October 2026</p>
+  <p class="lede">Blanca collects nothing. What you copy stays on your computer.</p>
+
+  <h2>What Blanca keeps</h2>
+  <p>The text you copy, so that it can give it back to you. It is kept in a file on your own computer, up to the number of clippings you set, and nowhere else. Clear in Blanca's menu removes it: the last hour, the last 24 hours, the last month, or all of it.</p>
+  <p>Copies that a password manager marks as confidential are not kept, unless you switch that off.</p>
+
+  <h2>What Blanca sends</h2>
+  <p>Nothing. There is no account, no sync, no analytics, no crash reporting and no advertising. Your clippings never leave your computer through Blanca.</p>
+  <p>The copy of Blanca from the Mac App Store makes no network connections at all. The copy from this site contacts GitHub only when you choose Check for Updates or run <code>blanca update</code>, to ask which release is the newest and to download it. That request carries nothing about you or your clippings.</p>
+
+  <h2>Accessibility on a Mac</h2>
+  <p>Blanca asks to be allowed under Accessibility for one thing: to press Command+V for you, so that the clipping you chose lands where you were typing. It does not read your screen or other apps, and does not record what you type.</p>
+
+  <h2>Copies from other devices</h2>
+  <p>Text you copy on an iPhone or iPad can reach your Mac through Apple's Universal Clipboard. That is between your devices and Apple. Blanca only sees it once it is on your Mac's clipboard, like any other copy.</p>
+
+  <h2>Questions</h2>
+  <p>Write to Tunca Üçer at <a href="mailto:tuncaucer@gmail.com">tuncaucer@gmail.com</a>. Blanca's source is <a href="https://github.com/ezapmar/blanca">on GitHub</a>, where every claim on this page can be checked.</p>
+</main>
+</body>
+</html>
