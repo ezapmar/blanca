@@ -79,13 +79,18 @@
     padding: 9px 13px; background: var(--vermilion); color: var(--graphite);
     clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
   }
-  .mac { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; font-size: 0.95rem; color: var(--ash); }
-  .mac a {
-    font: 700 0.95rem/1 var(--display); letter-spacing: 0.02em; padding: 12px 18px;
+  /* one way in per system, side by side */
+  .get { width: 100%; margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px 24px; }
+  .get > div { display: grid; gap: 14px; justify-items: center; align-content: start; min-width: 0; }
+  .get h2 { margin: 0; font: 700 1.15rem/1.2 var(--display); letter-spacing: 0; }
+  .get p { font-size: 0.95rem; color: var(--ash); max-width: 24rem; }
+  .get .cmd { width: 100%; margin-top: 0; }
+  .dl {
+    font: 700 1rem/1 var(--display); letter-spacing: 0.02em; padding: 19px 24px;
     background: var(--bone); color: var(--graphite);
     clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
   }
-  .mac a:hover, .mac a:focus-visible { text-decoration: none; background: var(--saffron); }
+  .dl:hover, .dl:focus-visible { text-decoration: none; background: var(--saffron); }
   .hero .after { font-size: 0.95rem; color: var(--ash); }
 
   /* woven band between sections */
@@ -159,17 +164,23 @@
   <div class="wrap">
     <img src="assets/blanca-banner.png" alt="Blanca. The clipboard bezel for Omarchy and macOS" width="1520" height="400">
     <p class="lede">Everything you copy, kept. One hotkey brings it back, one clipping at a time, and Return pastes it where you were.</p>
-    <div class="cmd">
-      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
-      <button type="button" id="copy">Copy</button>
+    <div class="get">
+      <div>
+        <h2>Mac</h2>
+        <a class="dl" href="https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg">Download for Mac</a>
+        <p>Open it and drag Blanca to Applications. macOS 13 or later.</p>
+      </div>
+      <div>
+        <h2>Omarchy</h2>
+        <div class="cmd">
+          <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
+          <button type="button" id="copy">Copy</button>
+        </div>
+        <p>Paste it in a terminal. It installs Blanca and sets up the hotkey.</p>
+      </div>
     </div>
-    <p class="mac">
-      <a href="https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg">Download for Mac</a>
-      <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst">Download for Omarchy</a>
-    </p>
-    <p class="after">Mac: macOS 13 or later. Omarchy: a pacman package for x86_64 (<a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a>); install it with <code>sudo pacman -U blanca-x86_64.pkg.tar.zst &amp;&amp; blanca setup</code></p>
-    <p class="after">The same line on Omarchy and on macOS. Then copy something and press <code>Ctrl+Alt+V</code>; on a Mac that is Control + Option + V. <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
-    <p class="after">To update later, on either system: <code>blanca update</code>, or Check for Updates in the menu.</p>
+    <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. On a Mac that is Control + Option + V.</p>
+    <p class="after"><a href="#install" id="more">Other ways to install</a> · <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
   </div>
 </header>
 
@@ -236,10 +247,13 @@
 
   <section style="padding-top:0">
     <div class="wrap">
-      <details>
+      <details id="install">
         <summary>Other ways to install</summary>
-        <p>On macOS, take <code>Blanca.dmg</code> from the <a href="https://github.com/ezapmar/blanca/releases/latest">latest release</a> and drag the app to Applications. It needs macOS 13 or later.</p>
-        <p>Arch package, built from the release binary:</p>
+        <p>On a Mac the Omarchy command works too. It puts <code>Blanca.app</code> in Applications and links the <code>blanca</code> command into <code>~/.local/bin</code>:</p>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code></pre>
+        <p>On Omarchy, a pacman package, so <code>pacman</code> tracks it: <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst">x86_64</a> or <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a>. Download it, then:</p>
+        <pre><code>sudo pacman -U blanca-x86_64.pkg.tar.zst &amp;&amp; blanca setup</code></pre>
+        <p>The same package, built locally:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
         <p>From source:</p>
         <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
@@ -251,6 +265,10 @@ go build -o ~/.local/bin/blanca . &amp;&amp; blanca setup</code></pre>
 scripts/macapp 0.3.0
 cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</code></pre>
         <p>On Linux it needs <code>wl-clipboard</code>, <code>wtype</code> and <code>xdg-terminal-exec</code>, all part of Omarchy.</p>
+      </details>
+      <details>
+        <summary>Update</summary>
+        <p>On either system: <code>blanca update</code>, or Check for Updates in the menu. It installs the newest release the way the first one came.</p>
       </details>
       <details>
         <summary>Configure</summary>
@@ -376,6 +394,10 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
   bands();
   var t;
   window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(bands, 150); });
+
+  document.getElementById('more').addEventListener('click', function () {
+    document.getElementById('install').open = true;
+  });
 
   var btn = document.getElementById('copy');
   if (!navigator.clipboard) { btn.hidden = true; return; }

@@ -21,25 +21,20 @@
 
 ## Install
 
+**Mac.** Download [Blanca.dmg](https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg),
+open it and drag Blanca to Applications. It needs macOS 13 or later, and asks once for
+Accessibility permission, which is what lets it paste for you.
+
+**Omarchy.** Paste this in a terminal. It installs Blanca and sets up the hotkey:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh
 ```
 
-That is all of it. The script puts one static binary in `~/.local/bin`, installs the
-icons, adds the keybind, autostart and window rules to your Hyprland config, reloads it
-and starts the clipboard watcher. Copy something, press `Ctrl+Alt+V`.
+Then copy something and press `Ctrl+Alt+V`. On a Mac that is Control + Option + V.
 
-The same line works on macOS. There it puts `Blanca.app` in Applications, starts it and
-links the `blanca` command into `~/.local/bin`. macOS asks once for Accessibility
-permission, which is what lets Blanca paste for you. It needs macOS 13 or later. Or download
-[Blanca.dmg](https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg) and
-drag the app across. On Omarchy there is a pacman package too:
-[x86_64](https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst),
-[aarch64](https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst).
-
-To update, on either system: `blanca update`, or Check for Updates in the menu. It asks
-GitHub for the newest release and, if that is ahead of yours, installs it the way the
-first one came.
+To update, on either system: `blanca update`, or Check for Updates in the menu.
+Other ways to install are in the fold further down.
 
 ## What's new in 0.3
 
@@ -87,6 +82,9 @@ want is showing, and let go: it pastes.
 
 <details>
 <summary><b>Other ways to install</b></summary>
+
+On a Mac the Omarchy command works too. It puts `Blanca.app` in Applications and links
+the `blanca` command into `~/.local/bin`.
 
 A pacman package, so `pacman` tracks it. Every release ships `blanca-bin` for
 x86_64 and aarch64; take the file for your machine from the
