@@ -132,7 +132,7 @@ void bzShow(const char *text, const char *head) {
 void bzHide(void) { [bezel orderOut:nil]; }
 
 // Menu is the menu bar item's menu: the newest clippings,
-// Clear, Settings, Check for Updates and Quit. It is rebuilt from the history every time it opens.
+// Clear, Settings, About, Check for Updates and Quit. It is rebuilt from the history every time it opens.
 @interface Menu : NSObject <NSMenuDelegate>
 @end
 
@@ -151,6 +151,7 @@ static NSMenu *spans;  // the Clear submenu
 	goClearMenu();
 	[m addItemWithTitle:@"Settings" action:nil keyEquivalent:@""].submenu = prefs = [NSMenu new];
 	goSettings();
+	[m addItemWithTitle:@"About Blanca" action:@selector(about:) keyEquivalent:@""].target = self;
 	[m addItemWithTitle:@"Check for Updates…" action:@selector(update:) keyEquivalent:@""].target = self;
 	[m addItem:NSMenuItem.separatorItem];
 	[m addItemWithTitle:@"Quit Blanca" action:@selector(terminate:) keyEquivalent:@""];
@@ -165,6 +166,7 @@ static NSMenu *spans;  // the Clear submenu
 	[NSApp activateIgnoringOtherApps:YES];
 	if ([a runModal] == NSAlertFirstButtonReturn) goMenuClear((int)i.tag);
 }
+- (void)about:(id)sender { goAbout(); }
 - (void)update:(id)sender { // the check waits on the network, so not on the main thread
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
 		char *note = NULL, *tag = goUpdateCheck(&note);
@@ -186,6 +188,18 @@ static NSMenu *spans;  // the Clear submenu
 	});
 }
 @end
+
+// bzAbout shows the name and version over a few words about Blanca, and offers its page.
+void bzAbout(const char *head, const char *text, const char *url) {
+	NSAlert *a = [NSAlert new];
+	a.messageText = @(head) ?: @"";
+	a.informativeText = @(text) ?: @"";
+	[a addButtonWithTitle:@"OK"];
+	[a addButtonWithTitle:@"Website"];
+	NSURL *page = [NSURL URLWithString:@(url) ?: @""];
+	[NSApp activateIgnoringOtherApps:YES];
+	if ([a runModal] == NSAlertSecondButtonReturn && page) [NSWorkspace.sharedWorkspace openURL:page];
+}
 
 // bzMenuAdd lists a clipping; one that came from another device gets a phone beside it.
 void bzMenuAdd(const char *text, bool remote) {

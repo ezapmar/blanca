@@ -7,6 +7,7 @@ package main
 #include <stdlib.h>
 void bzRun(bool paste, const void *icon, int iconLen);
 bool bzAskMove(const char *dir);
+void bzAbout(const char *head, const char *text, const char *url);
 void bzMenuAdd(const char *title, bool remote);
 void bzClearAdd(const char *title);
 void bzSetting(const char *title, bool on, int tag, bool sub);
@@ -135,6 +136,17 @@ func goSet(tag C.int) {
 	if err := saveConfig(bz.cfg); err != nil {
 		fmt.Fprintln(os.Stderr, "blanca:", err)
 	}
+}
+
+// goAbout is the menu's About Blanca.
+//
+//export goAbout
+func goAbout() {
+	head, text, url := C.CString("Blanca "+version), C.CString(aboutText+"\n\n"+aboutNote), C.CString(homepage)
+	C.bzAbout(head, text, url)
+	C.free(unsafe.Pointer(head))
+	C.free(unsafe.Pointer(text))
+	C.free(unsafe.Pointer(url))
 }
 
 // goUpdateCheck is the menu's Check for Updates, called off the main thread because it

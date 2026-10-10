@@ -75,7 +75,7 @@ func platformSettings(c *Config) []setting {
 }
 
 // cmdMenu is the Waybar button's click: the first `display`
-// clippings, Clear, Settings and Check for Updates, shown in Walker. Choosing a clipping places it like the bezel.
+// clippings, Clear, Settings, About and Check for Updates, shown in Walker. Choosing a clipping places it like the bezel.
 func cmdMenu(cfg Config) {
 	items, err := readHistory()
 	if err != nil {
@@ -86,13 +86,16 @@ func cmdMenu(cfg Config) {
 	for i, s := range items {
 		fmt.Fprintf(&b, "%d  %s\n", i+1, shorten(s, 40))
 	}
-	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nCheck for Updates\n")
+	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nAbout Blanca\nCheck for Updates\n")
 	switch sel {
 	case "Clear":
 		menuClear()
 		return
 	case "Settings":
 		menuSettings(cfg)
+		return
+	case "About Blanca":
+		menuAbout()
 		return
 	case "Check for Updates":
 		menuUpdate()
@@ -146,6 +149,13 @@ func menuSettings(cfg Config) {
 		if err := saveConfig(cfg); err != nil {
 			fatal(err)
 		}
+	}
+}
+
+// menuAbout shows the version over a few words about Blanca, and offers its page.
+func menuAbout() {
+	if dmenu("Blanca "+version, aboutText+"\n"+aboutNote+"\nWebsite\n") == "Website" {
+		exec.Command("xdg-open", homepage).Start()
 	}
 }
 

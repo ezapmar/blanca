@@ -13,6 +13,14 @@ import (
 
 var version = "dev" // set by -ldflags at release time
 
+// What the menu's About shows under the name and version, and the page it offers to open.
+const (
+	aboutText = "A clipboard manager for Omarchy Linux and macOS. Everything you copy is kept, " +
+		"and Ctrl+Alt+V brings it back, one clipping at a time."
+	aboutNote = "MIT licence"
+	homepage  = "https://github.com/" + repo
+)
+
 // Config is the preferences; every field is optional in config.json.
 type Config struct {
 	Remember        int    `json:"remember"`         // clippings kept (min 10)
