@@ -84,7 +84,7 @@
   .get > div { display: grid; gap: 14px; justify-items: center; align-content: start; min-width: 0; }
   .get h2 { margin: 0; font: 700 1.15rem/1.2 var(--display); letter-spacing: 0; }
   .get p { font-size: 0.95rem; color: var(--ash); max-width: 24rem; }
-  .get .cmd { width: 100%; margin-top: 0; }
+  .get code { font-size: 0.82em; }
   .dl {
     font: 700 1rem/1 var(--display); letter-spacing: 0.02em; padding: 19px 24px;
     background: var(--bone); color: var(--graphite);
@@ -172,12 +172,14 @@
       </div>
       <div>
         <h2>Omarchy</h2>
-        <div class="cmd">
-          <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
-          <button type="button" id="copy">Copy</button>
-        </div>
-        <p>Paste it in a terminal. It installs Blanca and sets up the hotkey.</p>
+        <a class="dl" href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst">Download for Omarchy</a>
+        <p>A pacman package. Install it with <code>sudo pacman -U blanca-x86_64.pkg.tar.zst &amp;&amp; blanca setup</code></p>
       </div>
+    </div>
+    <p class="after">Or paste this in a terminal, on either system:</p>
+    <div class="cmd">
+      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
+      <button type="button" id="copy">Copy</button>
     </div>
     <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. On a Mac that is Control + Option + V.</p>
     <p class="after"><a href="#install" id="more">Other ways to install</a> · <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
@@ -249,10 +251,8 @@
     <div class="wrap">
       <details id="install">
         <summary>Other ways to install</summary>
-        <p>On a Mac the Omarchy command works too. It puts <code>Blanca.app</code> in Applications and links the <code>blanca</code> command into <code>~/.local/bin</code>:</p>
-        <pre><code>curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code></pre>
-        <p>On Omarchy, a pacman package, so <code>pacman</code> tracks it: <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst">x86_64</a> or <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a>. Download it, then:</p>
-        <pre><code>sudo pacman -U blanca-x86_64.pkg.tar.zst &amp;&amp; blanca setup</code></pre>
+        <p>On a Mac the terminal command puts <code>Blanca.app</code> in Applications and links the <code>blanca</code> command into <code>~/.local/bin</code>. On Omarchy it installs the binary into <code>~/.local/bin</code> and runs <code>blanca setup</code>.</p>
+        <p>The pacman package also comes for <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a>.</p>
         <p>The same package, built locally:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
         <p>From source:</p>

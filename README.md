@@ -25,7 +25,10 @@
 open it and drag Blanca to Applications. It needs macOS 13 or later, and asks once for
 Accessibility permission, which is what lets it paste for you.
 
-**Omarchy.** Paste this in a terminal. It installs Blanca and sets up the hotkey:
+**Omarchy.** Download the [pacman package](https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst)
+and install it with `sudo pacman -U blanca-x86_64.pkg.tar.zst && blanca setup`.
+
+Or paste this in a terminal, on either system:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh
@@ -83,8 +86,8 @@ want is showing, and let go: it pastes.
 <details>
 <summary><b>Other ways to install</b></summary>
 
-On a Mac the Omarchy command works too. It puts `Blanca.app` in Applications and links
-the `blanca` command into `~/.local/bin`.
+On a Mac the terminal command puts `Blanca.app` in Applications and links the `blanca`
+command into `~/.local/bin`.
 
 A pacman package, so `pacman` tracks it. Every release ships `blanca-bin` for
 x86_64 and aarch64; take the file for your machine from the
