@@ -49,6 +49,21 @@ bool bzSetLogin(bool on) {
 	return ok;
 }
 
+// bzAskMove asks, of a Blanca opened inside its disk image, whether to move it to dir.
+bool bzAskMove(const char *dir) {
+	[NSApplication sharedApplication];
+	NSApp.activationPolicy = NSApplicationActivationPolicyAccessory;
+	NSAlert *a = [NSAlert new];
+	a.messageText = @"Move Blanca to the Applications folder?";
+	a.informativeText = [NSString stringWithFormat:@"Blanca was opened from its disk image, and stops "
+		@"working once that is ejected. Moving it puts Blanca.app in %s, in place of an older one, "
+		@"and opens it from there.", dir];
+	[a addButtonWithTitle:@"Move to Applications"];
+	[a addButtonWithTitle:@"Quit"];
+	[NSApp activateIgnoringOtherApps:YES];
+	return [a runModal] == NSAlertFirstButtonReturn;
+}
+
 // Bezel takes the keyboard without activating Blanca, so closing it returns focus
 // to the window the clipping is pasted into.
 @interface Bezel : NSPanel

@@ -6,6 +6,7 @@ package main
 #include <stdbool.h>
 #include <stdlib.h>
 void bzRun(bool paste, const void *icon, int iconLen);
+bool bzAskMove(const char *dir);
 void bzMenuAdd(const char *title, bool remote);
 void bzClearAdd(const char *title);
 void bzSetting(const char *title, bool on, int tag, bool sub);
@@ -31,6 +32,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 	"unsafe"
 )
 
@@ -54,6 +56,9 @@ var bz struct {
 // Ctrl+Alt+V hotkey, the menu bar item and the bezel. It never returns.
 func cmdWatch(cfg Config) {
 	bz.cfg = cfg
+	if inApp() && onDiskImage() {
+		moveToApplications()
+	}
 	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
 		os.Remove(agentPath()) // a LaunchAgent from before Blanca.app could be a login item
 	}
@@ -276,6 +281,44 @@ func writeAgent() error {
 func inApp() bool {
 	self, _ := os.Executable()
 	return strings.Contains(self, ".app/Contents/MacOS/")
+}
+
+// onDiskImage reports whether this binary runs from a read-only volume: Blanca.app opened
+// inside its disk image instead of dragged out of it. Ejecting the image takes the
+// binary away from under the running Blanca, whose menu then never opens.
+func onDiskImage() bool {
+	self, _ := os.Executable()
+	var fs syscall.Statfs_t
+	return syscall.Statfs(self, &fs) == nil && fs.Flags&1 != 0 // MNT_RDONLY
+}
+
+// moveToApplications offers to copy Blanca.app off its disk image, over an older one if
+// there is one, and to carry on from the copy. Either way this Blanca ends here.
+func moveToApplications() {
+	self, _ := os.Executable()
+	app := self[:strings.Index(self, ".app/Contents/MacOS/")+len(".app")]
+	apps := "/Applications"
+	if syscall.Access(apps, 2) != nil { // not writable
+		home, _ := os.UserHomeDir()
+		apps = filepath.Join(home, "Applications")
+	}
+	dir := C.CString(apps)
+	move := bool(C.bzAskMove(dir))
+	C.free(unsafe.Pointer(dir))
+	if !move {
+		os.Exit(0)
+	}
+	to := filepath.Join(apps, filepath.Base(app))
+	os.RemoveAll(to)
+	if out, err := exec.Command("ditto", app, to).CombinedOutput(); err != nil {
+		fatal(fmt.Errorf("ditto: %s", out))
+	}
+	// Opened once this one is gone: Blanca.app runs one at a time.
+	open := exec.Command("/bin/sh", "-c", `while kill -0 "$0" 2>/dev/null; do sleep 0.1; done; open "$1"`,
+		strconv.Itoa(os.Getpid()), to)
+	open.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	open.Start()
+	os.Exit(0)
 }
 
 // platformSettings: "Launch on login" makes Blanca.app one of the Open at Login items in
