@@ -131,6 +131,31 @@ void bzShow(const char *text, const char *head) {
 
 void bzHide(void) { [bezel orderOut:nil]; }
 
+#ifndef MAS
+// bzOffer is the alert for a release ahead of this one: tag to offer it, or no tag and a
+// note to show instead. The caller owns both strings. Main thread only.
+static void bzOffer(const char *tag, const char *note) {
+	NSAlert *a = [NSAlert new];
+	if (tag) {
+		a.messageText = [NSString stringWithFormat:@"Blanca %s is available", tag + 1];
+		a.informativeText = @"Blanca restarts when it is installed. macOS then asks you to allow it under Accessibility again.";
+		[a addButtonWithTitle:@"Update"];
+		[a addButtonWithTitle:@"Later"];
+	} else {
+		a.messageText = @(note) ?: @"";
+	}
+	[NSApp activateIgnoringOtherApps:YES];
+	if ([a runModal] == NSAlertFirstButtonReturn && tag) goUpdate((char *)tag);
+}
+
+// bzUpdateFound is the daily check calling in from its own goroutine: offer the release
+// it found, once, on the main thread. The menu goes on offering it either way.
+void bzUpdateFound(const char *tag) {
+	NSString *t = @(tag);
+	dispatch_async(dispatch_get_main_queue(), ^{ bzOffer(t.UTF8String, NULL); });
+}
+#endif
+
 // Menu is the menu bar item's menu: the newest clippings,
 // Clear, Settings, About, Check for Updates and Quit. It is rebuilt from the history every time it opens.
 @interface Menu : NSObject <NSMenuDelegate>
@@ -153,7 +178,10 @@ static NSMenu *spans;  // the Clear submenu
 	goSettings();
 	[m addItemWithTitle:@"About Blanca" action:@selector(about:) keyEquivalent:@""].target = self;
 #ifndef MAS // the App Store updates its Blanca
-	[m addItemWithTitle:@"Check for Updates…" action:@selector(update:) keyEquivalent:@""].target = self;
+	// The daily check may already have found a release; then the item offers it by name.
+	char *u = goUpdateTitle();
+	[m addItemWithTitle:@(u) action:@selector(update:) keyEquivalent:@""].target = self;
+	free(u);
 #endif
 	[m addItem:NSMenuItem.separatorItem];
 	[m addItemWithTitle:@"Quit Blanca" action:@selector(terminate:) keyEquivalent:@""];
@@ -174,17 +202,7 @@ static NSMenu *spans;  // the Clear submenu
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
 		char *note = NULL, *tag = goUpdateCheck(&note);
 		dispatch_async(dispatch_get_main_queue(), ^{
-			NSAlert *a = [NSAlert new];
-			if (tag) {
-				a.messageText = [NSString stringWithFormat:@"Blanca %s is available", tag + 1];
-				a.informativeText = @"Blanca restarts when it is installed. macOS then asks you to allow it under Accessibility again.";
-				[a addButtonWithTitle:@"Update"];
-				[a addButtonWithTitle:@"Later"];
-			} else {
-				a.messageText = @(note) ?: @"";
-			}
-			[NSApp activateIgnoringOtherApps:YES];
-			if ([a runModal] == NSAlertFirstButtonReturn && tag) goUpdate(tag);
+			bzOffer(tag, note);
 			free(tag);
 			free(note);
 		});

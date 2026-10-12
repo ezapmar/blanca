@@ -10,7 +10,7 @@ func TestConfigDefaults(t *testing.T) {
 	isolate(t)
 	c := loadConfig()
 	want := Config{Remember: 99, Display: 10, Paste: true, PasteMode: "shift-insert",
-		IgnoreLarge: true, IgnoreSensitive: true}
+		IgnoreLarge: true, IgnoreSensitive: true, CheckUpdates: true}
 	if c != want {
 		t.Fatalf("defaults: %+v", c)
 	}
@@ -68,7 +68,7 @@ func TestSettingsSave(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := Config{Remember: 99, Display: 20, Wraparound: true, Paste: true, PasteMode: "shift-insert",
-		IgnoreLarge: true, IgnoreSensitive: true}
+		IgnoreLarge: true, IgnoreSensitive: true, CheckUpdates: true}
 	if got := loadConfig(); got != want {
 		t.Fatalf("saved: %+v", got)
 	}

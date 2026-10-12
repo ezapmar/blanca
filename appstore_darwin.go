@@ -9,3 +9,6 @@ const appStore = true
 
 // The Store's Blanca says nothing of other systems: its reviewers turn that down.
 const aboutWhat = "A clipboard manager for the Mac."
+
+// The Store's Blanca does not look for releases of its own: the Store brings them.
+func startAutoCheck() {}

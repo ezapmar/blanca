@@ -19,6 +19,9 @@ func cmdStore(cfg Config) {
 	if _, err := store(cfg, string(b), sensitive); err != nil {
 		fatal(err)
 	}
+	// This is the only blanca that runs by itself on Linux, so the daily look for a
+	// release rides along with it, in a process of its own so a copy never waits.
+	startCheck()
 }
 
 // store applies the filters and records s. It reports whether s was added.

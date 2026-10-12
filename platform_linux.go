@@ -140,7 +140,12 @@ func cmdMenu(cfg Config) {
 	for i, s := range items {
 		fmt.Fprintf(&b, "%d  %s\n", i+1, shorten(s, 40))
 	}
-	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nAbout Blanca\nCheck for Updates\n")
+	// The daily check may already have found a release; then the line offers it by name.
+	update := "Check for Updates"
+	if tag := readUpdateState().pending(); tag != "" {
+		update = "Update to " + strings.TrimPrefix(tag, "v")
+	}
+	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nAbout Blanca\n"+update+"\n")
 	switch sel {
 	case "Clear":
 		menuClear()
@@ -151,7 +156,7 @@ func cmdMenu(cfg Config) {
 	case "About Blanca":
 		menuAbout()
 		return
-	case "Check for Updates":
+	case update:
 		menuUpdate()
 		return
 	}

@@ -63,6 +63,7 @@ func cmdWatch(cfg Config) {
 	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
 		os.Remove(agentPath()) // a LaunchAgent from before Blanca.app could be a login item
 	}
+	startAutoCheck()
 	var installed *C.char // install.sh opens Blanca.app with `watch installed`
 	if len(os.Args) > 2 && os.Args[2] == "installed" {
 		installed = C.CString("Blanca " + version + " is installed")

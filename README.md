@@ -196,7 +196,8 @@ Objective-C file behind cgo. Releasing the modifier keys pastes, and the paste i
   "move_to_top": false,
   "allow_whitespace": false,
   "ignore_large": true,
-  "ignore_sensitive": true
+  "ignore_sensitive": true,
+  "check_updates": true
 }
 ```
 

@@ -239,7 +239,7 @@
       <h2>New in 0.3</h2>
       <ul class="news">
         <li><b>No Open Anyway on a Mac.</b> The app and the <code>.dmg</code> open like any other.</li>
-        <li><b>Updates.</b> <code>blanca update</code>, or Check for Updates in the menu, installs the newest release.</li>
+        <li><b>Updates.</b> Blanca looks for one once a day and offers it; <code>blanca update</code>, or Check for Updates in the menu, installs the newest release.</li>
         <li><b>Clear by age.</b> Clear the last hour, 24 hours, month, or all of it.</li>
         <li><b>Blanca for macOS.</b> A native app with the same bezel and the same hotkey. Let go of the keys and it pastes.</li>
         <li><b>A menu in the bar.</b> Click the dog for your newest clippings and Clear All: the menu bar on macOS, a Waybar button on Omarchy.</li>
@@ -303,7 +303,7 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
       </details>
       <details>
         <summary>Update</summary>
-        <p>On either system: <code>blanca update</code>, or Check for Updates in the menu. It installs the newest release the way the first one came.</p>
+        <p>Blanca looks for a release once a day and offers it, once per release: the menu line then reads Update to 0.3.6. To update at any time, on either system: <code>blanca update</code>, or Check for Updates in the menu. It installs the newest release the way the first one came.</p>
       </details>
       <details>
         <summary>Configure</summary>
@@ -318,7 +318,8 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
   "move_to_top": false,
   "allow_whitespace": false,
   "ignore_large": true,
-  "ignore_sensitive": true
+  "ignore_sensitive": true,
+  "check_updates": true
 }</code></pre>
         <p>Set <code>paste_mode</code> to <code>ctrl-v</code> for apps that ignore Shift+Insert. On macOS, <code>sticky</code> keeps the bezel open when you let go of the keys.</p>
       </details>

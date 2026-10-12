@@ -36,11 +36,12 @@ type Config struct {
 	AllowWhitespace bool   `json:"allow_whitespace"` // keep whitespace-only clippings
 	IgnoreLarge     bool   `json:"ignore_large"`     // skip clippings > 50000 chars
 	IgnoreSensitive bool   `json:"ignore_sensitive"` // skip password-manager clippings
+	CheckUpdates    bool   `json:"check_updates"`    // look for a release once a day
 }
 
 func loadConfig() Config {
 	c := Config{Remember: 99, Display: 10, Paste: true, PasteMode: "shift-insert",
-		IgnoreLarge: true, IgnoreSensitive: true}
+		IgnoreLarge: true, IgnoreSensitive: true, CheckUpdates: true}
 	p := configPath()
 	if b, err := os.ReadFile(p); err == nil {
 		if err := json.Unmarshal(b, &c); err != nil {
@@ -166,6 +167,8 @@ func main() {
 		if err := clearSpan(clearOptions[i].span); err != nil {
 			fatal(err)
 		}
+	case "check": // not in the usage: Blanca's own daily look for a release
+		cmdCheck()
 	case "setup":
 		cmdSetup()
 	case "update":

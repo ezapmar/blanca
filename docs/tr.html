@@ -239,7 +239,7 @@
       <h2>0.3 ile gelenler</h2>
       <ul class="news">
         <li><b>Mac'te Open Anyway yok.</b> Uygulama ve <code>.dmg</code> her uygulama gibi açılıyor.</li>
-        <li><b>Güncelleme.</b> <code>blanca update</code> ya da menüdeki Check for Updates en yeni sürümü kuruyor.</li>
+        <li><b>Güncelleme.</b> Blanca günde bir kez yeni sürüme bakıyor ve çıkanı söylüyor; <code>blanca update</code> ya da menüdeki Check for Updates en yeni sürümü kuruyor.</li>
         <li><b>Yaşa göre temizleme.</b> Son saat, son 24 saat, son ay ya da hepsi.</li>
         <li><b>macOS için Blanca.</b> Aynı çerçeve ve aynı kısayolla yerel bir uygulama. Tuşları bırak, yapıştırıyor.</li>
         <li><b>Çubukta bir menü.</b> Köpeğe tıkla, en yeni kopyaların ve Clear All orada: macOS'ta menü çubuğu, Omarchy'de bir Waybar düğmesi.</li>
@@ -303,7 +303,7 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
       </details>
       <details>
         <summary>Güncelleme</summary>
-        <p>İki sistemde de: <code>blanca update</code> ya da menüdeki Check for Updates. En yeni sürümü, ilki nasıl geldiyse öyle kuruyor.</p>
+        <p>Blanca günde bir kez yeni sürüme bakıyor ve her sürüm için bir kez söylüyor: menüdeki satır o zaman Update to 0.3.6 oluyor. İstediğin an güncellemek için iki sistemde de: <code>blanca update</code> ya da menüdeki Check for Updates. En yeni sürümü, ilki nasıl geldiyse öyle kuruyor.</p>
       </details>
       <details>
         <summary>Yapılandırma</summary>
@@ -318,7 +318,8 @@ cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</c
   "move_to_top": false,
   "allow_whitespace": false,
   "ignore_large": true,
-  "ignore_sensitive": true
+  "ignore_sensitive": true,
+  "check_updates": true
 }</code></pre>
         <p>Shift+Insert'i yok sayan uygulamalar için <code>paste_mode</code> değerini <code>ctrl-v</code> yap. macOS'ta <code>sticky</code>, tuşları bıraktığında çerçeveyi açık tutuyor.</p>
       </details>
