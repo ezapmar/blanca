@@ -55,7 +55,10 @@ jobs:
             cp "blanca-bin-${ver}-1-${arch}.pkg.tar.zst" "blanca-${arch}.pkg.tar.zst"
           done
           ls -l *.pkg.tar.zst
-          gh release upload --repo "${GITHUB_REPOSITORY}" "${tag}" *.pkg.tar.zst --clobber
+          # The packages go into SHA256SUMS too, so an install from a pinned release can be
+          # verified against one file: `sha256sum -c --ignore-missing SHA256SUMS`.
+          sha256sum *.pkg.tar.zst >> SHA256SUMS
+          gh release upload --repo "${GITHUB_REPOSITORY}" "${tag}" *.pkg.tar.zst SHA256SUMS --clobber
   macos:
     needs: build
     runs-on: macos-latest
@@ -114,5 +117,6 @@ jobs:
           tar -C dist -czf "$out.tar.gz" "$(basename "$out")"
           ditto -c -k --keepParent dist/Blanca.app "dist/Blanca-${tag}.zip"
           (cd dist && shasum -a 256 "$(basename "$out").tar.gz" > "$(basename "$out").tar.gz.sha256")
+          (cd dist && shasum -a 256 "Blanca-${tag}.zip" > "Blanca-${tag}.zip.sha256") # install.sh checks this before it unpacks
           cp dist/Blanca.dmg "dist/Blanca-${tag}.dmg" # Blanca.dmg too: the site's download link never changes
-          gh release upload "$tag" "$out.tar.gz" "$out.tar.gz.sha256" "dist/Blanca-${tag}.zip" "dist/Blanca-${tag}.dmg" dist/Blanca.dmg --clobber
+          gh release upload "$tag" "$out.tar.gz" "$out.tar.gz.sha256" "dist/Blanca-${tag}.zip" "dist/Blanca-${tag}.zip.sha256" "dist/Blanca-${tag}.dmg" dist/Blanca.dmg --clobber
