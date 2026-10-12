@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blanca · Omarchy ve macOS için pano yöneticisi</title>
+<meta name="description" content="Kopyaladığın her şey duruyor. Tek kısayol geri getiriyor, teker teker; Return olduğun yere yapıştırıyor.">
+<meta property="og:title" content="Blanca">
+<meta property="og:description" content="Kopyaladığın her şey duruyor. Tek kısayol geri getiriyor, Return olduğun yere yapıştırıyor.">
+<meta property="og:image" content="https://ezapmar.github.io/blanca/assets/blanca-social.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" hreflang="en" href="./">
+<link rel="icon" href="assets/blanca-256.png" type="image/png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Hanken+Grotesk:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Palette: docs/design.md. Stepped corners, the woven band and the knot-grid
+     motifs are shared with the brainless family. */
+  :root {
+    --graphite: #262626; --bone: #F9EBDB; --ash: #9B9B9B;
+    --vermilion: #F24B1E; --teal: #0C9794; --saffron: #FBA335;
+    --well: #1C1C1C; --line: #3A3A3A; --link: #2FB5B1;
+
+    --display: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+
+    --step: 5px;
+    --stepped: polygon(
+      0 calc(2 * var(--step)), var(--step) calc(2 * var(--step)), var(--step) var(--step),
+      calc(2 * var(--step)) var(--step), calc(2 * var(--step)) 0,
+      calc(100% - 2 * var(--step)) 0, calc(100% - 2 * var(--step)) var(--step),
+      calc(100% - var(--step)) var(--step), calc(100% - var(--step)) calc(2 * var(--step)),
+      100% calc(2 * var(--step)),
+      100% calc(100% - 2 * var(--step)), calc(100% - var(--step)) calc(100% - 2 * var(--step)),
+      calc(100% - var(--step)) calc(100% - var(--step)), calc(100% - 2 * var(--step)) calc(100% - var(--step)),
+      calc(100% - 2 * var(--step)) 100%,
+      calc(2 * var(--step)) 100%, calc(2 * var(--step)) calc(100% - var(--step)),
+      var(--step) calc(100% - var(--step)), var(--step) calc(100% - 2 * var(--step)),
+      0 calc(100% - 2 * var(--step))
+    );
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--graphite); color: var(--bone);
+    font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: min(880px, 100%); margin-inline: auto; padding-inline: 16px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.9em; }
+  h2 { margin: 0 0 32px; font: 800 clamp(1.5rem, 1.2rem + 1.4vw, 2rem)/1.1 var(--display); letter-spacing: -0.01em; }
+  .muted { color: var(--ash); }
+
+  /* announcement bar: one line of news above the hero */
+  .news-bar { display: block; background: var(--saffron); color: var(--graphite); text-align: center; padding: 9px 16px; font: 600 0.95rem/1.4 var(--body); }
+  .news-bar b { font: 800 0.95rem/1.4 var(--display); letter-spacing: 0.02em; }
+  .news-bar u { text-underline-offset: 3px; white-space: nowrap; }
+  a.news-bar:hover, a.news-bar:focus-visible { text-decoration: none; background: var(--bone); }
+
+  /* hero: one face, the banner wordmark, the one action */
+  .hero { padding-block: 56px 64px; }
+  .hero .wrap { display: grid; gap: 24px; justify-items: center; text-align: center; }
+  .hero img { width: min(560px, 100%); height: auto; display: block; }
+  .lede { font-size: 1.2rem; line-height: 1.5; max-width: 30rem; }
+  .cmd {
+    width: min(800px, 100%); margin-top: 8px;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+    background: var(--well); clip-path: var(--stepped); padding: 14px 16px; text-align: left;
+    font: 0.8rem/1.5 var(--mono);
+  }
+  .cmd code { display: block; min-width: 0; overflow-x: auto; white-space: nowrap; padding-block: 2px; font-size: inherit; scrollbar-width: none; }
+  .cmd code::-webkit-scrollbar { display: none; }
+  .cmd button {
+    font: 700 0.82rem/1 var(--display); letter-spacing: 0.04em; border: 0; cursor: pointer;
+    padding: 9px 13px; background: var(--vermilion); color: var(--graphite);
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+  }
+  /* one way in per system, side by side */
+  .get { width: 100%; margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px 24px; }
+  .get > div { display: grid; gap: 14px; justify-items: center; align-content: start; min-width: 0; }
+  .get h2 { margin: 0; font: 700 1.15rem/1.2 var(--display); letter-spacing: 0; }
+  .get p { font-size: 0.95rem; color: var(--ash); max-width: 24rem; }
+  .get code { font-size: 0.82em; }
+  .dl {
+    font: 700 1rem/1 var(--display); letter-spacing: 0.02em; padding: 19px 24px;
+    background: var(--bone); color: var(--graphite);
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+  }
+  .dl:hover, .dl:focus-visible { text-decoration: none; background: var(--saffron); }
+  .hero .after { font-size: 0.95rem; color: var(--ash); }
+
+  /* woven band between sections */
+  .band { display: block; width: 100%; height: 24px; }
+
+  section { padding-block: 72px; }
+
+  /* three knots */
+  .loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 36px 28px; }
+  .knot { display: grid; gap: 10px; align-content: start; }
+  .knot svg { width: 60px; height: 60px; margin-bottom: 6px; }
+  .knot .name { font: 0.78rem/1.4 var(--mono); color: var(--ash); }
+  .knot h3 { margin: 0; font: 700 1.15rem/1.2 var(--display); }
+  .knot p { color: var(--ash); font-size: 0.98rem; }
+
+  /* news */
+  ul.news { margin: 0; padding: 0; list-style: none; display: grid; }
+  ul.news li { padding: 12px 0; border-top: 1px solid var(--line); color: var(--ash); }
+  ul.news li:first-child { border-top: 0; padding-top: 0; }
+  ul.news b { color: var(--bone); font-weight: 600; }
+
+  /* keys */
+  dl.keys { margin: 0; display: grid; grid-template-columns: max-content 1fr; }
+  dl.keys dt, dl.keys dd { margin: 0; padding: 10px 0; border-top: 1px solid var(--line); }
+  dl.keys dt { font: 0.85rem/1.9 var(--mono); padding-right: 40px; }
+  dl.keys dd { color: var(--ash); }
+  dl.keys dt:first-of-type, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
+  .keys-note { margin-top: 24px; color: var(--ash); font-size: 0.98rem; max-width: 60ch; }
+
+  /* the dog the program is named after */
+  .story { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .story img { width: 100%; height: auto; display: block; clip-path: var(--stepped); }
+  .story p { color: var(--ash); margin-bottom: 14px; max-width: 54ch; }
+  .story p:last-child { margin-bottom: 0; }
+
+  /* folds */
+  details { border-top: 1px solid var(--line); }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary {
+    cursor: pointer; padding: 16px 0; list-style: none; display: flex; align-items: center; gap: 12px;
+    font: 700 1.05rem/1.3 var(--display);
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: ""; width: 7px; height: 7px; flex: none; border: 1.5px solid var(--bone); transform: rotate(45deg); }
+  details[open] summary::before { background: var(--vermilion); border-color: var(--vermilion); }
+  details > :not(summary) { color: var(--ash); margin: 0 0 14px 19px; }
+  details > :last-child { margin-bottom: 22px; }
+  details pre {
+    padding: 14px 16px; overflow-x: auto; background: var(--well); color: var(--bone);
+    clip-path: var(--stepped); font: 0.85rem/1.6 var(--mono);
+  }
+  details pre code { font-size: inherit; }
+  details ul { padding-left: 1.1em; display: grid; gap: 6px; }
+  details li::marker { color: var(--saffron); }
+
+  footer { padding-block: 48px 56px; }
+  footer .wrap { display: grid; gap: 16px; }
+  .foot-motifs { display: flex; gap: 12px; }
+  .foot-motifs svg { width: 28px; height: 28px; }
+  footer p { color: var(--ash); font-size: 0.92rem; max-width: 60ch; }
+
+  @media (max-width: 560px) {
+    .hero { padding-block: 32px 48px; }
+    .lede { font-size: 1.08rem; }
+    section { padding-block: 56px; }
+    .story { grid-template-columns: 1fr; gap: 24px; }
+    .story img { width: min(220px, 60%); }
+    dl.keys { grid-template-columns: 1fr; }
+    dl.keys dt { padding-bottom: 0; }
+    dl.keys dd, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
+  }
+</style>
+</head>
+<body>
+
+<a class="news-bar" href="https://github.com/ezapmar/blanca/releases/latest"><b>0.3 ile gelenler</b> · Mac uygulaması artık her uygulama gibi açılıyor, menüden kendini güncelliyor. <u>İndir</u></a>
+
+<header class="hero">
+  <div class="wrap">
+    <img src="assets/blanca-banner.png" alt="Blanca. Omarchy ve macOS için pano çerçevesi" width="1520" height="400">
+    <p class="lede">Kopyaladığın her şey duruyor. Tek kısayol geri getiriyor, teker teker; Return olduğun yere yapıştırıyor.</p>
+    <div class="get">
+      <div>
+        <h2>Mac</h2>
+        <a class="dl" href="https://github.com/ezapmar/blanca/releases/latest/download/Blanca.dmg">Mac için indir</a>
+        <p>Aç ve Blanca'yı Applications klasörüne sürükle. macOS 13 ve sonrası.</p>
+      </div>
+      <div>
+        <h2>Omarchy</h2>
+        <a class="dl" href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst">Omarchy için indir</a>
+        <p>Bir pacman paketi. Kurulumu: <code>sudo pacman -U blanca-x86_64.pkg.tar.zst &amp;&amp; blanca setup</code></p>
+      </div>
+    </div>
+    <p class="after">Ya da iki sistemde de şunu terminale yapıştır:</p>
+    <div class="cmd">
+      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
+      <button type="button" id="copy">Kopyala</button>
+    </div>
+    <p class="after">Sonra bir şey kopyala ve <code>Ctrl+Alt+V</code>'ye bas. Mac'te bu Control + Option + V.</p>
+    <p class="after"><a href="#install" id="more">Diğer kurulum yolları</a> · <a href="https://github.com/ezapmar/blanca">GitHub'da kaynak</a> · <a href="./">English</a></p>
+  </div>
+</header>
+
+<svg class="band" aria-hidden="true"></svg>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>Nasıl çalışıyor</h2>
+      <div class="loop">
+        <div class="knot">
+          <svg data-motif="eye" viewBox="0 0 15 15" aria-hidden="true"></svg>
+          <span class="name">göz</span>
+          <h3>Bir izleyici kaydediyor</h3>
+          <p>Kopyaladığın her metin, makinendeki bir dosyada tutulan 99'luk geçmişe giriyor. Parola yöneticisinin gizli diye işaretlediği kopyalar atlanıyor.</p>
+        </div>
+        <div class="knot">
+          <svg data-motif="star" viewBox="0 0 15 15" aria-hidden="true"></svg>
+          <span class="name">yıldız</span>
+          <h3>Çerçeve tek şey gösteriyor</h3>
+          <p>Kısayol, en yeni kopyanı gösteren küçük bir pencere açıyor. Bir daha bas, bir öncekine geçiyor.</p>
+        </div>
+        <div class="knot">
+          <svg data-motif="horn" viewBox="0 0 15 15" aria-hidden="true"></svg>
+          <span class="name">koçboynuzu</span>
+          <h3>Return yapıştırıyor</h3>
+          <p>Pencere kapanıyor, kopya yazdığın yere düşüyor. Menüdeki Clear, son saati, son 24 saati, son ayı ya da hepsini unutuyor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>0.3 ile gelenler</h2>
+      <ul class="news">
+        <li><b>Mac'te Open Anyway yok.</b> Uygulama ve <code>.dmg</code> her uygulama gibi açılıyor.</li>
+        <li><b>Güncelleme.</b> <code>blanca update</code> ya da menüdeki Check for Updates en yeni sürümü kuruyor.</li>
+        <li><b>Yaşa göre temizleme.</b> Son saat, son 24 saat, son ay ya da hepsi.</li>
+        <li><b>macOS için Blanca.</b> Aynı çerçeve ve aynı kısayolla yerel bir uygulama. Tuşları bırak, yapıştırıyor.</li>
+        <li><b>Çubukta bir menü.</b> Köpeğe tıkla, en yeni kopyaların ve Clear All orada: macOS'ta menü çubuğu, Omarchy'de bir Waybar düğmesi.</li>
+        <li><b>Ayarlar da o menüde.</b> Her seçenek orada bir anahtar, Launch on login dahil. Dosya düzenlemek yok.</li>
+        <li><b>iPhone'dan gelen kopyalar.</b> macOS'ta iPhone ya da iPad'de kopyaladığın şey, yanında küçük bir telefonla listeye düşüyor.</li>
+        <li><b>Kurulum paketleri.</b> Yukarıdaki tek satır Mac'e <code>Blanca.app</code> kuruyor; her sürümde ayrıca bir <code>.dmg</code> var.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>Tuşlar</h2>
+      <dl class="keys">
+        <dt>Ctrl+Alt+V  ↓  →</dt><dd>Bir önceki kopya</dd>
+        <dt>Ctrl+Alt+Shift+V  ↑  ←</dt><dd>Bir sonraki kopya</dd>
+        <dt>PgDn  PgUp  Home  End</dt><dd>Onar onar, en yeni, en eski</dd>
+        <dt>1 ile 9, 0</dt><dd>O sıradakine atla; 0 onuncu</dd>
+        <dt>Return</dt><dd>Kopyala ve yapıştır</dd>
+        <dt>Backspace  Delete</dt><dd>Bu kopyayı unut</dd>
+        <dt>Esc  q</dt><dd>Kapat</dd>
+      </dl>
+      <p class="keys-note">Mac klavyesinde <code>Ctrl+Alt+V</code> şu demek: Control (⌃) + Option (⌥) + V. Alt, Option tuşu; Command değil Control. Control ile Option'ı basılı tut, istediğin kopya görünene kadar <code>V</code>'ye vur ve bırak: yapışıyor.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>Blanca kim</h2>
+      <div class="story">
+        <img src="assets/blanca-photo.jpg" alt="Blanca, beyaz bir köpek, sandalyenin arkasından bakıyor" width="570" height="760" loading="lazy">
+        <div>
+          <p>Sempati Barınağı'ndan sahiplendiğimiz köpeğimiz. İki yaşında, dişi, oyunbaz. Bir şeyi bir yerden alır, kemirir ve saklar.</p>
+          <p>Sakladığı yeri unutmaz. İhtiyacı olunca çıkarır, kullanır.</p>
+          <p>Program oradan çıktı. Kopyaladığın şey bir yere gider, orada durur, lazım olduğunda geri gelir.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <details id="install">
+        <summary>Diğer kurulum yolları</summary>
+        <p>Mac'te terminal komutu <code>Blanca.app</code>'i Applications klasörüne koyuyor, <code>blanca</code> komutunu da <code>~/.local/bin</code> içine bağlıyor. Omarchy'de ikili dosyayı <code>~/.local/bin</code> içine kuruyor ve <code>blanca setup</code> çalıştırıyor.</p>
+        <p>pacman paketinin <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a> sürümü de var.</p>
+        <p>Aynı paketi yerelde derlemek:</p>
+        <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
+        <p>Kaynaktan:</p>
+        <pre><code>go install github.com/ezapmar/blanca@latest &amp;&amp; blanca setup</code></pre>
+        <p>Ya da bir klondan, Go 1.26 veya sonrasıyla. Omarchy'de:</p>
+        <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca
+go build -o ~/.local/bin/blanca . &amp;&amp; blanca setup</code></pre>
+        <p>macOS'ta, Xcode komut satırı araçları kuruluysa <code>scripts/macapp</code> evrensel bir <code>dist/Blanca.app</code> ve yanına bir <code>dist/Blanca.dmg</code> üretiyor. Uygulama ad hoc imzalı, hedefi macOS 13.</p>
+        <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca
+scripts/macapp 0.3.0
+cp -R dist/Blanca.app /Applications/ &amp;&amp; open /Applications/Blanca.app</code></pre>
+        <p>Linux'ta <code>wl-clipboard</code>, <code>wtype</code> ve <code>xdg-terminal-exec</code> gerekiyor; üçü de Omarchy'nin parçası.</p>
+      </details>
+      <details>
+        <summary>Güncelleme</summary>
+        <p>İki sistemde de: <code>blanca update</code> ya da menüdeki Check for Updates. En yeni sürümü, ilki nasıl geldiyse öyle kuruyor.</p>
+      </details>
+      <details>
+        <summary>Yapılandırma</summary>
+        <p>Menüdeki Settings'i kullan ya da <code>~/.config/blanca/config.json</code> dosyasını düzenle. Her anahtar isteğe bağlı; aşağıdakiler varsayılanlar.</p>
+<pre><code>{
+  "remember": 99,
+  "display": 10,
+  "wraparound": false,
+  "paste": true,
+  "paste_mode": "shift-insert",
+  "sticky": false,
+  "move_to_top": false,
+  "allow_whitespace": false,
+  "ignore_large": true,
+  "ignore_sensitive": true
+}</code></pre>
+        <p>Shift+Insert'i yok sayan uygulamalar için <code>paste_mode</code> değerini <code>ctrl-v</code> yap. macOS'ta <code>sticky</code>, tuşları bıraktığında çerçeveyi açık tutuyor.</p>
+      </details>
+      <details>
+        <summary>Dürüst sınırlar</summary>
+        <ul>
+          <li>Yalnız metin. Görsel ve dosya kaydedilmiyor.</li>
+          <li>Omarchy üzerinde Hyprland ile test edildi. Diğer wlroots bileşicileri kendi keybind ve floating kuralını istiyor.</li>
+          <li>Uygulama bazlı yok sayma listesi yok; Wayland bir kopyanın hangi pencereden geldiğini söylemiyor.</li>
+          <li>Mac'te 0.2'den geliyorsan Blanca'ya Accessibility iznini bir kez daha ver: macOS 0.3'ü yeni bir uygulama sayıyor. Kısayolu Ctrl+Alt+V'de sabit, aynı kısayolu kullanan başka uygulama varsa önce onu kapat.</li>
+          <li>iPhone kopyaları yalnız Mac'e ulaşıyor. Bu Apple'ın Universal Clipboard'u, Linux onun parçası değil.</li>
+          <li>Bu v0.3. Pürüz bekle.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+</main>
+
+<svg class="band" aria-hidden="true"></svg>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-motifs" aria-hidden="true">
+      <svg data-motif="eye" viewBox="0 0 15 15"></svg>
+      <svg data-motif="tree" viewBox="0 0 15 15"></svg>
+      <svg data-motif="horn" viewBox="0 0 15 15"></svg>
+      <svg data-motif="star" viewBox="0 0 15 15"></svg>
+    </div>
+    <p>Adını köpeğimden alıyor: Anadolu tazısı ve Russell terrier karışımı. Motifler Anadolu tezgahlarının kilim düğümleri, <a href="https://github.com/ezapmar/brainless-public">brainless</a> ile ortak.</p>
+    <p>MIT. Steve Cook'un <a href="https://github.com/snark/jumpcut">Jumpcut</a> projesinden türedi, bildirimi lisansta duruyor; ne yazarıyla ne de <a href="https://omarchy.org">Omarchy</a> ile bağlantılı.</p>
+  </div>
+</footer>
+
+<script>
+/* Kilim motifs as 15 by 15 knot grids and the woven band, after the brainless site. */
+(function () {
+  var P = { bone: '#F9EBDB', vermilion: '#F24B1E', teal: '#0C9794', saffron: '#FBA335' };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function cell(svg, x, y, fill) {
+    var r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', x); r.setAttribute('y', y);
+    r.setAttribute('width', 1); r.setAttribute('height', 1);
+    r.setAttribute('fill', fill); r.setAttribute('shape-rendering', 'crispEdges');
+    svg.appendChild(r);
+  }
+
+  var horn = [
+    '.cc.........cc.', 'c..c.......c..c', 'c...c.....c...c', '.c..cc...cc..c.', '.....c...c.....',
+    '.....cc.cc.....', '......ccc......', '.......c.......', '.......c.......', '......ccc......',
+    '.....ccAcc.....', '....cc.A.cc....', '...cc..A..cc...', '..cc...A...cc..', '.......A.......'
+  ];
+
+  function drawMotif(svg) {
+    var kind = svg.getAttribute('data-motif'), c = P.bone, x, y, i;
+    if (kind === 'eye') {
+      for (y = 0; y < 15; y++) for (x = 0; x < 15; x++) {
+        var d = Math.abs(x - 7) + Math.abs(y - 7);
+        if (d > 7 || (d >= 4 && d <= 6)) continue;
+        cell(svg, x, y, d > 1 ? c : P.teal);
+      }
+    } else if (kind === 'star') {
+      for (y = 0; y < 15; y++) for (x = 0; x < 15; x++) {
+        var dx = Math.abs(x - 7), dy = Math.abs(y - 7), m = Math.max(dx, dy);
+        if ((dx + dy <= 7 && dx + dy >= 5) || (m <= 4 && m >= 3)) cell(svg, x, y, c);
+        else if (dx + dy <= 1) cell(svg, x, y, P.vermilion);
+      }
+    } else if (kind === 'tree') {
+      for (y = 1; y < 15; y++) cell(svg, 7, y, c);
+      for (y = 2; y < 13; y += 3) for (i = 1; i <= 4; i++) { cell(svg, 7 - i, y + i, c); cell(svg, 7 + i, y + i, c); }
+      cell(svg, 7, 0, P.vermilion); cell(svg, 6, 1, P.vermilion); cell(svg, 8, 1, P.vermilion);
+    } else if (kind === 'horn') {
+      for (y = 0; y < 15; y++) for (x = 0; x < 15; x++) {
+        if (horn[y][x] === 'c') cell(svg, x, y, c);
+        else if (horn[y][x] === 'A') cell(svg, x, y, P.saffron);
+      }
+    }
+  }
+
+  /* A row of small eyes in alternating dyes, between two threads. */
+  function drawBand(svg, seed) {
+    var unit = 15, dyes = [P.vermilion, P.saffron, P.teal];
+    var cols = Math.ceil(Math.max(svg.clientWidth || 0, 320) / 24 * 15 / unit) + 1;
+    svg.setAttribute('viewBox', '0 0 ' + (cols * unit) + ' 15');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    [1, 13].forEach(function (y) {
+      var l = document.createElementNS(NS, 'rect');
+      l.setAttribute('x', 0); l.setAttribute('y', y); l.setAttribute('width', cols * unit); l.setAttribute('height', 1);
+      l.setAttribute('fill', P.bone); svg.appendChild(l);
+    });
+    for (var i = 0; i < cols; i++) {
+      var cx = i * unit + 7;
+      for (var y = 3; y <= 11; y++) for (var x = i * unit; x < i * unit + unit; x++) {
+        var d = Math.abs(x - cx) + Math.abs(y - 7);
+        if (d > 4) continue;
+        cell(svg, x, y, d === 4 || d < 2 ? P.bone : dyes[(i + seed) % dyes.length]);
+      }
+    }
+  }
+
+  var motifs = document.querySelectorAll('svg[data-motif]');
+  for (var i = 0; i < motifs.length; i++) drawMotif(motifs[i]);
+  function bands() {
+    var b = document.querySelectorAll('svg.band');
+    for (var j = 0; j < b.length; j++) drawBand(b[j], j);
+  }
+  bands();
+  var t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(bands, 150); });
+
+  document.getElementById('more').addEventListener('click', function () {
+    document.getElementById('install').open = true;
+  });
+
+  var btn = document.getElementById('copy');
+  if (!navigator.clipboard) { btn.hidden = true; return; }
+  btn.addEventListener('click', function () {
+    navigator.clipboard.writeText(document.getElementById('cmd').textContent).then(function () {
+      btn.textContent = 'Kopyalandı';
+      setTimeout(function () { btn.textContent = 'Kopyala'; }, 1600);
+    }, function () {});
+  });
+})();
+</script>
+</body>
+</html>

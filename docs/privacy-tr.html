@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blanca · Gizlilik</title>
+<meta name="description" content="Blanca hiçbir şey toplamıyor. Kopyaladıkların bilgisayarında kalıyor.">
+<link rel="alternate" hreflang="en" href="privacy.html">
+<link rel="icon" href="assets/blanca-256.png" type="image/png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Hanken+Grotesk:wght@400;600&display=swap">
+<style>
+  /* Palette and type: docs/design.md, as on the front page. */
+  :root {
+    --graphite: #262626; --bone: #F9EBDB; --ash: #9B9B9B; --saffron: #FBA335; --link: #2FB5B1;
+    --display: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--graphite); color: var(--bone);
+    font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: min(680px, 100%); margin-inline: auto; padding: 56px 16px 72px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+  h1 { margin: 24px 0 8px; font: 800 clamp(2rem, 1.5rem + 2vw, 2.75rem)/1.1 var(--display); letter-spacing: -0.01em; }
+  h2 { margin: 40px 0 8px; font: 700 1.25rem/1.2 var(--display); }
+  p { margin: 0 0 14px; }
+  .muted { color: var(--ash); }
+  .lede { font-size: 1.15rem; }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a href="tr.html"><img src="assets/blanca-256.png" alt="Blanca" width="64" height="64"></a>
+  <h1>Gizlilik</h1>
+  <p class="muted">10 Ekim 2026 · <a href="privacy.html">English</a></p>
+  <p class="lede">Blanca hiçbir şey toplamıyor. Kopyaladığın şey bilgisayarında kalıyor.</p>
+
+  <h2>Blanca neyi tutuyor</h2>
+  <p>Kopyaladığın metni, sana geri verebilmek için. Bu metin kendi bilgisayarındaki bir dosyada, belirlediğin kopya sayısı kadar tutuluyor, başka hiçbir yerde değil. Blanca menüsündeki Clear onu siliyor: son saat, son 24 saat, son ay ya da hepsi.</p>
+  <p>Parola yöneticisinin gizli diye işaretlediği kopyalar tutulmuyor, sen bu ayarı kapatmadıkça.</p>
+
+  <h2>Blanca ne gönderiyor</h2>
+  <p>Hiçbir şey. Hesap yok, senkronizasyon yok, analitik yok, çökme raporu yok, reklam yok. Kopyaların Blanca üzerinden bilgisayarından çıkmıyor.</p>
+  <p>Mac App Store'dan gelen Blanca hiçbir ağ bağlantısı kurmuyor. Bu siteden gelen kopya ise yalnız Check for Updates'i seçtiğinde ya da <code>blanca update</code> çalıştırdığında GitHub'a bağlanıyor: en yeni sürümün hangisi olduğunu sormak ve onu indirmek için. O istek seninle ya da kopyalarınla ilgili hiçbir şey taşımıyor.</p>
+
+  <h2>Mac'te Accessibility izni</h2>
+  <p>Blanca, Accessibility altında izni tek bir iş için istiyor: senin yerine Command+V'ye basmak, böylece seçtiğin kopya yazdığın yere düşüyor. Ekranını ya da diğer uygulamaları okumuyor, yazdıklarını kaydetmiyor.</p>
+
+  <h2>Diğer cihazlardan gelen kopyalar</h2>
+  <p>iPhone ya da iPad'de kopyaladığın metin, Apple'ın Universal Clipboard'u üzerinden Mac'ine ulaşabiliyor. Bu, cihazlarınla Apple arasında. Blanca onu ancak Mac'inin panosuna düştükten sonra, diğer her kopya gibi görüyor.</p>
+
+  <h2>Sorular</h2>
+  <p>Tunca Üçer'e yaz: <a href="mailto:tuncaucer@gmail.com">tuncaucer@gmail.com</a>. Blanca'nın kaynak kodu <a href="https://github.com/ezapmar/blanca">GitHub'da</a>; bu sayfadaki her iddia oradan doğrulanabilir.</p>
+</main>
+</body>
+</html>
