@@ -9,6 +9,7 @@
 <meta property="og:description" content="Everything you copy, kept. One hotkey brings it back, and Return pastes it where you were.">
 <meta property="og:image" content="https://ezapmar.github.io/blanca/assets/blanca-social.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" hreflang="tr" href="tr.html">
 <link rel="icon" href="assets/blanca-256.png" type="image/png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Hanken+Grotesk:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -120,6 +121,12 @@
   dl.keys dt:first-of-type, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
   .keys-note { margin-top: 24px; color: var(--ash); font-size: 0.98rem; max-width: 60ch; }
 
+  /* the dog the program is named after */
+  .story { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .story img { width: 100%; height: auto; display: block; clip-path: var(--stepped); }
+  .story p { color: var(--ash); margin-bottom: 14px; max-width: 54ch; }
+  .story p:last-child { margin-bottom: 0; }
+
   /* folds */
   details { border-top: 1px solid var(--line); }
   details:last-of-type { border-bottom: 1px solid var(--line); }
@@ -150,6 +157,8 @@
     .hero { padding-block: 32px 48px; }
     .lede { font-size: 1.08rem; }
     section { padding-block: 56px; }
+    .story { grid-template-columns: 1fr; gap: 24px; }
+    .story img { width: min(220px, 60%); }
     dl.keys { grid-template-columns: 1fr; }
     dl.keys dt { padding-bottom: 0; }
     dl.keys dd, dl.keys dd:first-of-type { border-top: 0; padding-top: 0; }
@@ -182,7 +191,7 @@
       <button type="button" id="copy">Copy</button>
     </div>
     <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. On a Mac that is Control + Option + V.</p>
-    <p class="after"><a href="#install" id="more">Other ways to install</a> · <a href="https://github.com/ezapmar/blanca">Source on GitHub</a></p>
+    <p class="after"><a href="#install" id="more">Other ways to install</a> · <a href="https://github.com/ezapmar/blanca">Source on GitHub</a> · <a href="tr.html">Türkçe</a></p>
   </div>
 </header>
 
@@ -244,6 +253,20 @@
         <dt>Esc  q</dt><dd>Close</dd>
       </dl>
       <p class="keys-note">On a Mac keyboard <code>Ctrl+Alt+V</code> is Control (⌃) + Option (⌥) + V. Alt is the Option key, and it is Control, not Command. Hold Control and Option, tap <code>V</code> until the clipping you want is showing, and let go: it pastes.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>Who Blanca is</h2>
+      <div class="story">
+        <img src="assets/blanca-photo.jpg" alt="Blanca, a white dog, looking over the back of a chair" width="570" height="760" loading="lazy">
+        <div>
+          <p>Our dog, adopted from the Sempati shelter. Two years old, a playful one. She picks something up, chews it and hides it away.</p>
+          <p>She does not forget where she put it. When she needs it, she digs it out and uses it.</p>
+          <p>The program came from that. What you copy goes somewhere, stays there, and comes back when you need it.</p>
+        </div>
+      </div>
     </div>
   </section>
 
