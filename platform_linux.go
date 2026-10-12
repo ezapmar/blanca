@@ -47,7 +47,7 @@ func cmdSetup() {
 			fmt.Println("ok   clipboard watcher started")
 		}
 	}
-	fmt.Println("done Press Ctrl+Alt+V after copying something.")
+	fmt.Println("done Press " + hotkeyName + " after copying something.")
 }
 
 // retireOldWidget takes away the button 0.3.4 wrote under the un-namespaced id, now that
@@ -205,6 +205,9 @@ func menuSettings(cfg Config) {
 		}
 	}
 }
+
+// hotkeyName is the hotkey as it is written here.
+const hotkeyName = "Ctrl+Alt+V"
 
 // menuAbout shows the version over a few words about Blanca and who made it, and offers
 // its page and a letter to its maker.

@@ -142,6 +142,10 @@ func goSet(tag C.int) {
 	}
 }
 
+// hotkeyName is the hotkey as a Mac keyboard spells it: there is no Alt key on one, and
+// it is Control, not Command.
+const hotkeyName = "Control+Option+V"
+
 // goAbout is the menu's About Blanca.
 //
 //export goAbout
@@ -355,7 +359,7 @@ func cmdSetup() {
 	}
 	fmt.Println("ok   clipboard watcher started")
 	fmt.Println("done Allow blanca under Privacy & Security > Accessibility so it can paste,")
-	fmt.Println("     then press Ctrl+Alt+V after copying something.")
+	fmt.Println("     then press " + hotkeyName + " after copying something.")
 }
 
 func cmdMenu(Config) { fatal(errors.New("on macOS the menu is Blanca's menu bar icon")) }

@@ -18,7 +18,7 @@ var version = "dev" // set by -ldflags at release time
 // it offers to open.
 const (
 	aboutText = aboutWhat + " Everything you copy is kept, " +
-		"and Ctrl+Alt+V brings it back, one clipping at a time."
+		"and " + hotkeyName + " brings it back, one clipping at a time."
 	aboutNote = "Made by Tunca Üçer, " + email + "\nMIT licence"
 	homepage  = "https://github.com/" + repo
 	email     = "tuncaucer@gmail.com"

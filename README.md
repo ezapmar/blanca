@@ -36,13 +36,15 @@ curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | 
 
 Then copy something and press `Ctrl+Alt+V`. On a Mac that is Control + Option + V.
 
-To update, on either system: `blanca update`, or Check for Updates in the menu.
+Blanca looks for a release once a day and offers it: the menu line then reads Update to
+0.3.6, and it says so once per release rather than every day. To update at any time, on
+either system: `blanca update`, or Check for Updates in the menu.
 Other ways to install are in the fold further down.
 
 ## What's new in 0.3
 
 - **No Open Anyway on a Mac.** The app and the `.dmg` open like any other.
-- **Updates.** `blanca update`, or Check for Updates in the menu, installs the newest
+- **Updates.** Blanca looks once a day; `blanca update`, or Check for Updates in the menu, installs the newest
   release.
 - **Clear by age.** Clear the last hour, 24 hours, month, or all of it.
 
@@ -70,16 +72,16 @@ has the same reaction to the word "paste".
 | Key | Does |
 |---|---|
 | hotkey again, `↓`, `→` | older clipping |
-| `Ctrl+Alt+Shift+V`, `↑`, `←` | newer clipping |
+| `Ctrl+Alt+Shift+V`, `⌃⌥⇧V`, `↑`, `←` | newer clipping |
 | `PgDn`, `PgUp`, `Home`, `End` | ten at a time, newest, oldest |
 | `1` to `9`, `0` | jump to that position, `0` is tenth |
 | `Return` | copy and paste |
 | `Backspace`, `Delete` | forget this clipping |
 | `Esc`, `q` | close |
 
-On a Mac keyboard `Ctrl+Alt+V` is Control (⌃) + Option (⌥) + V. Alt is the Option key,
-and it is Control, not Command. Hold Control and Option, tap `V` until the clipping you
-want is showing, and let go: it pastes.
+A Mac keyboard has no Alt key: `⌃⌥V` is Control + Option + V. Option is the Alt key, and
+it is Control, not Command. Hold Control and Option, tap `V` until the clipping you want
+is showing, and let go: it pastes.
 
 ---
 
