@@ -18,14 +18,25 @@ const appID = "org.omarchy.blanca"
 var barIcon []byte
 
 // cmdSetup wires Blanca into an Omarchy config: Hyprland keybinds, autostart watcher and
-// floating window rules, and a Waybar button. Idempotent: a file that already mentions
+// floating window rules, and a button on the bar. Idempotent: a file that already mentions
 // blanca is left alone.
 func cmdSetup() {
 	conf := xdg("XDG_CONFIG_HOME", ".config")
-	for _, line := range append(writeHyprSnippets(filepath.Join(conf, "hypr")), writeWaybar(filepath.Join(conf, "waybar"), barIcon)...) {
+	lines := writeHyprSnippets(filepath.Join(conf, "hypr"))
+	// From Omarchy 4 on the bar is Quickshell's and takes plugins; before that it was
+	// Waybar, which takes a module and a stylesheet.
+	if _, err := exec.LookPath("omarchy-shell"); err == nil {
+		plugins := filepath.Join(conf, "omarchy", "plugins")
+		lines = append(lines, retireOldWidget(plugins)...)
+		lines = append(lines, writeShellWidget(plugins, barIcon)...)
+		lines = append(lines, enableShellWidget(filepath.Join(conf, "omarchy", "shell.json")))
+	} else {
+		lines = append(lines, writeWaybar(filepath.Join(conf, "waybar"), barIcon)...)
+		exec.Command("pkill", "-SIGUSR2", "waybar").Run() // reload the bar
+	}
+	for _, line := range lines {
 		fmt.Println(line)
 	}
-	exec.Command("pkill", "-SIGUSR2", "waybar").Run() // reload the bar
 	if err := exec.Command("hyprctl", "reload").Run(); err == nil {
 		fmt.Println("ok   hyprctl reload")
 	}
@@ -36,7 +47,50 @@ func cmdSetup() {
 			fmt.Println("ok   clipboard watcher started")
 		}
 	}
-	fmt.Println("done Press Ctrl+Alt+V after copying something.")
+	fmt.Println("done Press " + hotkeyName + " after copying something.")
+}
+
+// retireOldWidget takes away the button 0.3.4 wrote under the un-namespaced id, now that
+// the widget has a repo and an id of its own. Only Blanca's own copy is removed: one the
+// user has made a checkout of is theirs, and is left for them to remove.
+func retireOldWidget(plugins string) []string {
+	dir := filepath.Join(plugins, oldWidgetID)
+	if _, err := os.Stat(dir); err != nil {
+		return nil
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+		return []string{"skip " + dir + " (a checkout of the old id; remove it yourself)"}
+	}
+	exec.Command("omarchy-plugin-disable", oldWidgetID).Run() // takes it off the bar
+	if err := os.RemoveAll(dir); err != nil {
+		return []string{"skip " + dir + " (" + err.Error() + ")"}
+	}
+	return []string{"gone " + dir + " (replaced by " + widgetID + ")"}
+}
+
+// enableShellWidget asks the running Omarchy shell to take in the plugin and put its
+// button on the bar. A shell.json that already names the widget is left alone: where the
+// button sits, and whether it is there at all, is the user's to decide after the first run.
+func enableShellWidget(shellJSON string) string {
+	if b, err := os.ReadFile(shellJSON); err == nil && strings.Contains(string(b), widgetID) {
+		return "ok   " + shellJSON + " already carries the button"
+	}
+	manual := "; put it on the bar with `omarchy plugin enable " + widgetID + "`"
+	if out, err := exec.Command("omarchy-shell", "shell", "rescanPlugins").CombinedOutput(); err != nil {
+		return "skip the bar button (" + reason(out, err) + manual + ")"
+	}
+	if out, err := exec.Command("omarchy-plugin-enable", widgetID).CombinedOutput(); err != nil {
+		return "skip the bar button (" + reason(out, err) + manual + ")"
+	}
+	return "add  the bar button"
+}
+
+// reason is what a shelled-out command said about failing, or failing that, the error.
+func reason(out []byte, err error) string {
+	if s := strings.TrimSpace(string(out)); s != "" {
+		return strings.ReplaceAll(s, "\n", "; ")
+	}
+	return err.Error()
 }
 
 // cmdWatch hands the watching to wl-paste, which runs `blanca store` on every text copy.
@@ -86,7 +140,12 @@ func cmdMenu(cfg Config) {
 	for i, s := range items {
 		fmt.Fprintf(&b, "%d  %s\n", i+1, shorten(s, 40))
 	}
-	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nAbout Blanca\nCheck for Updates\n")
+	// The daily check may already have found a release; then the line offers it by name.
+	update := "Check for Updates"
+	if tag := readUpdateState().pending(); tag != "" {
+		update = "Update to " + strings.TrimPrefix(tag, "v")
+	}
+	sel := dmenu("Blanca…", b.String()+"Clear\nSettings\nAbout Blanca\n"+update+"\n")
 	switch sel {
 	case "Clear":
 		menuClear()
@@ -97,7 +156,7 @@ func cmdMenu(cfg Config) {
 	case "About Blanca":
 		menuAbout()
 		return
-	case "Check for Updates":
+	case update:
 		menuUpdate()
 		return
 	}
@@ -152,6 +211,9 @@ func menuSettings(cfg Config) {
 	}
 }
 
+// hotkeyName is the hotkey as it is written here.
+const hotkeyName = "Ctrl+Alt+V"
+
 // menuAbout shows the version over a few words about Blanca and who made it, and offers
 // its page and a letter to its maker.
 func menuAbout() {
@@ -184,13 +246,15 @@ func menuUpdate() {
 	}
 }
 
-// dmenu shows lines in Walker the way Omarchy's own menus do and returns the chosen one.
+// dmenu shows lines the way Omarchy's own menus do and returns the chosen one, or "" when
+// the menu was dismissed. From Omarchy 4 on that menu is the shell's own; before it, Walker.
 func dmenu(prompt, lines string) string {
-	walker := "walker"
-	if _, err := exec.LookPath("omarchy-launch-walker"); err == nil {
-		walker = "omarchy-launch-walker"
+	cmd := exec.Command("walker", "--dmenu", "-p", prompt)
+	if _, err := exec.LookPath("omarchy-menu-select"); err == nil {
+		cmd = exec.Command("omarchy-menu-select", prompt)
+	} else if _, err := exec.LookPath("omarchy-launch-walker"); err == nil {
+		cmd = exec.Command("omarchy-launch-walker", "--dmenu", "-p", prompt)
 	}
-	cmd := exec.Command(walker, "--dmenu", "-p", prompt)
 	cmd.Stdin = strings.NewReader(lines)
 	out, _ := cmd.Output()
 	return strings.TrimSpace(string(out))
@@ -201,8 +265,11 @@ func launchBezel(self string) error { return launchTUI(self, "pick") }
 // launchTUI runs a command in Blanca's floating terminal.
 func launchTUI(args ...string) error {
 	cmd := exec.Command("xdg-terminal-exec", append([]string{"--app-id=" + appID, "-e"}, args...)...)
+	// Omarchy's own launcher names the window org.omarchy.<command>, which for the blanca
+	// binary is the app-id the window rules are written for. Only Omarchy 4 and later take
+	// an --app-id of their own, and one passed to an older Omarchy is read as the command.
 	if _, err := exec.LookPath("omarchy-launch-tui"); err == nil {
-		cmd = exec.Command("omarchy-launch-tui", append([]string{"--app-id=" + appID}, args...)...)
+		cmd = exec.Command("omarchy-launch-tui", args...)
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	return cmd.Start()

@@ -35,9 +35,10 @@ func number(name string, n *int, nums ...int) setting {
 	return setting{name: name, num: n, nums: nums, pick: func(i int) { *n = nums[i] }}
 }
 
-// settings lists what the menu offers.
+// settings lists what the menu offers. The App Store's Blanca has no say over its own
+// updates, so it does not offer the switch for them.
 func settings(c *Config) []setting {
-	return append(platformSettings(c),
+	s := append(platformSettings(c),
 		toggle("Selection pastes", &c.Paste),
 		toggle("Wraparound bezel", &c.Wraparound),
 		toggle("Move clippings to top after use", &c.MoveToTop),
@@ -46,6 +47,10 @@ func settings(c *Config) []setting {
 		toggle("Ignore confidential clipping types", &c.IgnoreSensitive),
 		number("Clippings to remember", &c.Remember, 10, 25, 50, 99, 200),
 		number("Clippings in menu", &c.Display, 5, 10, 15, 20, 25))
+	if appStore {
+		return s
+	}
+	return append(s, toggle("Check for updates daily", &c.CheckUpdates))
 }
 
 func saveConfig(c Config) error {

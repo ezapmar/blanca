@@ -63,6 +63,7 @@ func cmdWatch(cfg Config) {
 	if _, err := os.Stat(agentPath()); err == nil && inApp() && bool(C.bzSetLogin(true)) {
 		os.Remove(agentPath()) // a LaunchAgent from before Blanca.app could be a login item
 	}
+	startAutoCheck()
 	var installed *C.char // install.sh opens Blanca.app with `watch installed`
 	if len(os.Args) > 2 && os.Args[2] == "installed" {
 		installed = C.CString("Blanca " + version + " is installed")
@@ -141,6 +142,10 @@ func goSet(tag C.int) {
 		fmt.Fprintln(os.Stderr, "blanca:", err)
 	}
 }
+
+// hotkeyName is the hotkey as a Mac keyboard spells it: there is no Alt key on one, and
+// it is Control, not Command.
+const hotkeyName = "Control+Option+V"
 
 // goAbout is the menu's About Blanca.
 //
@@ -355,7 +360,7 @@ func cmdSetup() {
 	}
 	fmt.Println("ok   clipboard watcher started")
 	fmt.Println("done Allow blanca under Privacy & Security > Accessibility so it can paste,")
-	fmt.Println("     then press Ctrl+Alt+V after copying something.")
+	fmt.Println("     then press " + hotkeyName + " after copying something.")
 }
 
 func cmdMenu(Config) { fatal(errors.New("on macOS the menu is Blanca's menu bar icon")) }

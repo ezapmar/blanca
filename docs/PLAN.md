@@ -153,13 +153,27 @@ Preferences, Blanca has neither.
 
 - macOS: `NSStatusItem` in `bezel_darwin.m`, template image from the embedded
   `blanca-symbolic-36.png`, menu rebuilt in `menuNeedsUpdate`.
-- Omarchy: Waybar `custom/blanca` button whose click runs `blanca menu`, a Walker
-  `--dmenu` list. `blanca setup` inserts the module ahead of `modules-right`, appends the
-  style and writes `blanca-symbolic.svg` next to it; the style uses `-gtk-recolor` so the
-  icon follows the theme. For that the symbolic SVG is one plain path, no mask.
+- Omarchy: a button on the bar whose click runs `blanca menu`, a list in whatever menu
+  the system has. Omarchy 4 and later replaced Waybar and Walker with one Quickshell
+  shell, so `blanca setup` writes whichever of the two the machine has:
+  - Omarchy 4 and later (`omarchy-shell` on the PATH): the bar-widget plugin
+    `io.github.ezapmar.blanca` in `~/.config/omarchy/plugins`, a manifest and a `BarWidget.qml`
+    that draws the icon in the bar's own text colour with `MultiEffect`, then
+    `rescanPlugins` and `omarchy plugin enable`. Qt has no `currentColor`, so the icon is
+    written with a plain fill and recoloured by the widget. The menu is
+    `omarchy-menu-select`, which reads its options on stdin as Walker did.
+    The same widget is published on its own at `github.com/ezapmar/omarchy-blanca`, for the
+    plugin marketplace, so setup leaves the directory alone when it finds a checkout there:
+    that copy is the user's, and `omarchy plugin update` keeps it current. Setup also
+    retires the `blanca.clipboard` button 0.3.4 wrote, before the widget had a repo and a
+    namespaced id.
+  - Omarchy 3 and earlier: the Waybar `custom/blanca` module ahead of `modules-right`, the
+    style appended and `blanca-symbolic.svg` written next to it; the style uses
+    `-gtk-recolor` so the icon follows the theme. For that the symbolic SVG is one plain
+    path, no mask.
 - Settings (`settings.go`): one shared list of switches and preset numbers over `Config`,
   written back with `saveConfig`. macOS shows it as a submenu with ticks, Omarchy as a
-  second Walker list that returns after each change.
+  second menu list that returns after each change.
 - Universal Clipboard: a copy on an iPhone reaches the Mac pasteboard as a normal change
   carrying `com.apple.is-remote-clipboard` (seen live, 2026-10-09). Such clippings get a
   phone icon in the macOS menu; their hashes live in `remote.json` beside the history.
@@ -171,7 +185,7 @@ Preferences, Blanca has neither.
 - Installers: `install.sh` on macOS puts `Blanca.app` in Applications from the release zip
   (curl leaves no quarantine flag) and links `blanca` into `~/.local/bin`; the release
   also carries `Blanca.dmg` for dragging. Linux is unchanged: binary, icons, `setup`.
-- Not run on Omarchy yet: the Walker flags, the Waybar edit and the recoloured icon.
+- Not run on Omarchy yet: the bar plugin's QML and the Waybar edit.
 
 ## Decisions
 

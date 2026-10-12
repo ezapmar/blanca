@@ -92,3 +92,53 @@ func TestSetAutostart(t *testing.T) {
 		t.Fatal("no autostart.lua is an error")
 	}
 }
+
+func TestWriteShellWidget(t *testing.T) {
+	plugins := t.TempDir()
+	out := writeShellWidget(plugins, []byte(`<svg><path fill="currentColor"/></svg>`))
+	if len(out) != 3 {
+		t.Fatalf("first run: %v", out)
+	}
+	for _, l := range out {
+		if !strings.HasPrefix(l, "add ") {
+			t.Fatalf("first run: %v", out)
+		}
+	}
+	dir := filepath.Join(plugins, widgetID)
+	b, err := os.ReadFile(filepath.Join(dir, "manifest.json"))
+	if err != nil || !strings.Contains(string(b), `"barWidget": "BarWidget.qml"`) {
+		t.Fatalf("manifest: %s %v", b, err)
+	}
+	if b, _ = os.ReadFile(filepath.Join(dir, "BarWidget.qml")); !strings.Contains(string(b), "blanca menu") {
+		t.Fatalf("widget: %s", b)
+	}
+	// Qt has no currentColor: the icon is written with a fill the widget can recolour.
+	if b, _ = os.ReadFile(filepath.Join(dir, "blanca-symbolic.svg")); string(b) != `<svg><path fill="#ffffff"/></svg>` {
+		t.Fatalf("icon: %s", b)
+	}
+	// Second run must change nothing.
+	out = writeShellWidget(plugins, []byte(`<svg><path fill="currentColor"/></svg>`))
+	for _, l := range out {
+		if !strings.HasPrefix(l, "ok ") {
+			t.Fatalf("second run must be a no-op: %v", out)
+		}
+	}
+}
+
+func TestWriteShellWidgetLeavesACheckoutAlone(t *testing.T) {
+	plugins := t.TempDir()
+	dir := filepath.Join(plugins, widgetID)
+	// The plugin as `omarchy plugin add` leaves it: a checkout, with its own files.
+	os.MkdirAll(filepath.Join(dir, ".git"), 0o755)
+	os.WriteFile(filepath.Join(dir, "BarWidget.qml"), []byte("// the user's copy\n"), 0o644)
+	out := writeShellWidget(plugins, []byte("<svg/>"))
+	if len(out) != 1 || !strings.HasPrefix(out[0], "ok ") {
+		t.Fatalf("a checkout must be left alone: %v", out)
+	}
+	if b, _ := os.ReadFile(filepath.Join(dir, "BarWidget.qml")); string(b) != "// the user's copy\n" {
+		t.Fatalf("widget overwritten: %s", b)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "manifest.json")); err == nil {
+		t.Fatal("nothing of ours must be written into a checkout")
+	}
+}
