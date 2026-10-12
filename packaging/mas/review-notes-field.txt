@@ -1,0 +1,29 @@
+Blanca is a clipboard history manager. It is a MENU BAR APP: no Dock icon, no main window. After launch, look for the dog's head in the menu bar at the top right. That menu is the entire interface.
+
+No login, no demo account and no sample files are needed. Nothing is locked or paid.
+
+HOW TO TRY IT
+1. Open Blanca. macOS asks to allow it under System Settings > Privacy & Security > Accessibility. Please allow it.
+2. Copy a few separate pieces of text in any app, TextEdit for example.
+3. Click into a text field, hold Control and Option, and press V. A bezel appears with the latest clipping. Keep the keys held and press V again for older ones.
+4. Let go of the keys. Blanca pastes the clipping that was on screen, at the cursor.
+5. Click the dog in the menu bar for the clippings as a menu, Clear, the settings switches, and About.
+
+PURPOSE
+macOS keeps only the last thing you copied. Blanca keeps the text you copy and brings it back with one keystroke. For people who type on a Mac all day: developers, writers, translators, support and data entry work. Free, no accounts, no purchases.
+
+WHY ACCESSIBILITY
+Once a clipping is chosen, Blanca places it on the clipboard and sends a single Command+V keystroke to the frontmost app, so the text lands where you were typing. That is the only use of the permission. Blanca does not read the screen or other apps' windows, and does not log keystrokes. If declined, the app still works: the clipping goes on the clipboard and the user pastes it with Command+V.
+
+EXTERNAL SERVICES: NONE
+All on-device, Apple frameworks only (AppKit, NSPasteboard, RegisterEventHotKey). No data providers, authentication, payment processors, AI services, analytics or third-party SDKs. The app makes no network connections and has no network entitlement; it is sandboxed with com.apple.security.app-sandbox alone. History is a file in the app's sandbox container and never leaves the device. Text copied on an iPhone can appear in the list, but that is Apple's Universal Clipboard delivering it to the Mac's pasteboard. Open source, MIT: https://github.com/ezapmar/blanca
+
+NO ACCOUNTS, NO USER CONTENT, NO PURCHASES
+No registration or account, so nothing to delete and no credentials to supply. Clippings are text the user copied on their own Mac, visible only to them and never transmitted, so there is nothing to report or block. No in-app purchases.
+
+REGIONS: identical everywhere. No geofencing, no server. English only.
+
+REGULATED INDUSTRY / THIRD-PARTY MATERIAL: neither. No licence required. Every asset is my own work, including the icon and the drawings of my own dog. The code is mine, MIT, no dependencies.
+
+PRIVACY
+Clippings marked concealed by password managers are skipped by default, as are very large copies. Text only; copied images and files are ignored. App Privacy answer is Data Not Collected, which is literally accurate.

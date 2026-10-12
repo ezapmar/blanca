@@ -1,0 +1,55 @@
+Thank you for the review. Answers to each point below, and the screen recording is attached. I have also added this information to the Notes field in App Review Information.
+
+1. SCREEN RECORDING
+
+Attached. It is recorded on a Mac running the latest macOS, starts with launching the app, and shows the typical flow: granting Accessibility, copying several pieces of text, recalling and pasting them with the hotkey, and the menu bar menu.
+
+Blanca has no account registration, login or account deletion, no user-generated content, and no paid content or features, so none of those flows appear in the recording. There is nothing in the app that is locked, purchased or shared with other users.
+
+Please note Blanca is a menu bar app: it has no Dock icon and no main window. After launch, look for the dog's head in the menu bar at the top right. That menu is the entire interface.
+
+2. PURPOSE AND TARGET AUDIENCE
+
+Blanca is a clipboard history manager. macOS keeps only the last thing you copied, so anything copied before that is lost: the address you copied before the order number, the line of code you copied before the error message. Blanca keeps the text you copy, brings it back with one keystroke, and pastes the one you choose exactly where you were typing.
+
+It is for people who type on a Mac all day and copy more than one thing at a time: developers, writers, translators, support and data entry work. The value is that nothing you copy is lost, and recovering it costs one keystroke instead of going back to find the original.
+
+The app is free. There are no accounts and no purchases.
+
+3. SETTING UP AND ACCESSING THE MAIN FEATURES
+
+No login, no demo account and no sample files are needed. Nothing is locked.
+
+1. Open Blanca. macOS asks to allow it under System Settings > Privacy & Security > Accessibility. Please allow it.
+2. Copy a few separate pieces of text in any app, TextEdit for example.
+3. Click into a text field, hold Control and Option, and press V. A bezel appears in the middle of the screen with the latest clipping. Keep Control and Option held and press V again to step back through older ones.
+4. Let go of the keys. Blanca pastes the clipping that was on screen, at the cursor.
+5. Click the dog in the menu bar for the same clippings as a menu (click one to use it), Clear (last hour, 24 hours, month, everything), the settings switches, and About.
+
+Why Accessibility is needed: once a clipping is chosen, Blanca places it on the clipboard and sends a single Command+V keystroke to the frontmost app, so the text lands where you were typing. That keystroke is the only use of the permission. Blanca does not read the screen, other apps' windows or their contents, and does not record or log keystrokes. If the permission is declined the app still works: the chosen clipping is placed on the clipboard and the user pastes it themselves with Command+V.
+
+4. EXTERNAL SERVICES, TOOLS AND PLATFORMS
+
+None. Blanca delivers all of its functionality on the device using Apple frameworks only (AppKit, NSPasteboard, and Carbon's RegisterEventHotKey for the global hotkey).
+
+There are no data providers, no authentication services, no payment processors, no AI or machine learning services, no analytics or crash reporting, and no third-party SDKs or dependencies of any kind. The app makes no network connections at all and ships with no network entitlement: it is sandboxed with com.apple.security.app-sandbox alone. The clipboard history is a file inside the app's own sandbox container and never leaves the device.
+
+Text copied on an iPhone or iPad can appear in the list, but that is Apple's own Universal Clipboard delivering it to the Mac's pasteboard. Blanca does not communicate with the device or with iCloud itself.
+
+Blanca is open source under the MIT licence, and the full source is at https://github.com/ezapmar/blanca
+
+5. REGIONAL DIFFERENCES
+
+None. The app behaves identically in every region and on every network. There is no geofencing, no region-dependent content or features, and no server that could vary by country. The interface is English only in this version.
+
+6. REGULATED INDUSTRY OR PROTECTED THIRD-PARTY MATERIAL
+
+Neither applies. Blanca is a utility and is not in a regulated industry, so no licence or authorisation is required.
+
+The app contains no third-party content, trademarks, media or data. Every asset is my own original work, including the app icon and the dog drawings, which are of my own dog. The code is mine, MIT licensed, with no third-party dependencies.
+
+ADDITIONAL PRIVACY NOTES
+
+Clippings that a password manager marks as concealed are skipped by default, and very large copies are skipped by default. Blanca keeps text only; images and files that are copied are ignored. The pasteboard's change count is polled twice a second. The App Privacy answer is Data Not Collected, which is literally accurate: nothing is collected, and nothing is sent anywhere.
+
+Please let me know if anything else would help.

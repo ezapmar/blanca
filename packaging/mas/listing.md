@@ -82,17 +82,93 @@ Info.plist, so App Store Connect does not ask.
 
 ### Notes for the reviewer
 
-Blanca is a clipboard history manager that lives in the menu bar. It has no Dock icon and no main window: look for the dog's head in the menu bar after launch.
+Everything below goes in the Notes field, and the same text is the reply in Resolution
+Center when review asks for it (guideline 2.1, Information Needed, as they did on the
+first submission on 2026-10-10).
 
-How to try it:
-1. Open Blanca. macOS asks to allow it under Privacy & Security > Accessibility. Please allow it.
-2. Copy a few pieces of text in any app, TextEdit for example.
-3. Click into a text field and press Control+Option+V. A bezel appears with the latest clipping. Keep Control+Option held and press V again to step to older ones.
-4. Let go of the keys. Blanca pastes the clipping that was on screen.
-5. Click the dog in the menu bar to see the same clippings as a menu, with Clear, Settings and About.
+**What Blanca is, and who it is for.** Blanca is a clipboard history manager for macOS.
+macOS keeps only the last thing you copied, so anything copied before that is gone: the
+address you copied before the order number, the line of code you copied before the error
+message. Blanca keeps the text you copy and brings it back with one keystroke, and pastes
+the one you choose where you were typing. It is for anyone who types on a Mac all day and
+copies more than one thing at a time: developers, writers, translators, support and data
+entry work. It is free, has no accounts and no purchases.
 
-Why Accessibility is needed: after you choose a clipping, Blanca places it on the clipboard and sends one Command+V keystroke to the frontmost app, so the text lands where you were typing. That keystroke is the only thing the permission is used for. Blanca does not read the screen, other apps' windows or their content, and does not record or log keystrokes. If the permission is declined, the app still works: the chosen clipping is put on the clipboard and the user pastes it with Command+V.
+**No Dock icon, no window.** Blanca is a menu bar app (LSUIElement). After launch, look
+for the dog's head in the menu bar at the top right. There is no main window and no
+settings window: the menu is the whole interface.
 
-Clipboard access: Blanca checks the general pasteboard's change count twice a second and keeps plain text only. Items a password manager marks as concealed are skipped. The history is a file inside the app's sandbox container. The app makes no network connections and has no network entitlement.
+**Setting it up and seeing the main features.** No login, no demo account, no sample
+files; nothing is locked or paid.
 
-The global hotkey is registered with RegisterEventHotKey, which needs no extra permission.
+1. Open Blanca. macOS asks to allow it under System Settings > Privacy & Security >
+   Accessibility. Please allow it. (If it is declined, the app still works; see below.)
+2. Copy a few separate pieces of text in any app, TextEdit for example.
+3. Click into a text field and hold Control+Option and press V. A bezel appears in the
+   middle of the screen with the latest clipping. Keep Control+Option held and press V
+   again to step back to older ones.
+4. Let go of the keys. Blanca pastes the clipping that was on screen, at the cursor.
+5. Click the dog in the menu bar: the same clippings as a menu (click one to use it),
+   Clear (last hour, 24 hours, month, everything), the settings switches, and About.
+
+**Why Accessibility is needed.** After a clipping is chosen, Blanca puts it on the
+clipboard and sends one Command+V keystroke to the frontmost app, so the text lands where
+you were typing. That keystroke is the only use of the permission. Blanca does not read
+the screen, other apps' windows or their content, and does not record or log keystrokes.
+With the permission declined, the chosen clipping is still placed on the clipboard and the
+user pastes it with Command+V.
+
+**External services, tools and platforms: none.** Blanca delivers all of its
+functionality on the device, with Apple frameworks only (AppKit, Carbon's
+RegisterEventHotKey for the global hotkey, NSPasteboard). There are no data providers, no
+authentication services, no payment processors, no AI or machine learning services, no
+analytics or crash reporting, and no third-party SDKs. The app makes no network
+connections at all and ships with no network entitlement: it is sandboxed with
+com.apple.security.app-sandbox alone. Clipboard history is a file inside the app's own
+sandbox container and never leaves the device. Text copied on an iPhone or iPad can appear
+in the list, but that is Apple's own Universal Clipboard delivering it to the Mac's
+pasteboard; Blanca neither talks to the device nor to iCloud itself. The app is open
+source under the MIT licence: https://github.com/ezapmar/blanca
+
+**Regional differences: none.** The app behaves identically in every region and on every
+network. There is no geofencing, no region-dependent content, no server to vary by
+country. The interface is English only in this version.
+
+**Regulated industries and third-party material: none.** Blanca is a utility; it is not
+in a regulated industry and needs no licence or authorisation. It contains no third-party
+content, trademarks, media or data. Every asset is original work by the developer: the
+icon and the dog drawings are his own, of his own dog. The code is his, MIT licensed,
+with no third-party dependencies.
+
+**No account-based features, no user-generated content, no purchases.** There is no
+registration, login or account, so there is nothing to delete and no credentials to
+supply. Nothing is shared or published: a clipping is text the user copied on their own
+Mac, visible only to them, never transmitted, so there is no content feed and nothing to
+report or block. There are no in-app purchases or paid features; the whole app is free.
+The App Privacy answer is Data Not Collected, and that is literally true: nothing is
+collected or sent anywhere.
+
+**Privacy protections built in.** Clippings a password manager marks as concealed are
+skipped by default, and very large copies are skipped by default. Blanca keeps text only;
+images and files that are copied are ignored. The pasteboard is polled twice a second for
+its change count.
+
+### The screen recording review asks for
+
+Record on a Mac running the latest macOS (that is the physical device for a Mac app).
+QuickTime Player > File > New Screen Recording, or Command+Shift+5. Keep it under five
+minutes, no cuts, and start with the launch.
+
+1. Start with Blanca not running. Open it from Applications and let the Accessibility
+   prompt appear; open System Settings and switch Blanca on, on camera.
+2. Point at the dog in the menu bar: say there is no Dock icon and no window.
+3. In TextEdit, copy three separate lines, one after another.
+4. Click into a text field, hold Control+Option, press V three times so the bezel steps
+   back through all three, then let go and show the text being pasted at the cursor.
+5. Click the dog: show the clippings in the menu, click one, then show Clear and the
+   settings switches, and About.
+6. Say aloud, or caption, that there is no account, no purchase, no user-generated
+   content and no network connection, so none of those flows exist to show.
+
+No resubmission is needed for this: reply in Resolution Center with the notes above and
+attach the recording, and add the notes to the Notes field for future submissions.
