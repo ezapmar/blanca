@@ -157,11 +157,16 @@ Preferences, Blanca has neither.
   the system has. Omarchy 4 and later replaced Waybar and Walker with one Quickshell
   shell, so `blanca setup` writes whichever of the two the machine has:
   - Omarchy 4 and later (`omarchy-shell` on the PATH): the bar-widget plugin
-    `blanca.clipboard` in `~/.config/omarchy/plugins`, a manifest and a `BarWidget.qml`
+    `io.github.ezapmar.blanca` in `~/.config/omarchy/plugins`, a manifest and a `BarWidget.qml`
     that draws the icon in the bar's own text colour with `MultiEffect`, then
     `rescanPlugins` and `omarchy plugin enable`. Qt has no `currentColor`, so the icon is
     written with a plain fill and recoloured by the widget. The menu is
     `omarchy-menu-select`, which reads its options on stdin as Walker did.
+    The same widget is published on its own at `github.com/ezapmar/omarchy-blanca`, for the
+    plugin marketplace, so setup leaves the directory alone when it finds a checkout there:
+    that copy is the user's, and `omarchy plugin update` keeps it current. Setup also
+    retires the `blanca.clipboard` button 0.3.4 wrote, before the widget had a repo and a
+    namespaced id.
   - Omarchy 3 and earlier: the Waybar `custom/blanca` module ahead of `modules-right`, the
     style appended and `blanca-symbolic.svg` written next to it; the style uses
     `-gtk-recolor` so the icon follows the theme. For that the symbolic SVG is one plain

@@ -76,8 +76,11 @@ func setAutostart(hypr string, on bool) error {
 }
 
 // Blanca's button on the Omarchy bar from Omarchy 4 on, where the bar is Quickshell's and
-// its buttons are shell plugins living in ~/.config/omarchy/plugins/<id>.
-const widgetID = "blanca.clipboard"
+// its buttons are shell plugins living in ~/.config/omarchy/plugins/<id>. The same widget
+// is published as a plugin of its own, github.com/ezapmar/omarchy-blanca, so the id is the
+// namespaced one the marketplace asks for; oldWidgetID is what 0.3.4 wrote before that.
+const widgetID = "io.github.ezapmar.blanca"
+const oldWidgetID = "blanca.clipboard"
 
 const widgetManifest = `{
   "schemaVersion": 1,
@@ -155,6 +158,12 @@ Item {
 // with a plain fill and recoloured by the widget.
 func writeShellWidget(plugins string, icon []byte) []string {
 	dir := filepath.Join(plugins, widgetID)
+	// A checkout is the plugin installed from its own repo, by `omarchy plugin add` or from
+	// the marketplace. That copy is the user's, updated by `omarchy plugin update`, so it is
+	// left exactly as it is.
+	if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+		return []string{"ok   " + dir + " is installed as a plugin, left alone"}
+	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return []string{"skip " + dir + " (" + err.Error() + ")"}
 	}

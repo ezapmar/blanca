@@ -26,7 +26,9 @@ func cmdSetup() {
 	// From Omarchy 4 on the bar is Quickshell's and takes plugins; before that it was
 	// Waybar, which takes a module and a stylesheet.
 	if _, err := exec.LookPath("omarchy-shell"); err == nil {
-		lines = append(lines, writeShellWidget(filepath.Join(conf, "omarchy", "plugins"), barIcon)...)
+		plugins := filepath.Join(conf, "omarchy", "plugins")
+		lines = append(lines, retireOldWidget(plugins)...)
+		lines = append(lines, writeShellWidget(plugins, barIcon)...)
 		lines = append(lines, enableShellWidget(filepath.Join(conf, "omarchy", "shell.json")))
 	} else {
 		lines = append(lines, writeWaybar(filepath.Join(conf, "waybar"), barIcon)...)
@@ -46,6 +48,24 @@ func cmdSetup() {
 		}
 	}
 	fmt.Println("done Press Ctrl+Alt+V after copying something.")
+}
+
+// retireOldWidget takes away the button 0.3.4 wrote under the un-namespaced id, now that
+// the widget has a repo and an id of its own. Only Blanca's own copy is removed: one the
+// user has made a checkout of is theirs, and is left for them to remove.
+func retireOldWidget(plugins string) []string {
+	dir := filepath.Join(plugins, oldWidgetID)
+	if _, err := os.Stat(dir); err != nil {
+		return nil
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+		return []string{"skip " + dir + " (a checkout of the old id; remove it yourself)"}
+	}
+	exec.Command("omarchy-plugin-disable", oldWidgetID).Run() // takes it off the bar
+	if err := os.RemoveAll(dir); err != nil {
+		return []string{"skip " + dir + " (" + err.Error() + ")"}
+	}
+	return []string{"gone " + dir + " (replaced by " + widgetID + ")"}
 }
 
 // enableShellWidget asks the running Omarchy shell to take in the plugin and put its

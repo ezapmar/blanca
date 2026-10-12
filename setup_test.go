@@ -124,3 +124,21 @@ func TestWriteShellWidget(t *testing.T) {
 		}
 	}
 }
+
+func TestWriteShellWidgetLeavesACheckoutAlone(t *testing.T) {
+	plugins := t.TempDir()
+	dir := filepath.Join(plugins, widgetID)
+	// The plugin as `omarchy plugin add` leaves it: a checkout, with its own files.
+	os.MkdirAll(filepath.Join(dir, ".git"), 0o755)
+	os.WriteFile(filepath.Join(dir, "BarWidget.qml"), []byte("// the user's copy\n"), 0o644)
+	out := writeShellWidget(plugins, []byte("<svg/>"))
+	if len(out) != 1 || !strings.HasPrefix(out[0], "ok ") {
+		t.Fatalf("a checkout must be left alone: %v", out)
+	}
+	if b, _ := os.ReadFile(filepath.Join(dir, "BarWidget.qml")); string(b) != "// the user's copy\n" {
+		t.Fatalf("widget overwritten: %s", b)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "manifest.json")); err == nil {
+		t.Fatal("nothing of ours must be written into a checkout")
+	}
+}
