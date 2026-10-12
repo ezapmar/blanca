@@ -75,6 +75,110 @@ func setAutostart(hypr string, on bool) error {
 	return os.WriteFile(p, []byte(s), 0o644)
 }
 
+// Blanca's button on the Omarchy bar from Omarchy 4 on, where the bar is Quickshell's and
+// its buttons are shell plugins living in ~/.config/omarchy/plugins/<id>.
+const widgetID = "blanca.clipboard"
+
+const widgetManifest = `{
+  "schemaVersion": 1,
+  "id": "` + widgetID + `",
+  "name": "Blanca clipboard",
+  "version": "1.0.0",
+  "author": "Tunca Üçer",
+  "description": "Everything you copy, kept; the button opens the clippings",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "Blanca clipboard",
+    "description": "Opens the Blanca clipboard menu",
+    "category": "Utilities",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
+`
+
+// The widget itself: the dog in the bar's own text colour, a click opens `blanca menu`.
+// MultiEffect paints the silhouette, so the icon follows the theme the way a bar glyph does.
+const widgetQML = `import QtQuick
+import QtQuick.Effects
+
+Item {
+  id: root
+
+  // Filled in by the bar when it loads the widget.
+  property var bar
+  property string moduleName: "` + widgetID + `"
+  property var settings
+
+  readonly property real iconSize: 16
+
+  implicitWidth: 28
+  implicitHeight: bar ? bar.barSize : 26
+
+  Image {
+    id: icon
+    anchors.centerIn: parent
+    width: root.iconSize
+    height: root.iconSize
+    // Decoded at twice the drawn size so the silhouette stays crisp on a HiDPI screen.
+    sourceSize.width: root.iconSize * 2
+    sourceSize.height: root.iconSize * 2
+    source: Qt.resolvedUrl("blanca-symbolic.svg")
+    fillMode: Image.PreserveAspectFit
+    // Kept as a hidden layer so the effect can sample it as a texture.
+    visible: false
+    layer.enabled: true
+  }
+
+  MultiEffect {
+    anchors.fill: icon
+    source: icon
+    colorization: 1.0
+    colorizationColor: root.bar ? root.bar.foreground : "white"
+  }
+
+  MouseArea {
+    anchors.fill: parent
+    hoverEnabled: true
+    onEntered: if (root.bar) root.bar.showTooltip(root, "Blanca clipboard")
+    onExited: if (root.bar) root.bar.hideTooltip(root)
+    onClicked: if (root.bar) root.bar.run("blanca menu")
+  }
+}
+`
+
+// writeShellWidget writes the bar-widget plugin into the Omarchy plugins directory: the
+// manifest, the widget and the icon. The files are Blanca's own, so they are rewritten
+// rather than left alone; where the button sits on the bar is the user's and is decided
+// by enableShellWidget. Qt's SVG renderer has no currentColor, so the icon is written
+// with a plain fill and recoloured by the widget.
+func writeShellWidget(plugins string, icon []byte) []string {
+	dir := filepath.Join(plugins, widgetID)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return []string{"skip " + dir + " (" + err.Error() + ")"}
+	}
+	files := map[string][]byte{
+		"manifest.json":       []byte(widgetManifest),
+		"BarWidget.qml":       []byte(widgetQML),
+		"blanca-symbolic.svg": []byte(strings.ReplaceAll(string(icon), "currentColor", "#ffffff")),
+	}
+	var out []string
+	for _, name := range []string{"manifest.json", "BarWidget.qml", "blanca-symbolic.svg"} {
+		p := filepath.Join(dir, name)
+		old, err := os.ReadFile(p)
+		if err == nil && string(old) == string(files[name]) {
+			out = append(out, "ok   "+p+" already set up")
+			continue
+		}
+		if err := os.WriteFile(p, files[name], 0o644); err != nil {
+			fatal(err)
+		}
+		out = append(out, "add  "+p)
+	}
+	return out
+}
+
 var modulesRight = regexp.MustCompile(`"modules-right"\s*:\s*\[`)
 
 // writeWaybar adds a Blanca button to the Waybar config in dir: the module, its place at

@@ -49,6 +49,11 @@ func TestParseKey(t *testing.T) {
 		"\x1b[H": kHome, "\x1b[1~": kHome, "\x1bOH": kHome,
 		"\x1b[F": kEnd, "\x1b[4~": kEnd, "\x1bOF": kEnd,
 		"x": kNone, "\x1b[Z": kNone,
+		// The hotkey is Ctrl+Alt+V, so a key pressed before the chord is let go carries the
+		// Alt as a leading Esc, and a modern terminal may report Esc itself as CSI 27 u.
+		"\x1b\x1b": kQuit, "\x1b[27u": kQuit, "\x1b[27;3u": kQuit,
+		"\x1b\x1b[B": kNext, "\x1b\x1b[A": kPrev,
+		"\x1b[1;3B": kNext, "\x1b[1;2A": kPrev, "\x1b[1;5F": kEnd, "\x1b[1;5H": kHome,
 	}
 	for in, want := range cases {
 		if got := parseKey(in).k; got != want {

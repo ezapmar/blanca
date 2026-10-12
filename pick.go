@@ -181,6 +181,25 @@ func parseKey(s string) event {
 	case "\x1b[F", "\x1b[4~", "\x1b[8~", "\x1bOF":
 		return event{k: kEnd}
 	}
+	// A key pressed while Alt is still held arrives with an Esc in front of it, so Alt+Esc
+	// is two Escs and Alt+Down is Esc Esc [B. The hotkey is Ctrl+Alt+V, and anything pressed
+	// before the chord is let go comes in this way; the modifier means nothing to the bezel,
+	// so read the key under it.
+	if strings.HasPrefix(s, "\x1b\x1b") {
+		return parseKey(s[1:])
+	}
+	// An arrow or Home/End with a modifier held carries the modifier in the sequence,
+	// as Esc [ 1 ; 3 B for Alt+Down. The bezel cares only about the key.
+	if strings.HasPrefix(s, "\x1b[1;") && len(s) > 4 {
+		if last := s[len(s)-1]; strings.IndexByte("ABCDHF", last) >= 0 {
+			return parseKey("\x1b[" + string(last))
+		}
+	}
+	// Esc as a modern terminal reports it when the kitty keyboard protocol is on: CSI 27 u,
+	// with a modifier field when a modifier was held.
+	if strings.HasPrefix(s, "\x1b[27") && strings.HasSuffix(s, "u") {
+		return event{k: kQuit}
+	}
 	if len(s) == 1 && s[0] >= '0' && s[0] <= '9' {
 		return event{k: kDigit, n: int(s[0] - '0')}
 	}
