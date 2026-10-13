@@ -197,7 +197,7 @@
     </div>
     <p class="after">Ya da iki sistemde de şunu terminale yapıştır:</p>
     <div class="cmd">
-      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
+      <code id="cmd">curl -fsSLO https://raw.githubusercontent.com/ezapmar/blanca/v0.3.8/install.sh &amp;&amp; echo "c1e81a25a708716a15bda2057b18067162ee8eaccf24f3b10db02b113f26a95d  install.sh" | $(command -v shasum &gt;/dev/null &amp;&amp; echo shasum -a 256 || echo sha256sum) -c &amp;&amp; sh install.sh v0.3.8</code>
       <button type="button" id="copy">Kopyala</button>
     </div>
     <p class="after">Sonra bir şey kopyala ve <code>Ctrl+Alt+V</code>'ye bas. Mac'te bu Control + Option + V.</p>
@@ -286,7 +286,7 @@
     <div class="wrap">
       <details id="install">
         <summary>Diğer kurulum yolları</summary>
-        <p>Mac'te terminal komutu <code>Blanca.app</code>'i Applications klasörüne koyuyor, <code>blanca</code> komutunu da <code>~/.local/bin</code> içine bağlıyor. Omarchy'de ikili dosyayı <code>~/.local/bin</code> içine kuruyor ve <code>blanca setup</code> çalıştırıyor.</p>
+        <p>Terminal komutu tek bir sürümün kurucusunu indiriyor, komutun içindeki SHA-256 ile karşılaştırıyor, ancak ondan sonra çalıştırıyor; kurucu da indirdiklerini aynı şekilde doğruluyor. Mac'te bu komut <code>Blanca.app</code>'i Applications klasörüne koyuyor, <code>blanca</code> komutunu da <code>~/.local/bin</code> içine bağlıyor. Omarchy'de ikili dosyayı <code>~/.local/bin</code> içine kuruyor ve <code>blanca setup</code> çalıştırıyor.</p>
         <p>pacman paketinin <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a> sürümü de var.</p>
         <p>Aynı paketi yerelde derlemek:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>
