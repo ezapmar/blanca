@@ -2,6 +2,10 @@
 # Install Blanca on Omarchy / Arch Linux or macOS without a Go toolchain.
 # Usage: curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh
 #        (optionally: sh install.sh v0.1.0 to pin a version)
+#
+# `blanca update` runs the copy of this file built into the binary, as `sh -c`, with the
+# tag of the release to install: so an older Blanca's copy must be able to install a
+# newer release. Keep the names of the release files it downloads stable.
 set -eu
 repo=ezapmar/blanca
 case "$(uname -m)" in
