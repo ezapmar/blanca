@@ -33,7 +33,7 @@ sub "s/pkgver = .*/pkgver = $ver/" packaging/aur/.SRCINFO
 sub "s#v$prev#v$ver#g" packaging/aur/.SRCINFO
 sub "s/sha256sums_x86_64 = .*/sha256sums_x86_64 = $a/" packaging/aur/.SRCINFO
 sub "s/sha256sums_aarch64 = .*/sha256sums_aarch64 = $b/" packaging/aur/.SRCINFO
-sub "s#v$prev/blanca-bin-$prev-1#v$ver/blanca-bin-$ver-1#" README.md
+sub "s/^v=$prev\$/v=$ver/" README.md   # the pacman install in the fold
 # The terminal install line names this release's install.sh and carries its SHA-256.
 h=$(git show "v$ver:install.sh" | shasum -a 256 | cut -d' ' -f1)
 for f in README.md docs/index.html docs/tr.html; do

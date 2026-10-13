@@ -95,11 +95,15 @@ On a Mac the terminal command puts `Blanca.app` in Applications and links the `b
 command into `~/.local/bin`.
 
 A pacman package, so `pacman` tracks it. Every release ships `blanca-bin` for
-x86_64 and aarch64; take the file for your machine from the
-[latest release](https://github.com/ezapmar/blanca/releases/latest):
+x86_64 and aarch64, and a `SHA256SUMS` that lists both. Take the one for your machine and
+check it before pacman installs it; for aarch64, change the name in both lines:
 
 ```bash
-sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.3.8/blanca-bin-0.3.8-1-x86_64.pkg.tar.zst && blanca setup
+v=0.3.8
+curl -fLO "https://github.com/ezapmar/blanca/releases/download/v$v/blanca-bin-$v-1-x86_64.pkg.tar.zst"
+curl -fLO "https://github.com/ezapmar/blanca/releases/download/v$v/SHA256SUMS"
+sha256sum -c --ignore-missing SHA256SUMS &&
+  sudo pacman -U "blanca-bin-$v-1-x86_64.pkg.tar.zst" && blanca setup
 ```
 
 The same package can be built locally from `packaging/aur` with `makepkg -si`.
