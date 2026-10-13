@@ -197,7 +197,7 @@
     </div>
     <p class="after">Or paste this in a terminal, on either system:</p>
     <div class="cmd">
-      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh</code>
+      <code id="cmd">curl -fsSLO https://raw.githubusercontent.com/ezapmar/blanca/v0.3.8/install.sh &amp;&amp; echo "c1e81a25a708716a15bda2057b18067162ee8eaccf24f3b10db02b113f26a95d  install.sh" | $(command -v shasum &gt;/dev/null &amp;&amp; echo shasum -a 256 || echo sha256sum) -c &amp;&amp; sh install.sh v0.3.8</code>
       <button type="button" id="copy">Copy</button>
     </div>
     <p class="after">Then copy something and press <code>Ctrl+Alt+V</code>. On a Mac that is Control + Option + V.</p>
@@ -286,7 +286,7 @@
     <div class="wrap">
       <details id="install">
         <summary>Other ways to install</summary>
-        <p>On a Mac the terminal command puts <code>Blanca.app</code> in Applications and links the <code>blanca</code> command into <code>~/.local/bin</code>. On Omarchy it installs the binary into <code>~/.local/bin</code> and runs <code>blanca setup</code>.</p>
+        <p>The terminal command fetches the installer of one release, checks it against the SHA-256 in the command, and only then runs it; the installer checks what it downloads the same way. On a Mac it puts <code>Blanca.app</code> in Applications and links the <code>blanca</code> command into <code>~/.local/bin</code>. On Omarchy it installs the binary into <code>~/.local/bin</code> and runs <code>blanca setup</code>.</p>
         <p>The pacman package also comes for <a href="https://github.com/ezapmar/blanca/releases/latest/download/blanca-aarch64.pkg.tar.zst">aarch64</a>.</p>
         <p>The same package, built locally:</p>
         <pre><code>git clone https://github.com/ezapmar/blanca &amp;&amp; cd blanca/packaging/aur &amp;&amp; makepkg -si &amp;&amp; blanca setup</code></pre>

@@ -31,8 +31,11 @@ and install it with `sudo pacman -U blanca-x86_64.pkg.tar.zst && blanca setup`.
 Or paste this in a terminal, on either system:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ezapmar/blanca/master/install.sh | sh
+curl -fsSLO https://raw.githubusercontent.com/ezapmar/blanca/v0.3.8/install.sh && echo "c1e81a25a708716a15bda2057b18067162ee8eaccf24f3b10db02b113f26a95d  install.sh" | $(command -v shasum >/dev/null && echo shasum -a 256 || echo sha256sum) -c && sh install.sh v0.3.8
 ```
+
+It fetches the installer of one release, checks it against the SHA-256 written here, and
+only then runs it; the installer checks what it downloads the same way.
 
 Then copy something and press `Ctrl+Alt+V`. On a Mac that is Control + Option + V.
 
@@ -96,7 +99,7 @@ x86_64 and aarch64; take the file for your machine from the
 [latest release](https://github.com/ezapmar/blanca/releases/latest):
 
 ```bash
-sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.3.6/blanca-bin-0.3.6-1-x86_64.pkg.tar.zst && blanca setup
+sudo pacman -U https://github.com/ezapmar/blanca/releases/download/v0.3.8/blanca-bin-0.3.8-1-x86_64.pkg.tar.zst && blanca setup
 ```
 
 The same package can be built locally from `packaging/aur` with `makepkg -si`.

@@ -34,7 +34,12 @@ sub "s#v$prev#v$ver#g" packaging/aur/.SRCINFO
 sub "s/sha256sums_x86_64 = .*/sha256sums_x86_64 = $a/" packaging/aur/.SRCINFO
 sub "s/sha256sums_aarch64 = .*/sha256sums_aarch64 = $b/" packaging/aur/.SRCINFO
 sub "s#v$prev/blanca-bin-$prev-1#v$ver/blanca-bin-$ver-1#" README.md
-git add packaging/aur README.md
+# The terminal install line names this release's install.sh and carries its SHA-256.
+h=$(git show "v$ver:install.sh" | shasum -a 256 | cut -d' ' -f1)
+for f in README.md docs/index.html docs/tr.html; do
+  sub "s#blanca/v$prev/install.sh#blanca/v$ver/install.sh#; s#[0-9a-f]\{64\}  install.sh#$h  install.sh#; s#sh install.sh v$prev#sh install.sh v$ver#" "$f"
+done
+git add packaging/aur README.md docs/index.html docs/tr.html
 git commit -q -m "AUR and README: $ver"
 git push -q
 echo "Released v$ver. If blanca-bin is on the AUR, push packaging/aur/{PKGBUILD,.SRCINFO} there too."

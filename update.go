@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -83,17 +84,43 @@ func newer(tag, current string) bool {
 	return false
 }
 
-// updateCommand is the shell line that installs release tag over the blanca at self.
-// A binary under /usr came from the pacman package, so pacman replaces it; any other
-// goes the way it came, through install.sh.
-func updateCommand(tag, self, goos, goarch string) string {
+// installer is the install.sh this blanca was built with. An update runs this copy and
+// never one fetched at update time: it is as trusted as the binary it sits in, and the
+// first thing it does with a download is check it against the release's checksum.
+//
+//go:embed install.sh
+var installer string
+
+// pacmanInstaller fetches the release's pacman package, $1 the tag and $2 the pacman
+// architecture, and hands it to pacman only once it matches the release's SHA256SUMS.
+const pacmanInstaller = `set -eu
+pkg="blanca-bin-${1#v}-1-$2.pkg.tar.zst"
+base="https://github.com/` + repo + `/releases/download/$1"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+echo "Downloading $pkg"
+curl -fsSL "$base/$pkg" -o "$tmp/$pkg"
+curl -fsSL "$base/SHA256SUMS" -o "$tmp/SHA256SUMS"
+want=$(grep " $pkg\$" "$tmp/SHA256SUMS" | cut -d' ' -f1 || true)
+got=$(sha256sum "$tmp/$pkg" | cut -d' ' -f1)
+[ -n "$want" ] && [ "$got" = "$want" ] || {
+  echo "blanca: $pkg does not match the checksum in the release" >&2
+  echo "  expected ${want:-one in SHA256SUMS, which has none}" >&2
+  echo "  got      $got" >&2
+  exit 1
+}
+sudo pacman -U "$tmp/$pkg"
+`
+
+// updateCommand is the sh command line that installs release tag over the blanca at
+// self. A binary under /usr came from the pacman package, so pacman replaces it; any
+// other goes the way it came, through the installer. Either way the script is this
+// binary's own, and nothing it downloads is unpacked or run before its checksum matches.
+func updateCommand(tag, self, goos, goarch string) []string {
 	if goos == "linux" && strings.HasPrefix(self, "/usr/") {
 		arch := map[string]string{"amd64": "x86_64", "arm64": "aarch64"}[goarch]
-		ver := strings.TrimPrefix(tag, "v")
-		return fmt.Sprintf("sudo pacman -U https://github.com/%s/releases/download/%s/blanca-bin-%s-1-%s.pkg.tar.zst",
-			repo, tag, ver, arch)
+		return []string{"sh", "-c", pacmanInstaller, "sh", tag, arch}
 	}
-	return fmt.Sprintf("curl -fsSL https://raw.githubusercontent.com/%s/%s/install.sh | sh -s %s", repo, tag, tag)
+	return []string{"sh", "-c", installer, "sh", tag}
 }
 
 // checkUpdate is the menu's Check for Updates. It returns the tag of a release ahead of
@@ -119,7 +146,7 @@ func startUpdate(tag string, failed func(why string)) error {
 		return err
 	}
 	var out bytes.Buffer
-	cmd := exec.Command("/bin/sh", "-c", updateCommand(tag, self, runtime.GOOS, runtime.GOARCH))
+	cmd := exec.Command("/bin/sh", updateCommand(tag, self, runtime.GOOS, runtime.GOARCH)[1:]...)
 	cmd.Stderr = &out
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	if err := cmd.Start(); err != nil {
@@ -146,9 +173,8 @@ func cmdUpdate() {
 	if err != nil {
 		fatal(err)
 	}
-	cmd := updateCommand(tag, self, runtime.GOOS, runtime.GOARCH)
-	fmt.Printf("blanca %s -> %s\n%s\n", version, strings.TrimPrefix(tag, "v"), cmd)
+	fmt.Printf("blanca %s -> %s\n", version, strings.TrimPrefix(tag, "v"))
 	// Become the shell rather than start one: on macOS the installer stops every running
 	// blanca, and this would be one of them.
-	fatal(syscall.Exec("/bin/sh", []string{"sh", "-c", cmd}, os.Environ()))
+	fatal(syscall.Exec("/bin/sh", updateCommand(tag, self, runtime.GOOS, runtime.GOARCH), os.Environ()))
 }
