@@ -26,7 +26,12 @@ open it and drag Blanca to Applications. It needs macOS 13 or later, and asks on
 Accessibility permission, which is what lets it paste for you.
 
 **Omarchy.** Download the [pacman package](https://github.com/ezapmar/blanca/releases/latest/download/blanca-x86_64.pkg.tar.zst)
-and install it with `sudo pacman -U blanca-x86_64.pkg.tar.zst && blanca setup`.
+and the release's [SHA256SUMS](https://github.com/ezapmar/blanca/releases/latest/download/SHA256SUMS) beside it. Then, in the folder they
+are in, check the package and install it:
+
+```bash
+sha256sum -c --ignore-missing SHA256SUMS && sudo pacman -U blanca-x86_64.pkg.tar.zst && blanca setup
+```
 
 Or paste this in a terminal, on either system:
 
